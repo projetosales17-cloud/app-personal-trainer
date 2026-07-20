@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../models/anamnese.dart';
 import '../services/anamnese_repository.dart';
+import '../services/gerador_ficha_treino.dart';
+import '../services/notificacoes_treino_service.dart';
 import '../services/preferencias_repository.dart';
 
 /// Assinatura/licença ainda depende de uma decisão de backend/autenticação
@@ -12,11 +14,17 @@ class PerfilScreen extends StatefulWidget {
     super.key,
     AnamneseRepository? anamneseRepositorio,
     PreferenciasRepository? preferenciasRepositorio,
+    GeradorFichaTreino? geradorFicha,
+    NotificacoesTreinoService? notificacoesService,
   }) : anamneseRepositorio = anamneseRepositorio ?? AnamneseRepository(),
-       preferenciasRepositorio = preferenciasRepositorio ?? PreferenciasRepository();
+       preferenciasRepositorio = preferenciasRepositorio ?? PreferenciasRepository(),
+       geradorFicha = geradorFicha ?? GeradorFichaTreino(),
+       notificacoesService = notificacoesService ?? NotificacoesTreinoService();
 
   final AnamneseRepository anamneseRepositorio;
   final PreferenciasRepository preferenciasRepositorio;
+  final GeradorFichaTreino geradorFicha;
+  final NotificacoesTreinoService notificacoesService;
 
   @override
   State<PerfilScreen> createState() => _PerfilScreenState();
@@ -27,7 +35,24 @@ class _PerfilScreenState extends State<PerfilScreen> {
   late Future<bool> _notificacoesFuture = widget.preferenciasRepositorio.notificacoesAtivadas();
 
   Future<void> _alterarNotificacoes(bool ativado) async {
-    await widget.preferenciasRepositorio.definirNotificacoesAtivadas(ativado);
+    if (ativado) {
+      final anamnese = await widget.anamneseRepositorio.carregar();
+      if (anamnese == null) {
+        // Sem ficha ainda para agendar lembretes — só guarda a intenção.
+        await widget.preferenciasRepositorio.definirNotificacoesAtivadas(true);
+      } else {
+        final ficha = widget.geradorFicha.gerar(anamnese);
+        final concedido = await widget.notificacoesService.ativar(ficha);
+        if (!concedido && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Permissão de notificações negada.')),
+          );
+        }
+      }
+    } else {
+      await widget.notificacoesService.desativar();
+    }
+
     setState(() {
       _notificacoesFuture = widget.preferenciasRepositorio.notificacoesAtivadas();
     });
