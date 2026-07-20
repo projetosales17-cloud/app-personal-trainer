@@ -34,7 +34,7 @@ class _OnboardingGateState extends State<OnboardingGate> {
     return FutureBuilder<bool>(
       future: _onboardingConcluido,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState != ConnectionState.done) {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
         if (snapshot.data == true) {
