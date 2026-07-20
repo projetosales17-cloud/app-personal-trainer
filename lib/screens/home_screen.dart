@@ -1,20 +1,28 @@
 import 'package:flutter/material.dart';
 
 import '../models/anamnese.dart';
+import '../models/cardapio.dart';
 import '../models/exercicio.dart';
 import '../models/ficha_treino.dart';
 import '../services/anamnese_repository.dart';
+import '../services/gerador_cardapio.dart';
 import '../services/gerador_ficha_treino.dart';
 
-/// Cards de Alimentação e Progresso ainda são placeholders — essas
-/// funcionalidades não foram implementadas (ver briefing do produto).
+/// Card de Progresso ainda é placeholder — essa funcionalidade não foi
+/// implementada (ver briefing do produto).
 class HomeScreen extends StatefulWidget {
-  HomeScreen({super.key, AnamneseRepository? anamneseRepositorio, GeradorFichaTreino? geradorFicha})
-    : anamneseRepositorio = anamneseRepositorio ?? AnamneseRepository(),
-      geradorFicha = geradorFicha ?? GeradorFichaTreino();
+  HomeScreen({
+    super.key,
+    AnamneseRepository? anamneseRepositorio,
+    GeradorFichaTreino? geradorFicha,
+    GeradorCardapio? geradorCardapio,
+  }) : anamneseRepositorio = anamneseRepositorio ?? AnamneseRepository(),
+       geradorFicha = geradorFicha ?? GeradorFichaTreino(),
+       geradorCardapio = geradorCardapio ?? GeradorCardapio();
 
   final AnamneseRepository anamneseRepositorio;
   final GeradorFichaTreino geradorFicha;
+  final GeradorCardapio geradorCardapio;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -54,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           final ficha = widget.geradorFicha.gerar(anamnese);
+          final cardapio = widget.geradorCardapio.gerar(anamnese);
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -67,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               _CardTreinoDoDia(dia: ficha.dias.first, validaAte: ficha.validaAte),
               const SizedBox(height: 16),
-              const _CardPlaceholder(titulo: 'Alimentação do dia', descricao: 'Em breve.'),
+              _CardAlimentacaoDoDia(dia: cardapio.dias.first, validaAte: cardapio.validaAte),
               const SizedBox(height: 16),
               const _CardPlaceholder(titulo: 'Progresso', descricao: 'Em breve.'),
             ],
@@ -112,6 +121,43 @@ class _CardTreinoDoDia extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Ficha válida até ${_formatarData(validaAte)}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CardAlimentacaoDoDia extends StatelessWidget {
+  const _CardAlimentacaoDoDia({required this.dia, required this.validaAte});
+
+  final DiaDeCardapio dia;
+  final DateTime validaAte;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Alimentação do dia', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                for (final refeicao in dia.refeicoes)
+                  Chip(label: Text(refeicao.nome), visualDensity: VisualDensity.compact),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text('${dia.refeicoes.length} refeições · veja na aba Alimentação'),
+            const SizedBox(height: 8),
+            Text(
+              'Cardápio válido até ${_formatarData(validaAte)}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
