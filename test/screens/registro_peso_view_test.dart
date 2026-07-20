@@ -49,6 +49,19 @@ void main() {
     final tiles = tester.widgetList<ListTile>(find.byType(ListTile)).toList();
     expect((tiles.first.title as Text).data, '69.0 kg');
     expect((tiles.last.title as Text).data, '70.0 kg');
+    expect(find.byKey(const Key('grafico-linha-simples')), findsOneWidget);
+  });
+
+  testWidgets('Com só um registro, o gráfico não aparece', (tester) async {
+    final repositorio = ProgressoRepository();
+    await repositorio.registrarPeso(70, data: DateTime(2026, 1, 1));
+
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: RegistroPesoView(repositorio: repositorio))),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('grafico-linha-simples')), findsNothing);
   });
 
   testWidgets('Texto inválido no campo de peso não registra nada', (tester) async {
