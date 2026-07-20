@@ -26,4 +26,25 @@ class FichaTreino {
   final DateTime validaAte;
 
   bool get expirada => DateTime.now().isAfter(validaAte);
+
+  /// Datas sugeridas de calendário para um dia da ficha, distribuídas ao
+  /// longo da semana (a partir de `geradaEm`) e repetidas semanalmente até
+  /// `validaAte`. É uma distribuição aproximada, não um agendamento exato
+  /// por dia da semana escolhido pela usuária (ver briefing do produto).
+  List<DateTime> datasPara(DiaDeTreino dia) {
+    final indice = dias.indexOf(dia);
+    if (indice == -1) return const [];
+
+    final intervaloDias = 7 / dias.length;
+    final inicio = geradaEm.add(Duration(days: (indice * intervaloDias).round()));
+    final primeiraData = DateTime(inicio.year, inicio.month, inicio.day);
+
+    final datas = <DateTime>[];
+    var dataAtual = primeiraData;
+    while (!dataAtual.isAfter(validaAte)) {
+      datas.add(dataAtual);
+      dataAtual = dataAtual.add(const Duration(days: 7));
+    }
+    return datas;
+  }
 }

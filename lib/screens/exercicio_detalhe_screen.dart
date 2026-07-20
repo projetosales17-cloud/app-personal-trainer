@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/exercicio.dart';
 import '../models/registro_carga.dart';
 import '../services/treino_repository.dart';
+import '../widgets/cronometro_descanso.dart';
 
 class ExercicioDetalheScreen extends StatefulWidget {
   ExercicioDetalheScreen({super.key, required this.exercicio, TreinoRepository? repositorio})
@@ -98,6 +99,10 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
               ),
             ),
           ],
+          const SizedBox(height: 24),
+          Text('Cronômetro de descanso', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          const CronometroDescanso(),
           const SizedBox(height: 24),
           Text('Registrar carga', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
