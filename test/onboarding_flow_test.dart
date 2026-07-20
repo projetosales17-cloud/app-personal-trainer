@@ -102,4 +102,49 @@ void main() {
     expect(salvo.nivelAtividade.name, 'moderado');
     expect(salvo.cirurgiaBariatrica, isFalse);
   });
+
+  testWidgets('Resumo mostra IMC, TMB e gasto calórico calculados', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: OnboardingFlow(onConcluido: () {}),
+    ));
+
+    await _avancar(tester); // boas-vindas -> licença
+
+    await tester.enterText(find.byType(TextField), 'ABC-123');
+    await tester.pump();
+    await _avancar(tester); // licença -> conta
+
+    await tester.enterText(find.byType(TextField).at(0), 'Maria');
+    await tester.enterText(find.byType(TextField).at(1), 'maria@example.com');
+    await tester.enterText(find.byType(TextField).at(2), 'senha123');
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.pump();
+    await _avancar(tester); // conta -> dados básicos
+
+    await tester.enterText(find.byType(TextField).at(0), '30');
+    await tester.enterText(find.byType(TextField).at(1), '175');
+    await tester.enterText(find.byType(TextField).at(2), '70');
+    await tester.pump();
+    await _avancar(tester); // dados básicos -> objetivo
+
+    await tester.tap(find.text('Emagrecimento'));
+    await tester.pump();
+    await _avancar(tester); // objetivo -> cirurgia bariátrica
+
+    await _avancar(tester); // bariátrica (não) -> condição hormonal
+    await _avancar(tester); // condição hormonal (padrão) -> restrições
+    await _avancar(tester); // restrições -> lesões
+    await _avancar(tester); // lesões -> atividade
+
+    await tester.tap(find.text('Moderado'));
+    await tester.pump();
+    await _avancar(tester); // atividade -> priorização de região
+
+    await _avancar(tester); // priorização de região -> resumo
+
+    expect(find.text('IMC: 22.86 (Peso normal)'), findsOneWidget);
+    expect(find.text('Taxa Metabólica Basal: 1482.75 kcal/dia'), findsOneWidget);
+    expect(find.text('Gasto calórico diário estimado: 2298.26 kcal'), findsOneWidget);
+    expect(find.textContaining('ATENÇÃO'), findsNothing);
+  });
 }

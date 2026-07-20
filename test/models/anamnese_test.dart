@@ -9,6 +9,7 @@ void main() {
       alturaCm: 165,
       pesoAtualKg: 80,
       pesoDesejadoKg: 65,
+      sexo: Sexo.masculino,
       objetivoPrincipal: Objetivo.hipertrofia,
       cirurgiaBariatrica: true,
       tipoCirurgiaBariatrica: 'Bypass gástrico',
@@ -27,6 +28,7 @@ void main() {
     expect(reconstruido.alturaCm, original.alturaCm);
     expect(reconstruido.pesoAtualKg, original.pesoAtualKg);
     expect(reconstruido.pesoDesejadoKg, original.pesoDesejadoKg);
+    expect(reconstruido.sexo, original.sexo);
     expect(reconstruido.objetivoPrincipal, original.objetivoPrincipal);
     expect(reconstruido.cirurgiaBariatrica, original.cirurgiaBariatrica);
     expect(reconstruido.tipoCirurgiaBariatrica, original.tipoCirurgiaBariatrica);
@@ -50,6 +52,7 @@ void main() {
     });
 
     expect(anamnese.pesoDesejadoKg, isNull);
+    expect(anamnese.sexo, Sexo.feminino);
     expect(anamnese.cirurgiaBariatrica, isFalse);
     expect(anamnese.condicaoHormonal, 'Nenhuma');
     expect(anamnese.restricoesAlimentares, isEmpty);

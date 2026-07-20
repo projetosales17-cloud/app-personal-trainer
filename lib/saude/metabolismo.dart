@@ -1,5 +1,4 @@
 import '../models/anamnese.dart';
-import 'sexo.dart';
 import 'util.dart';
 
 const fatoresAtividade = {

@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:app_personal_trainer/models/anamnese.dart';
 import 'package:app_personal_trainer/saude/metabolismo.dart';
-import 'package:app_personal_trainer/saude/sexo.dart';
 
 void main() {
   test('calcularTmb masculino', () {
