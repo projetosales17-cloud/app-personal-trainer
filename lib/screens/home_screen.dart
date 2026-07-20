@@ -4,25 +4,28 @@ import '../models/anamnese.dart';
 import '../models/cardapio.dart';
 import '../models/exercicio.dart';
 import '../models/ficha_treino.dart';
+import '../models/registro_peso.dart';
 import '../services/anamnese_repository.dart';
 import '../services/gerador_cardapio.dart';
 import '../services/gerador_ficha_treino.dart';
+import '../services/progresso_repository.dart';
 
-/// Card de Progresso ainda é placeholder — essa funcionalidade não foi
-/// implementada (ver briefing do produto).
 class HomeScreen extends StatefulWidget {
   HomeScreen({
     super.key,
     AnamneseRepository? anamneseRepositorio,
     GeradorFichaTreino? geradorFicha,
     GeradorCardapio? geradorCardapio,
+    ProgressoRepository? progressoRepositorio,
   }) : anamneseRepositorio = anamneseRepositorio ?? AnamneseRepository(),
        geradorFicha = geradorFicha ?? GeradorFichaTreino(),
-       geradorCardapio = geradorCardapio ?? GeradorCardapio();
+       geradorCardapio = geradorCardapio ?? GeradorCardapio(),
+       progressoRepositorio = progressoRepositorio ?? ProgressoRepository();
 
   final AnamneseRepository anamneseRepositorio;
   final GeradorFichaTreino geradorFicha;
   final GeradorCardapio geradorCardapio;
+  final ProgressoRepository progressoRepositorio;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -36,6 +39,7 @@ const _mensagensMotivacionais = [
 
 class _HomeScreenState extends State<HomeScreen> {
   late final Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
+  late final Future<RegistroPeso?> _ultimoPesoFuture = widget.progressoRepositorio.ultimoPeso();
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +82,15 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               _CardAlimentacaoDoDia(dia: cardapio.dias.first, validaAte: cardapio.validaAte),
               const SizedBox(height: 16),
-              const _CardPlaceholder(titulo: 'Progresso', descricao: 'Em breve.'),
+              FutureBuilder<RegistroPeso?>(
+                future: _ultimoPesoFuture,
+                builder: (context, pesoSnapshot) {
+                  if (pesoSnapshot.connectionState != ConnectionState.done) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  return _CardProgresso(anamnese: anamnese, ultimoRegistro: pesoSnapshot.data);
+                },
+              ),
             ],
           );
         },
@@ -167,23 +179,36 @@ class _CardAlimentacaoDoDia extends StatelessWidget {
   }
 }
 
-class _CardPlaceholder extends StatelessWidget {
-  const _CardPlaceholder({required this.titulo, required this.descricao});
+class _CardProgresso extends StatelessWidget {
+  const _CardProgresso({required this.anamnese, required this.ultimoRegistro});
 
-  final String titulo;
-  final String descricao;
+  final Anamnese anamnese;
+  final RegistroPeso? ultimoRegistro;
 
   @override
   Widget build(BuildContext context) {
+    final ultimoRegistro = this.ultimoRegistro;
+    final pesoAtual = ultimoRegistro?.pesoKg ?? anamnese.pesoAtualKg;
+    final delta = pesoAtual - anamnese.pesoAtualKg;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(titulo, style: Theme.of(context).textTheme.titleMedium),
+            Text('Progresso', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            Text(descricao),
+            Text('${pesoAtual.toStringAsFixed(1)} kg', style: Theme.of(context).textTheme.bodyLarge),
+            const SizedBox(height: 8),
+            if (ultimoRegistro == null)
+              const Text('Registre seu peso na aba Progresso para acompanhar a evolução.')
+            else
+              Text(
+                delta == 0
+                    ? 'Sem variação desde o início'
+                    : '${delta > 0 ? '+' : ''}${delta.toStringAsFixed(1)} kg desde o início',
+              ),
           ],
         ),
       ),

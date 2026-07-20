@@ -44,5 +44,10 @@ void main() {
     expect(find.textContaining('refeições · veja na aba Alimentação'), findsOneWidget);
     expect(find.textContaining('Cardápio válido até'), findsOneWidget);
     expect(find.text('Progresso'), findsOneWidget);
+    expect(find.text('65.0 kg'), findsOneWidget);
+    expect(
+      find.text('Registre seu peso na aba Progresso para acompanhar a evolução.'),
+      findsOneWidget,
+    );
   });
 }
