@@ -26,7 +26,7 @@ class _MainNavigationState extends State<MainNavigation> {
     const AlimentacaoScreen(),
     const ProgressoScreen(),
     OrientacoesScreen(),
-    const PerfilScreen(),
+    PerfilScreen(),
   ];
 
   static const _itens = [
