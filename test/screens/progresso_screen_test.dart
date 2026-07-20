@@ -36,4 +36,28 @@ void main() {
 
     expect(find.textContaining('Nenhuma foto ainda'), findsOneWidget);
   });
+
+  testWidgets('Trocar para a aba "Vídeos" mostra o estado vazio', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: ProgressoScreen()));
+    await tester.pump();
+
+    await tester.drag(find.byType(TabBar), const Offset(-500, 0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Vídeos'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Nenhum vídeo ainda'), findsOneWidget);
+  });
+
+  testWidgets('Trocar para a aba "Antes/Depois" pede mais fotos', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: ProgressoScreen()));
+    await tester.pump();
+
+    await tester.drag(find.byType(TabBar), const Offset(-500, 0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Antes/Depois'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Registre pelo menos duas fotos'), findsOneWidget);
+  });
 }
