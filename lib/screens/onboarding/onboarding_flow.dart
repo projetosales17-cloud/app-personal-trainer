@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../models/anamnese.dart';
+import '../../saude/imc.dart';
+import '../../saude/metabolismo.dart';
 import '../../services/anamnese_repository.dart';
 
 const _condicoesHormonais = [
@@ -484,17 +486,46 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         child: Center(child: CircularProgressIndicator()),
       );
     }
+
+    final idade = int.parse(_idadeController.text);
+    final alturaCm = double.parse(_alturaController.text.replaceAll(',', '.'));
+    final pesoAtualKg = double.parse(_pesoAtualController.text.replaceAll(',', '.'));
+
+    final imc = calcularImc(pesoAtualKg, alturaCm / 100);
+    final classificacaoImc = classificarImc(imc);
+    final alertaSaude = verificarAlertaSaude(imc);
+    final tmb = calcularTmb(pesoAtualKg, alturaCm, idade, Sexo.feminino);
+    final gastoCalorico = calcularGastoCaloricoDiario(tmb, _nivelAtividade!);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Resumo', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 16),
         Text('Objetivo: ${_objetivo?.label ?? '-'}'),
-        Text('Idade: ${_idadeController.text}'),
-        Text('Altura: ${_alturaController.text} cm'),
-        Text('Peso atual: ${_pesoAtualController.text} kg'),
+        Text('Idade: $idade anos'),
+        Text('Altura: $alturaCm cm'),
+        Text('Peso atual: $pesoAtualKg kg'),
         Text('Nível de atividade: ${_nivelAtividade?.label ?? '-'}'),
         Text('Dias por semana: $_frequenciaSemanalDias'),
+        const Divider(height: 32),
+        Text('IMC: $imc ($classificacaoImc)'),
+        Text('Taxa Metabólica Basal: $tmb kcal/dia'),
+        Text('Gasto calórico diário estimado: $gastoCalorico kcal'),
+        if (alertaSaude != null) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.errorContainer,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              'ATENÇÃO: $alertaSaude',
+              style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
         const Text('Confirme para gerar seu plano inicial.'),
       ],

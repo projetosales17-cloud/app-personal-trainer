@@ -1,3 +1,7 @@
+import '../saude/sexo.dart';
+
+export '../saude/sexo.dart' show Sexo;
+
 enum Objetivo {
   emagrecimento,
   tonificacao,
@@ -36,6 +40,10 @@ class Anamnese {
     required this.alturaCm,
     required this.pesoAtualKg,
     this.pesoDesejadoKg,
+    // O app é voltado ao público feminino (ver briefing do produto); não há
+    // ainda uma etapa de onboarding perguntando o sexo explicitamente, então
+    // assumimos feminino por padrão. Necessário para a fórmula de TMB.
+    this.sexo = Sexo.feminino,
     required this.objetivoPrincipal,
     this.cirurgiaBariatrica = false,
     this.tipoCirurgiaBariatrica,
@@ -52,6 +60,7 @@ class Anamnese {
   final double alturaCm;
   final double pesoAtualKg;
   final double? pesoDesejadoKg;
+  final Sexo sexo;
   final Objetivo objetivoPrincipal;
   final bool cirurgiaBariatrica;
   final String? tipoCirurgiaBariatrica;
@@ -68,6 +77,7 @@ class Anamnese {
     'alturaCm': alturaCm,
     'pesoAtualKg': pesoAtualKg,
     'pesoDesejadoKg': pesoDesejadoKg,
+    'sexo': sexo.name,
     'objetivoPrincipal': objetivoPrincipal.name,
     'cirurgiaBariatrica': cirurgiaBariatrica,
     'tipoCirurgiaBariatrica': tipoCirurgiaBariatrica,
@@ -85,6 +95,7 @@ class Anamnese {
     alturaCm: (json['alturaCm'] as num).toDouble(),
     pesoAtualKg: (json['pesoAtualKg'] as num).toDouble(),
     pesoDesejadoKg: (json['pesoDesejadoKg'] as num?)?.toDouble(),
+    sexo: Sexo.values.byName(json['sexo'] as String? ?? 'feminino'),
     objetivoPrincipal: Objetivo.values.byName(json['objetivoPrincipal'] as String),
     cirurgiaBariatrica: json['cirurgiaBariatrica'] as bool? ?? false,
     tipoCirurgiaBariatrica: json['tipoCirurgiaBariatrica'] as String?,
