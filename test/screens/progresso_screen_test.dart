@@ -26,4 +26,14 @@ void main() {
     expect(find.textContaining('Nenhum registro de medidas ainda'), findsOneWidget);
     expect(find.byKey(const Key('campo-cintura')), findsOneWidget);
   });
+
+  testWidgets('Trocar para a aba "Fotos" mostra o estado vazio', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: ProgressoScreen()));
+    await tester.pump();
+
+    await tester.tap(find.text('Fotos'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Nenhuma foto ainda'), findsOneWidget);
+  });
 }
