@@ -25,7 +25,7 @@ class _MainNavigationState extends State<MainNavigation> {
     const TreinoScreen(),
     const AlimentacaoScreen(),
     const ProgressoScreen(),
-    const OrientacoesScreen(),
+    OrientacoesScreen(),
     const PerfilScreen(),
   ];
 
