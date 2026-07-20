@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app_personal_trainer/screens/treino_screen.dart';
 
 const _lista = Key('lista-exercicios');
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   testWidgets('Mostra o primeiro exercício da lista por padrão (sem filtro)', (tester) async {
     await tester.pumpWidget(MaterialApp(home: TreinoScreen()));
 
@@ -46,5 +51,14 @@ void main() {
 
     expect(find.text('Como executar'), findsOneWidget);
     expect(find.textContaining('largura dos ombros'), findsOneWidget);
+  });
+
+  testWidgets('Trocar para a aba "Minha ficha" mostra o estado sem anamnese', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: TreinoScreen()));
+
+    await tester.tap(find.text('Minha ficha'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Complete a anamnese'), findsOneWidget);
   });
 }

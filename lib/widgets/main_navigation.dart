@@ -20,13 +20,13 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _indiceAtual = 0;
 
-  final _telas = [
-    const HomeScreen(),
+  static const _telas = [
+    HomeScreen(),
     TreinoScreen(),
-    const AlimentacaoScreen(),
-    const ProgressoScreen(),
-    const OrientacoesScreen(),
-    const PerfilScreen(),
+    AlimentacaoScreen(),
+    ProgressoScreen(),
+    OrientacoesScreen(),
+    PerfilScreen(),
   ];
 
   static const _itens = [
