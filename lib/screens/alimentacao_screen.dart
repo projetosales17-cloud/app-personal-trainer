@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 
 import 'biblioteca_alimentos_view.dart';
+import 'diario_alimentar_view.dart';
 import 'hidratacao_view.dart';
 import 'meu_cardapio_view.dart';
 
-/// Diário alimentar, receitas e suplementação ainda não foram implementados
-/// (ver briefing do produto).
+/// Receitas e suplementação ainda não foram implementados (ver briefing do
+/// produto).
 class AlimentacaoScreen extends StatelessWidget {
   const AlimentacaoScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Alimentação'),
@@ -20,6 +21,7 @@ class AlimentacaoScreen extends StatelessWidget {
             tabs: [
               Tab(text: 'Biblioteca'),
               Tab(text: 'Cardápio'),
+              Tab(text: 'Diário'),
               Tab(text: 'Hidratação'),
             ],
           ),
@@ -28,6 +30,7 @@ class AlimentacaoScreen extends StatelessWidget {
           children: [
             BibliotecaAlimentosView(),
             MeuCardapioView(),
+            DiarioAlimentarView(),
             HidratacaoView(),
           ],
         ),
