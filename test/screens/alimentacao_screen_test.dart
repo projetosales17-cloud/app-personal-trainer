@@ -56,6 +56,16 @@ void main() {
     expect(find.text('Tilápia assada'), findsOneWidget);
   });
 
+  testWidgets('Trocar para a aba "Cardápio" mostra o estado sem anamnese', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: AlimentacaoScreen()));
+    await tester.pump();
+
+    await tester.tap(find.text('Cardápio'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Complete a anamnese'), findsOneWidget);
+  });
+
   testWidgets('Trocar para a aba "Hidratação" mostra o estado sem anamnese', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: AlimentacaoScreen()));
     await tester.pump();
