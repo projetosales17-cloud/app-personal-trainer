@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'widgets/main_navigation.dart';
+import 'onboarding_gate.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -14,7 +14,7 @@ class App extends StatelessWidget {
         colorSchemeSeed: Colors.deepPurple,
         useMaterial3: true,
       ),
-      home: const MainNavigation(),
+      home: OnboardingGate(),
       debugShowCheckedModeBanner: false,
     );
   }
