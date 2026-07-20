@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/registro_peso.dart';
 import '../services/progresso_repository.dart';
+import '../widgets/grafico_linha_simples.dart';
 
 class RegistroPesoView extends StatefulWidget {
   RegistroPesoView({super.key, ProgressoRepository? repositorio})
@@ -73,23 +74,38 @@ class _RegistroPesoViewState extends State<RegistroPesoView> {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                final registros = (snapshot.data ?? const <RegistroPeso>[]).reversed.toList();
-                if (registros.isEmpty) {
+                final ascendentes = snapshot.data ?? const <RegistroPeso>[];
+                if (ascendentes.isEmpty) {
                   return const Center(
                     child: Text('Nenhum registro de peso ainda. Adicione o primeiro acima.'),
                   );
                 }
 
-                return ListView.builder(
-                  key: const Key('lista-registros-peso'),
-                  itemCount: registros.length,
-                  itemBuilder: (context, indice) {
-                    final registro = registros[indice];
-                    return ListTile(
-                      title: Text('${registro.pesoKg.toStringAsFixed(1)} kg'),
-                      subtitle: Text(_formatarData(registro.data)),
-                    );
-                  },
+                final registros = ascendentes.reversed.toList();
+
+                return Column(
+                  children: [
+                    if (ascendentes.length >= 2)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: GraficoLinhaSimples(
+                          valores: [for (final registro in ascendentes) registro.pesoKg],
+                        ),
+                      ),
+                    Expanded(
+                      child: ListView.builder(
+                        key: const Key('lista-registros-peso'),
+                        itemCount: registros.length,
+                        itemBuilder: (context, indice) {
+                          final registro = registros[indice];
+                          return ListTile(
+                            title: Text('${registro.pesoKg.toStringAsFixed(1)} kg'),
+                            subtitle: Text(_formatarData(registro.data)),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
