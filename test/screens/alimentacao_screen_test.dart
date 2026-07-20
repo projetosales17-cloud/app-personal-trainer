@@ -85,4 +85,14 @@ void main() {
 
     expect(find.textContaining('Nenhum registro no diário ainda'), findsOneWidget);
   });
+
+  testWidgets('Trocar para a aba "Receitas" mostra a lista de receitas', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: AlimentacaoScreen()));
+    await tester.pump();
+
+    await tester.tap(find.text('Receitas'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Omelete de espinafre'), findsOneWidget);
+  });
 }
