@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Usado para tirar fotos de progresso, guardadas só neste aparelho.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Usado para escolher fotos de progresso da sua galeria.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
