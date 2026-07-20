@@ -75,4 +75,14 @@ void main() {
 
     expect(find.textContaining('Complete a anamnese'), findsOneWidget);
   });
+
+  testWidgets('Trocar para a aba "Diário" mostra o estado vazio', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: AlimentacaoScreen()));
+    await tester.pump();
+
+    await tester.tap(find.text('Diário'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Nenhum registro no diário ainda'), findsOneWidget);
+  });
 }
