@@ -120,4 +120,29 @@ void main() {
     expect(primeiro.caminhoArquivo, isNot(segundo.caminhoArquivo));
     expect(await repositorio.listarFotos(), hasLength(2));
   });
+
+  test('listarVideos retorna vazio quando nada foi registrado', () async {
+    expect(await criarRepositorio().listarVideos(), isEmpty);
+  });
+
+  test('registrarVideo copia o arquivo para a pasta do app e registra o vídeo', () async {
+    final repositorio = criarRepositorio();
+    final registro = await repositorio.registrarVideo(arquivoOrigem);
+
+    expect(await File(registro.caminhoArquivo).exists(), isTrue);
+    expect(registro.caminhoArquivo, isNot(arquivoOrigem.path));
+    expect(registro.caminhoArquivo, contains('videos_progresso'));
+
+    final registros = await repositorio.listarVideos();
+    expect(registros, hasLength(1));
+  });
+
+  test('fotos e vídeos ficam em pastas separadas e listas independentes', () async {
+    final repositorio = criarRepositorio();
+    await repositorio.registrarFoto(arquivoOrigem);
+    await repositorio.registrarVideo(arquivoOrigem);
+
+    expect(await repositorio.listarFotos(), hasLength(1));
+    expect(await repositorio.listarVideos(), hasLength(1));
+  });
 }

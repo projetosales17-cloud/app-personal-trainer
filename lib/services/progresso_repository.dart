@@ -7,9 +7,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/registro_foto.dart';
 import '../models/registro_medidas.dart';
 import '../models/registro_peso.dart';
+import '../models/registro_video.dart';
 
-/// Persiste os registros de peso, medidas e fotos localmente no aparelho
-/// (sem backend por enquanto, sem custo de nuvem), como a anamnese.
+/// Persiste os registros de peso, medidas, fotos e vídeos localmente no
+/// aparelho (sem backend por enquanto, sem custo de nuvem), como a
+/// anamnese.
 class ProgressoRepository {
   ProgressoRepository({Future<Directory> Function()? resolverDiretorioBase})
     : _resolverDiretorioBase = resolverDiretorioBase ?? getApplicationDocumentsDirectory;
@@ -19,6 +21,7 @@ class ProgressoRepository {
   static const _chave = 'registros_peso';
   static const _chaveMedidas = 'registros_medidas';
   static const _chaveFotos = 'registros_fotos';
+  static const _chaveVideos = 'registros_videos';
 
   Future<void> registrarPeso(double pesoKg, {DateTime? data}) async {
     final registros = await listarPesos()
@@ -107,9 +110,48 @@ class ProgressoRepository {
     ];
   }
 
-  Future<Directory> _pastaFotos() async {
+  Future<Directory> _pastaFotos() => _pasta('fotos_progresso');
+
+  /// Copia o arquivo de origem para uma pasta própria do app e registra o
+  /// vídeo de progresso. Sem geração de miniatura ainda — a grade mostra
+  /// só um ícone genérico + data (ver briefing do produto).
+  Future<RegistroVideo> registrarVideo(File arquivoOrigem) async {
+    final pasta = await _pastaVideos();
+    final registrosExistentes = await listarVideos();
+
+    final pontoExtensao = arquivoOrigem.path.lastIndexOf('.');
+    final extensao = pontoExtensao == -1 ? '' : arquivoOrigem.path.substring(pontoExtensao);
+    final nomeArquivo =
+        '${DateTime.now().microsecondsSinceEpoch}_${registrosExistentes.length}$extensao';
+    final destino = await arquivoOrigem.copy('${pasta.path}/$nomeArquivo');
+
+    final registro = RegistroVideo(data: DateTime.now(), caminhoArquivo: destino.path);
+    final registros = registrosExistentes..add(registro);
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _chaveVideos,
+      jsonEncode([for (final item in registros) item.toJson()]),
+    );
+    return registro;
+  }
+
+  Future<List<RegistroVideo>> listarVideos() async {
+    final prefs = await SharedPreferences.getInstance();
+    final bruto = prefs.getString(_chaveVideos);
+    if (bruto == null) return [];
+
+    final lista = jsonDecode(bruto) as List;
+    return [
+      for (final item in lista) RegistroVideo.fromJson(item as Map<String, dynamic>),
+    ];
+  }
+
+  Future<Directory> _pastaVideos() => _pasta('videos_progresso');
+
+  Future<Directory> _pasta(String nome) async {
     final base = await _resolverDiretorioBase();
-    final pasta = Directory('${base.path}/fotos_progresso');
+    final pasta = Directory('${base.path}/$nome');
     if (!pasta.existsSync()) {
       pasta.createSync(recursive: true);
     }
