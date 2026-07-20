@@ -40,6 +40,9 @@ void main() {
     expect(find.text('Treino do dia'), findsOneWidget);
     expect(find.textContaining('Ficha válida até'), findsOneWidget);
     expect(find.text('Alimentação do dia'), findsOneWidget);
+    expect(find.text('Almoço'), findsOneWidget);
+    expect(find.textContaining('refeições · veja na aba Alimentação'), findsOneWidget);
+    expect(find.textContaining('Cardápio válido até'), findsOneWidget);
     expect(find.text('Progresso'), findsOneWidget);
   });
 }
