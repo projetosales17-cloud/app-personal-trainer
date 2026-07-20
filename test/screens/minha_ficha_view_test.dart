@@ -44,6 +44,7 @@ void main() {
 
     expect(find.textContaining('Válida até'), findsOneWidget);
     expect(find.text('Dia 1'), findsOneWidget);
+    expect(find.textContaining('Datas sugeridas:'), findsWidgets);
 
     await tester.dragUntilVisible(
       find.text('Dia 3'),

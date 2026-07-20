@@ -23,14 +23,14 @@ class MinhaFichaView extends StatefulWidget {
   State<MinhaFichaView> createState() => _MinhaFichaViewState();
 }
 
+String _formatarData(DateTime data) {
+  final dia = data.day.toString().padLeft(2, '0');
+  final mes = data.month.toString().padLeft(2, '0');
+  return '$dia/$mes/${data.year}';
+}
+
 class _MinhaFichaViewState extends State<MinhaFichaView> {
   late final Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
-
-  String _formatarData(DateTime data) {
-    final dia = data.day.toString().padLeft(2, '0');
-    final mes = data.month.toString().padLeft(2, '0');
-    return '$dia/$mes/${data.year}';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,8 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
-            for (final dia in ficha.dias) _DiaDeTreinoCard(dia: dia),
+            for (final dia in ficha.dias)
+              _DiaDeTreinoCard(dia: dia, datas: ficha.datasPara(dia)),
           ],
         );
       },
@@ -73,9 +74,10 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
 }
 
 class _DiaDeTreinoCard extends StatelessWidget {
-  const _DiaDeTreinoCard({required this.dia});
+  const _DiaDeTreinoCard({required this.dia, required this.datas});
 
   final DiaDeTreino dia;
+  final List<DateTime> datas;
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +89,13 @@ class _DiaDeTreinoCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Dia ${dia.dia}', style: Theme.of(context).textTheme.titleMedium),
+            if (datas.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Datas sugeridas: ${datas.map(_formatarData).join(', ')}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,

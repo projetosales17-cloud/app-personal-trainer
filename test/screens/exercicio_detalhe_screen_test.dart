@@ -11,10 +11,11 @@ final _flexao = bibliotecaExercicios.first;
 
 const _lista = Key('lista-exercicio-detalhe');
 
-// A seção de histórico fica abaixo da dobra na tela de detalhe (chips +
-// instruções + formulário de carga já ocupam a viewport de teste), então
-// precisamos rolar até o conteúdo antes de fazer qualquer asserção sobre
-// ele — do contrário o finder o considera "offstage" mesmo já construído.
+// Chips + instruções + cronômetro já ocupam a viewport de teste, então o
+// formulário de carga e o histórico ficam abaixo da dobra — precisamos
+// rolar até o conteúdo antes de interagir com ele ou fazer qualquer
+// asserção sobre ele, do contrário o finder o considera "offstage" mesmo
+// já construído.
 Future<void> _rolarAte(WidgetTester tester, Finder finder) =>
     tester.dragUntilVisible(finder, find.byKey(_lista), const Offset(0, -300));
 
@@ -40,6 +41,7 @@ void main() {
       ),
     );
     await tester.pump();
+    await _rolarAte(tester, find.byKey(const Key('botao-registrar-carga')));
 
     await tester.enterText(find.byKey(const Key('campo-peso-carga')), '0');
     await tester.enterText(find.byKey(const Key('campo-series')), '3');
@@ -98,6 +100,7 @@ void main() {
       ),
     );
     await tester.pump();
+    await _rolarAte(tester, find.byKey(const Key('botao-registrar-carga')));
 
     await tester.enterText(find.byKey(const Key('campo-peso-carga')), 'abc');
     await tester.tap(find.byKey(const Key('botao-registrar-carga')));
@@ -115,6 +118,7 @@ void main() {
       ),
     );
     await tester.pump();
+    await _rolarAte(tester, find.byKey(const Key('botao-registrar-carga')));
 
     await tester.enterText(find.byKey(const Key('campo-peso-carga')), '0');
     await tester.enterText(find.byKey(const Key('campo-series')), '3');
@@ -124,5 +128,13 @@ void main() {
     await _rolarAte(tester, find.text('0.0 kg · 3x20'));
 
     expect(find.text('0.0 kg · 3x20'), findsOneWidget);
+  });
+
+  testWidgets('Mostra o cronômetro de descanso', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao)));
+    await tester.pump();
+
+    expect(find.text('Cronômetro de descanso'), findsOneWidget);
+    expect(find.byKey(const Key('texto-cronometro')), findsOneWidget);
   });
 }
