@@ -75,7 +75,9 @@ void main() {
 
     await tester.tap(find.text('Academia'));
     await tester.pump();
-    await _avancar(tester); // local de treino -> priorização de região
+    await _avancar(tester); // local de treino -> preferência de treino (já vem pré-selecionada)
+
+    await _avancar(tester); // preferência de treino -> priorização de região
 
     await _avancar(tester); // priorização de região -> resumo
 
@@ -128,7 +130,9 @@ void main() {
 
     await tester.tap(find.text('Academia'));
     await tester.pump();
-    await _avancar(tester); // local de treino -> priorização de região
+    await _avancar(tester); // local de treino -> preferência de treino (já vem pré-selecionada)
+
+    await _avancar(tester); // preferência de treino -> priorização de região
 
     await _avancar(tester); // priorização de região -> resumo
 

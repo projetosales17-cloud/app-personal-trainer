@@ -1,3 +1,4 @@
+import 'atividade_cardio.dart';
 import 'exercicio.dart';
 
 class DiaDeTreino {
@@ -5,11 +6,13 @@ class DiaDeTreino {
     required this.dia,
     required this.gruposMusculares,
     required this.exercicios,
+    this.atividadesCardio = const [],
   });
 
   final int dia;
   final List<GrupoMuscular> gruposMusculares;
   final List<Exercicio> exercicios;
+  final List<AtividadeCardio> atividadesCardio;
 }
 
 /// Ficha de treino gerada a partir da anamnese. Tem validade definida

@@ -55,6 +55,30 @@ void main() {
     expect(find.text('Dia 3'), findsOneWidget);
   });
 
+  testWidgets('Preferência combinada mostra atividade de cardio no dia', (tester) async {
+    final repositorio = AnamneseRepository();
+    await repositorio.salvar(
+      const Anamnese(
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.emagrecimento,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+        preferenciaTreino: PreferenciaTreino.combinado,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(home: MinhaFichaView(anamneseRepositorio: repositorio)),
+    );
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.textContaining('min sugeridos'), findsWidgets);
+  });
+
   testWidgets(
     'Botão de salvar dias fica desabilitado até escolher a quantidade certa de dias',
     (tester) async {

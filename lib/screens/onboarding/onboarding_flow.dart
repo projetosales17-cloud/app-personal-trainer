@@ -54,7 +54,7 @@ class OnboardingFlow extends StatefulWidget {
 
 class _OnboardingFlowState extends State<OnboardingFlow> {
   int _passo = 0;
-  static const _totalPassos = 11;
+  static const _totalPassos = 12;
 
   final _idadeController = TextEditingController();
   final _alturaController = TextEditingController();
@@ -74,6 +74,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   NivelAtividade? _nivelAtividade;
   int _frequenciaSemanalDias = 3;
   LocalTreino? _localTreino;
+  PreferenciaTreino? _preferenciaTreino;
   final Set<String> _regioes = {};
 
   bool _salvando = false;
@@ -108,6 +109,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               int.tryParse(_mesesCirurgiaController.text) != null),
     7 => _nivelAtividade != null,
     8 => _localTreino != null,
+    9 => _preferenciaTreino != null,
     _ => true,
   };
 
@@ -116,7 +118,15 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       _concluir();
       return;
     }
-    setState(() => _passo++);
+    setState(() {
+      _passo++;
+      // Pré-seleciona o caminho recomendado pelo app para o objetivo já
+      // escolhido — a usuária pode trocar antes de confirmar (ver briefing
+      // do produto: "o app sempre orienta qual seria o caminho recomendado").
+      if (_passo == 9 && _preferenciaTreino == null && _objetivo != null) {
+        _preferenciaTreino = _objetivo!.preferenciaTreinoRecomendada;
+      }
+    });
   }
 
   void _voltar() {
@@ -151,6 +161,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       frequenciaSemanalDias: _frequenciaSemanalDias,
       regioesPriorizadas: _regioes.toList(),
       localTreino: _localTreino!,
+      preferenciaTreino: _preferenciaTreino!,
     );
 
     await widget.repositorio.salvar(anamnese);
@@ -227,13 +238,15 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       case 8:
         return _passoLocalTreino();
       case 9:
+        return _passoPreferenciaTreino();
+      case 10:
         return _passoMultiSelecao(
           titulo: 'Priorização de região corporal',
           opcoes: _regioesComuns,
           selecionadas: _regioes,
           outroController: null,
         );
-      case 10:
+      case 11:
         return _passoResumo();
       default:
         return const SizedBox.shrink();
@@ -447,6 +460,27 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     );
   }
 
+  Widget _passoPreferenciaTreino() {
+    final recomendada = _objetivo?.preferenciaTreinoRecomendada;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Musculação, cardio ou os dois?', style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 16),
+        for (final opcao in PreferenciaTreino.values)
+          RadioListTile<PreferenciaTreino>(
+            contentPadding: EdgeInsets.zero,
+            title: Text(opcao == recomendada ? '${opcao.label} (recomendado)' : opcao.label),
+            value: opcao,
+            // ignore: deprecated_member_use
+            groupValue: _preferenciaTreino,
+            // ignore: deprecated_member_use
+            onChanged: (valor) => setState(() => _preferenciaTreino = valor),
+          ),
+      ],
+    );
+  }
+
   Widget _passoResumo() {
     if (_salvando) {
       return const Padding(
@@ -477,6 +511,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         Text('Nível de atividade: ${_nivelAtividade?.label ?? '-'}'),
         Text('Dias por semana: $_frequenciaSemanalDias'),
         Text('Local de treino: ${_localTreino?.label ?? '-'}'),
+        Text('Preferência: ${_preferenciaTreino?.label ?? '-'}'),
         const Divider(height: 32),
         Text('IMC: $imc ($classificacaoImc)'),
         Text('Taxa Metabólica Basal: $tmb kcal/dia'),

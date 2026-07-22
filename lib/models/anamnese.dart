@@ -32,6 +32,34 @@ extension LocalTreinoLabel on LocalTreino {
   };
 }
 
+enum PreferenciaTreino { soMusculacao, soCardio, combinado }
+
+extension PreferenciaTreinoLabel on PreferenciaTreino {
+  String get label => switch (this) {
+    PreferenciaTreino.soMusculacao => 'Só musculação',
+    PreferenciaTreino.soCardio => 'Só cardio',
+    PreferenciaTreino.combinado => 'Musculação + cardio',
+  };
+}
+
+/// Caminho recomendado pelo app para cada objetivo — a usuária pode
+/// escolher outra opção, mas o app sempre sugere uma (ver briefing do
+/// produto). Hipertrofia recomenda só musculação (cardio em excesso
+/// atrapalha o ganho de massa); os demais objetivos se beneficiam de
+/// combinar os dois.
+extension PreferenciaTreinoRecomendada on Objetivo {
+  PreferenciaTreino get preferenciaTreinoRecomendada => switch (this) {
+    Objetivo.hipertrofia => PreferenciaTreino.soMusculacao,
+    Objetivo.tonificacao => PreferenciaTreino.combinado,
+    Objetivo.emagrecimento => PreferenciaTreino.combinado,
+    Objetivo.performanceAtletica => PreferenciaTreino.combinado,
+    Objetivo.saudeGeral => PreferenciaTreino.combinado,
+    // Cardio leve de baixo impacto + mobilidade combina bem com o
+    // objetivo de terceira idade (ver GeradorFichaTreino).
+    Objetivo.terceiraIdade => PreferenciaTreino.combinado,
+  };
+}
+
 enum NivelAtividade { sedentario, leve, moderado, intenso, muitoIntenso }
 
 extension NivelAtividadeLabel on NivelAtividade {
@@ -69,6 +97,9 @@ class Anamnese {
     // Anamneses salvas antes desse campo existir (ver fromJson) assumem
     // academia, que era o único modo suportado pela geração de ficha até então.
     this.localTreino = LocalTreino.academia,
+    // Idem: antes de existir cardio na ficha, o comportamento era sempre
+    // "só musculação".
+    this.preferenciaTreino = PreferenciaTreino.soMusculacao,
   });
 
   final int idade;
@@ -87,6 +118,7 @@ class Anamnese {
   final int frequenciaSemanalDias;
   final List<String> regioesPriorizadas;
   final LocalTreino localTreino;
+  final PreferenciaTreino preferenciaTreino;
 
   Map<String, dynamic> toJson() => {
     'idade': idade,
@@ -105,6 +137,7 @@ class Anamnese {
     'frequenciaSemanalDias': frequenciaSemanalDias,
     'regioesPriorizadas': regioesPriorizadas,
     'localTreino': localTreino.name,
+    'preferenciaTreino': preferenciaTreino.name,
   };
 
   factory Anamnese.fromJson(Map<String, dynamic> json) => Anamnese(
@@ -127,5 +160,8 @@ class Anamnese {
     regioesPriorizadas:
         (json['regioesPriorizadas'] as List?)?.cast<String>() ?? const [],
     localTreino: LocalTreino.values.byName(json['localTreino'] as String? ?? 'academia'),
+    preferenciaTreino: PreferenciaTreino.values.byName(
+      json['preferenciaTreino'] as String? ?? 'soMusculacao',
+    ),
   );
 }

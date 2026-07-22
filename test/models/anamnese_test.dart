@@ -21,6 +21,7 @@ void main() {
       frequenciaSemanalDias: 4,
       regioesPriorizadas: ['Fortalecer core'],
       localTreino: LocalTreino.casa,
+      preferenciaTreino: PreferenciaTreino.combinado,
     );
 
     final reconstruido = Anamnese.fromJson(original.toJson());
@@ -41,6 +42,7 @@ void main() {
     expect(reconstruido.frequenciaSemanalDias, original.frequenciaSemanalDias);
     expect(reconstruido.regioesPriorizadas, original.regioesPriorizadas);
     expect(reconstruido.localTreino, original.localTreino);
+    expect(reconstruido.preferenciaTreino, original.preferenciaTreino);
   });
 
   test('fromJson usa valores padrão para campos opcionais ausentes', () {
@@ -61,5 +63,15 @@ void main() {
     expect(anamnese.lesoesLimitacoes, isEmpty);
     expect(anamnese.regioesPriorizadas, isEmpty);
     expect(anamnese.localTreino, LocalTreino.academia);
+    expect(anamnese.preferenciaTreino, PreferenciaTreino.soMusculacao);
+  });
+
+  test('recomendação de preferência de treino por objetivo', () {
+    expect(Objetivo.hipertrofia.preferenciaTreinoRecomendada, PreferenciaTreino.soMusculacao);
+    expect(Objetivo.emagrecimento.preferenciaTreinoRecomendada, PreferenciaTreino.combinado);
+    expect(Objetivo.tonificacao.preferenciaTreinoRecomendada, PreferenciaTreino.combinado);
+    expect(Objetivo.performanceAtletica.preferenciaTreinoRecomendada, PreferenciaTreino.combinado);
+    expect(Objetivo.saudeGeral.preferenciaTreinoRecomendada, PreferenciaTreino.combinado);
+    expect(Objetivo.terceiraIdade.preferenciaTreinoRecomendada, PreferenciaTreino.combinado);
   });
 }

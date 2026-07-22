@@ -235,6 +235,13 @@ class _DiaDeTreinoCard extends StatelessWidget {
                   ),
                 ),
               ),
+            for (final atividade in dia.atividadesCardio)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.directions_run),
+                title: Text(atividade.nome),
+                subtitle: Text('${atividade.duracaoMinutosSugerida} min sugeridos'),
+              ),
           ],
         ),
       ),
