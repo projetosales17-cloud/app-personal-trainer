@@ -76,5 +76,34 @@ void main() {
         expect(datas[i].difference(datas[i - 1]).inDays, 7);
       }
     });
+
+    test('com diasDaSemana informado, usa o dia da semana escolhido para cada dia', () {
+      final ficha = FichaTreino(
+        dias: const [dia1, dia2],
+        geradaEm: DateTime(2026, 1, 5), // uma segunda-feira (weekday 1)
+        validaAte: DateTime(2026, 1, 26),
+      );
+
+      final datasDia1 = ficha.datasPara(dia1, diasDaSemana: [3, 6]); // quarta
+      final datasDia2 = ficha.datasPara(dia2, diasDaSemana: [3, 6]); // sábado
+
+      expect(datasDia1, isNotEmpty);
+      expect(datasDia1.every((d) => d.weekday == DateTime.wednesday), isTrue);
+      expect(datasDia2, isNotEmpty);
+      expect(datasDia2.every((d) => d.weekday == DateTime.saturday), isTrue);
+    });
+
+    test('com diasDaSemana de tamanho diferente de dias, ignora e usa a distribuição automática', () {
+      final ficha = FichaTreino(
+        dias: const [dia1, dia2, dia3],
+        geradaEm: DateTime(2026, 1, 5),
+        validaAte: DateTime(2026, 1, 31),
+      );
+
+      final comDiasErrados = ficha.datasPara(dia1, diasDaSemana: [3]);
+      final semDias = ficha.datasPara(dia1);
+
+      expect(comDiasErrados, semDias);
+    });
   });
 }
