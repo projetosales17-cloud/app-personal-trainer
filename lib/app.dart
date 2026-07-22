@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'autenticacao_gate.dart';
 import 'services/auth_repository.dart';
 import 'services/sessao_unica_service.dart';
+import 'tema.dart';
 
 class App extends StatelessWidget {
   App({super.key, AuthRepository? authRepositorio, SessaoUnicaService? sessaoUnicaService})
@@ -16,11 +17,9 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Personal Trainer Online',
-      // Paleta e identidade visual ainda não definidas (ver briefing do produto).
-      theme: ThemeData(
-        colorSchemeSeed: Colors.deepPurple,
-        useMaterial3: true,
-      ),
+      theme: temaClaro,
+      darkTheme: temaEscuro,
+      themeMode: ThemeMode.system,
       home: AutenticacaoGate(
         authRepositorio: authRepositorio,
         sessaoUnicaService: sessaoUnicaService,
