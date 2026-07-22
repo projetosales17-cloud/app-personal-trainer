@@ -95,4 +95,19 @@ void main() {
 
     expect(find.text('Omelete de espinafre'), findsOneWidget);
   });
+
+  testWidgets('Trocar para a aba "Suplementos" mostra a lista e o aviso educativo', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: AlimentacaoScreen()));
+    await tester.pump();
+
+    await tester.ensureVisible(find.text('Suplementos'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Suplementos'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Whey protein'), findsOneWidget);
+    expect(find.textContaining('sem dosagem'), findsOneWidget);
+  });
 }
