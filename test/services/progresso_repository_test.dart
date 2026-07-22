@@ -27,8 +27,16 @@ void main() {
     }
   });
 
-  ProgressoRepository criarRepositorio() =>
-      ProgressoRepository(resolverDiretorioBase: () async => diretorioTemp);
+  // gerarMiniaturaVideo real faz chamada de platform channel — sem
+  // implementação nativa disponível no ambiente de teste (mesmo em
+  // testWidgets, sem handler registrado; em test() puro, nem o binding
+  // existe). Injetamos um fake que não faz nada, como já é feito para
+  // image_picker/notificações/Firebase — os testes que exercitam a
+  // geração de fato injetam seu próprio fake.
+  ProgressoRepository criarRepositorio() => ProgressoRepository(
+    resolverDiretorioBase: () async => diretorioTemp,
+    gerarMiniaturaVideo: (_, _) async => null,
+  );
 
   test('listarPesos e ultimoPeso retornam vazio/nulo quando nada foi registrado', () async {
     final repositorio = ProgressoRepository();
@@ -135,6 +143,21 @@ void main() {
 
     final registros = await repositorio.listarVideos();
     expect(registros, hasLength(1));
+  });
+
+  test('registrarVideo grava o caminho retornado pelo gerador de miniatura injetado', () async {
+    final repositorio = ProgressoRepository(
+      resolverDiretorioBase: () async => diretorioTemp,
+      gerarMiniaturaVideo: (caminhoVideo, pastaDestino) async => '$pastaDestino/miniatura.jpg',
+    );
+
+    final registro = await repositorio.registrarVideo(arquivoOrigem);
+
+    expect(registro.caminhoMiniatura, contains('miniaturas_videos_progresso'));
+    expect(registro.caminhoMiniatura, endsWith('miniatura.jpg'));
+
+    final registros = await repositorio.listarVideos();
+    expect(registros.first.caminhoMiniatura, registro.caminhoMiniatura);
   });
 
   test('fotos e vídeos ficam em pastas separadas e listas independentes', () async {

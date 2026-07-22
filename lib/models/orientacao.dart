@@ -11,14 +11,27 @@ extension TemaOrientacaoLabel on TemaOrientacao {
   };
 }
 
-/// Um conteúdo pré-gravado da biblioteca de Orientações. `urlVideo` fica
-/// nulo por enquanto — só texto na v1 (ver briefing do produto).
+enum TipoConteudoOrientacao { artigo, faq }
+
+extension TipoConteudoOrientacaoLabel on TipoConteudoOrientacao {
+  String get label => switch (this) {
+    TipoConteudoOrientacao.artigo => 'Artigo',
+    TipoConteudoOrientacao.faq => 'FAQ',
+  };
+}
+
+/// Um conteúdo pré-gravado da biblioteca de Orientações — artigo ou FAQ
+/// (pergunta em `titulo`, resposta em `corpo`), conforme `tipo`. `urlVideo`
+/// fica nulo para toda a biblioteca por enquanto — produção de vídeos
+/// curtos é um passo de conteúdo externo ainda pendente (ver briefing do
+/// produto: "artigos por tema, FAQ e vídeos curtos").
 class Orientacao {
   const Orientacao({
     required this.id,
     required this.titulo,
     required this.tema,
     required this.corpo,
+    this.tipo = TipoConteudoOrientacao.artigo,
     this.urlVideo,
   });
 
@@ -26,5 +39,6 @@ class Orientacao {
   final String titulo;
   final TemaOrientacao tema;
   final String corpo;
+  final TipoConteudoOrientacao tipo;
   final String? urlVideo;
 }

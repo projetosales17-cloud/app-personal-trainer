@@ -49,4 +49,23 @@ void main() {
 
     expect(find.textContaining('aumenta'), findsOneWidget);
   });
+
+  testWidgets('Filtrar por tipo FAQ mostra só perguntas frequentes', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: OrientacoesScreen()));
+
+    await tester.tap(find.widgetWithText(ChoiceChip, 'FAQ'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Quantas vezes por semana devo treinar?'), findsOneWidget);
+    expect(find.text('Por que aquecer antes de treinar'), findsNothing);
+  });
+
+  testWidgets('Item de FAQ mostra o selo "FAQ" no subtítulo', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: OrientacoesScreen()));
+
+    await tester.tap(find.widgetWithText(ChoiceChip, 'FAQ'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('FAQ ·'), findsWidgets);
+  });
 }

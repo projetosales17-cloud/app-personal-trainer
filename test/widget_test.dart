@@ -81,6 +81,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Início'), findsWidgets);
-    expect(find.byType(NavigationDestination), findsNWidgets(6));
+    expect(find.byType(NavigationDestination), findsNWidgets(7));
   });
 }

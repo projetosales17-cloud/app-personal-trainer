@@ -89,11 +89,22 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
           const SizedBox(height: 24),
           Text('Como executar', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
+          if (exercicio.caminhoImagem != null) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                exercicio.caminhoImagem!,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           Text(exercicio.instrucoes, style: Theme.of(context).textTheme.bodyLarge),
-          if (exercicio.urlVideo == null) ...[
+          if (exercicio.caminhoImagem == null) ...[
             const SizedBox(height: 24),
             Text(
-              'Vídeo de execução em breve.',
+              'Imagem de demonstração em breve.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontStyle: FontStyle.italic,
               ),

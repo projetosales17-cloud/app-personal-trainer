@@ -42,4 +42,17 @@ void main() {
     expect(repositorio.porId('aquecimento-antes-do-treino'), isNotNull);
     expect(repositorio.porId('nao-existe'), isNull);
   });
+
+  test('filtrar por tipo FAQ retorna só perguntas frequentes', () {
+    final resultado = repositorio.filtrar(tipo: TipoConteudoOrientacao.faq);
+    expect(resultado, isNotEmpty);
+    for (final orientacao in resultado) {
+      expect(orientacao.tipo, TipoConteudoOrientacao.faq);
+    }
+  });
+
+  test('artigos existentes continuam com tipo artigo por padrão', () {
+    final artigo = repositorio.porId('aquecimento-antes-do-treino');
+    expect(artigo!.tipo, TipoConteudoOrientacao.artigo);
+  });
 }

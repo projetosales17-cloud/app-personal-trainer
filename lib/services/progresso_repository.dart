@@ -8,15 +8,20 @@ import '../models/registro_foto.dart';
 import '../models/registro_medidas.dart';
 import '../models/registro_peso.dart';
 import '../models/registro_video.dart';
+import 'gerador_miniatura_video.dart';
 
 /// Persiste os registros de peso, medidas, fotos e vídeos localmente no
 /// aparelho (sem backend por enquanto, sem custo de nuvem), como a
 /// anamnese.
 class ProgressoRepository {
-  ProgressoRepository({Future<Directory> Function()? resolverDiretorioBase})
-    : _resolverDiretorioBase = resolverDiretorioBase ?? getApplicationDocumentsDirectory;
+  ProgressoRepository({
+    Future<Directory> Function()? resolverDiretorioBase,
+    GerarMiniaturaVideo? gerarMiniaturaVideo,
+  }) : _resolverDiretorioBase = resolverDiretorioBase ?? getApplicationDocumentsDirectory,
+       _gerarMiniaturaVideo = gerarMiniaturaVideo ?? gerarMiniaturaVideoPadrao;
 
   final Future<Directory> Function() _resolverDiretorioBase;
+  final GerarMiniaturaVideo _gerarMiniaturaVideo;
 
   static const _chave = 'registros_peso';
   static const _chaveMedidas = 'registros_medidas';
@@ -112,9 +117,9 @@ class ProgressoRepository {
 
   Future<Directory> _pastaFotos() => _pasta('fotos_progresso');
 
-  /// Copia o arquivo de origem para uma pasta própria do app e registra o
-  /// vídeo de progresso. Sem geração de miniatura ainda — a grade mostra
-  /// só um ícone genérico + data (ver briefing do produto).
+  /// Copia o arquivo de origem para uma pasta própria do app, gera uma
+  /// miniatura (quando suportado pela plataforma, ver
+  /// gerador_miniatura_video.dart) e registra o vídeo de progresso.
   Future<RegistroVideo> registrarVideo(File arquivoOrigem) async {
     final pasta = await _pastaVideos();
     final registrosExistentes = await listarVideos();
@@ -125,7 +130,14 @@ class ProgressoRepository {
         '${DateTime.now().microsecondsSinceEpoch}_${registrosExistentes.length}$extensao';
     final destino = await arquivoOrigem.copy('${pasta.path}/$nomeArquivo');
 
-    final registro = RegistroVideo(data: DateTime.now(), caminhoArquivo: destino.path);
+    final pastaMiniaturas = await _pastaMiniaturasVideos();
+    final caminhoMiniatura = await _gerarMiniaturaVideo(destino.path, pastaMiniaturas.path);
+
+    final registro = RegistroVideo(
+      data: DateTime.now(),
+      caminhoArquivo: destino.path,
+      caminhoMiniatura: caminhoMiniatura,
+    );
     final registros = registrosExistentes..add(registro);
 
     final prefs = await SharedPreferences.getInstance();
@@ -148,6 +160,8 @@ class ProgressoRepository {
   }
 
   Future<Directory> _pastaVideos() => _pasta('videos_progresso');
+
+  Future<Directory> _pastaMiniaturasVideos() => _pasta('miniaturas_videos_progresso');
 
   Future<Directory> _pasta(String nome) async {
     final base = await _resolverDiretorioBase();
