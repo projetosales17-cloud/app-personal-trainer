@@ -18,7 +18,7 @@ Notas do processo real:
 
 ## 1. Personagem — descrição fixa
 
-Nome de referência interno: **Ana** (só para facilitar comunicação — não aparece no app).
+Nome de referência interno: **Yara** (só para facilitar comunicação — não aparece no app).
 
 - Mulher brasileira, aparência entre 30 e 35 anos — idade que soa acessível para a maioria dos perfis do app (emagrecimento, hipertrofia, menopausa, pós-bariátrica, terceira idade), sem parecer nem adolescente nem sênior.
 - Pele morena clara, tom médio.
@@ -51,7 +51,7 @@ Se preferir fotorrealismo mesmo assim, o mesmo texto da seção 1-2 funciona —
 Use isto como ponto de partida, trocando só o trecho `[POSE]` para cada exercício:
 
 ```
-Ana, a Brazilian woman in her early 30s, warm and confident expression,
+Yara, a Brazilian woman in her early 30s, warm and confident expression,
 medium-light brown skin tone, dark brown wavy hair in a high ponytail,
 realistic athletic build (not overly muscular), wearing a wine-red
 (#B0305A) fitness tank top, dark gray leggings, and white sneakers.
