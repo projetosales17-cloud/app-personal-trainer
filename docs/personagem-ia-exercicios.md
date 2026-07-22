@@ -1,12 +1,24 @@
 # Ficha da personagem — demonstração de exercícios por IA
 
-> Documento de referência para gerar as imagens reais de demonstração de exercício (ver `Exercicio.caminhoImagem` em `lib/models/exercicio.dart`), substituindo as ilustrações SVG interinas por grupo muscular. Objetivo: a **mesma personagem, consistente, aparece em todas as imagens da biblioteca de exercícios** — ver decisão no briefing do produto ("imagens geradas por IA, personagem consistente" em vez de vídeo/GIF).
+> Documento de referência para gerar as imagens reais de demonstração de exercício (ver `Exercicio.caminhoImagem` em `lib/models/exercicio.dart`). Objetivo: a **mesma personagem, consistente, aparece em todas as imagens da biblioteca de exercícios** — ver decisão no briefing do produto ("imagens geradas por IA, personagem consistente" em vez de vídeo/GIF).
 >
 > Este documento não gera as imagens — é o material para colar em qualquer ferramenta de geração de imagem (Leonardo AI, Midjourney, Gemini/ImageFX, etc.).
 
+## Status (2026-07-22)
+
+**Primeiro lote gerado e integrado**: 8 imagens (uma por grupo muscular, não por exercício individual ainda) via **Google Flow** (`labs.google/fx`, sucessor do ImageFX — ver seção 6), usando o recurso "Personagens" do Flow para manter a referência entre gerações. Substituíram as ilustrações SVG interinas como `GrupoMuscular.ilustracaoPadrao` (`lib/models/exercicio.dart`), em `assets/personagem/*.jpg`.
+
+Notas do processo real:
+- O prompt base funcionou bem para consistência de rosto/roupa/estilo entre poses diferentes.
+- Controle fino de pose (mãos exatas, ângulo exato dos braços) levou 1-3 tentativas por imagem — normal, não é falha da ferramenta.
+- Pequena variação notada: a imagem de bíceps saiu com braços mais definidos/musculosos que as demais (a IA "flexionou" mais ao interpretar "bicep curl position"). Aceitável por ora, mas se for gerar novo lote, vale adicionar "consistent moderate muscle tone, not more defined than in other poses" ao prompt dessa pose especificamente.
+- Baixar a imagem certa do histórico do Flow por navegação/hover foi pouco confiável (a ferramenta às vezes ativa o botão de download de uma miniatura diferente da que parece selecionada). O método confiável foi: gerar a pose, conferir visualmente o resultado ainda fresco na tela, e baixar imediatamente — não confiar em voltar ao histórico depois.
+
+**Ainda não feito**: imagens por exercício individual (hoje é só 1 imagem genérica por grupo muscular, os ~55 exercícios da biblioteca continuam sem `caminhoImagem` próprio).
+
 ## 1. Personagem — descrição fixa
 
-Nome de referência interno: **Ana** (só para facilitar comunicação — não aparece no app).
+Nome de referência interno: **Yara** (só para facilitar comunicação — não aparece no app).
 
 - Mulher brasileira, aparência entre 30 e 35 anos — idade que soa acessível para a maioria dos perfis do app (emagrecimento, hipertrofia, menopausa, pós-bariátrica, terceira idade), sem parecer nem adolescente nem sênior.
 - Pele morena clara, tom médio.
@@ -39,7 +51,7 @@ Se preferir fotorrealismo mesmo assim, o mesmo texto da seção 1-2 funciona —
 Use isto como ponto de partida, trocando só o trecho `[POSE]` para cada exercício:
 
 ```
-Ana, a Brazilian woman in her early 30s, warm and confident expression,
+Yara, a Brazilian woman in her early 30s, warm and confident expression,
 medium-light brown skin tone, dark brown wavy hair in a high ponytail,
 realistic athletic build (not overly muscular), wearing a wine-red
 (#B0305A) fitness tank top, dark gray leggings, and white sneakers.
@@ -50,8 +62,6 @@ Pose: [POSE]
 ```
 
 ### Sugestões de `[POSE]` por grupo muscular
-
-Reaproveitando o enquadramento das ilustrações SVG interinas já existentes (`assets/exercicios/*.svg`) como referência de ângulo/postura:
 
 | Grupo muscular | Sugestão de pose |
 |---|---|
@@ -84,12 +94,12 @@ Em qualquer ferramenta: gere a **imagem de referência primeiro** (pose neutra, 
 
 ## 7. Formato de entrega (para eu integrar no app)
 
-Quando tiver as imagens prontas:
-- Formato: PNG com fundo transparente (se a ferramenta permitir) ou fundo liso claro.
-- Nome do arquivo: usar o mesmo `id` do exercício em `lib/data/biblioteca_exercicios.dart` (ex: `flexao-de-braco.png`, `agachamento-livre.png`) — assim a integração é direta, sem precisar mapear manualmente.
+Para imagens **por exercício individual** (próximo passo, ainda não feito):
+- Formato: PNG/JPG com fundo liso claro (fundo transparente também funciona).
+- Nome do arquivo: usar o mesmo `id` do exercício em `lib/data/biblioteca_exercicios.dart` (ex: `flexao-de-braco.jpg`, `agachamento-livre.jpg`) — assim a integração é direta, sem precisar mapear manualmente.
 - Não precisa ser tudo de uma vez — dá pra integrar aos poucos, grupo muscular por grupo muscular.
 
 Quando tiver os arquivos, é só me avisar onde estão (pasta local) que eu:
-1. Copio pra `assets/exercicios/`.
+1. Copio pra `assets/personagem/`.
 2. Atualizo `Exercicio.caminhoImagem` de cada exercício correspondente em `lib/data/biblioteca_exercicios.dart`.
 3. Rodo os testes pra confirmar que nada quebrou.
