@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../models/exercicio.dart';
 import '../models/registro_carga.dart';
@@ -89,27 +90,27 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
           const SizedBox(height: 24),
           Text('Como executar', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
-          if (exercicio.caminhoImagem != null) ...[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                exercicio.caminhoImagem!,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              height: 160,
+              width: double.infinity,
+              child: _ImagemExercicio(
+                caminho: exercicio.caminhoImagem ?? exercicio.grupoMuscularPrincipal.ilustracaoPadrao,
               ),
             ),
-            const SizedBox(height: 12),
-          ],
-          Text(exercicio.instrucoes, style: Theme.of(context).textTheme.bodyLarge),
+          ),
           if (exercicio.caminhoImagem == null) ...[
-            const SizedBox(height: 24),
+            const SizedBox(height: 4),
             Text(
-              'Imagem de demonstração em breve.',
+              'Ilustração genérica do grupo muscular — imagem real do exercício em produção.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontStyle: FontStyle.italic,
               ),
             ),
           ],
+          const SizedBox(height: 12),
+          Text(exercicio.instrucoes, style: Theme.of(context).textTheme.bodyLarge),
           const SizedBox(height: 24),
           Text('Cronômetro de descanso', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
@@ -189,6 +190,27 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Renderiza um asset de imagem do exercício, escolhendo entre SVG
+/// (ilustrações genéricas por grupo muscular) e raster (futuras imagens
+/// reais geradas por IA) conforme a extensão do arquivo.
+class _ImagemExercicio extends StatelessWidget {
+  const _ImagemExercicio({required this.caminho});
+
+  final String caminho;
+
+  @override
+  Widget build(BuildContext context) {
+    if (caminho.toLowerCase().endsWith('.svg')) {
+      return SvgPicture.asset(caminho, fit: BoxFit.contain);
+    }
+    return Image.asset(
+      caminho,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
     );
   }
 }
