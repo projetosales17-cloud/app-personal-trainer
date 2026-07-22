@@ -72,5 +72,6 @@ void main() {
     expect(Objetivo.tonificacao.preferenciaTreinoRecomendada, PreferenciaTreino.combinado);
     expect(Objetivo.performanceAtletica.preferenciaTreinoRecomendada, PreferenciaTreino.combinado);
     expect(Objetivo.saudeGeral.preferenciaTreinoRecomendada, PreferenciaTreino.combinado);
+    expect(Objetivo.terceiraIdade.preferenciaTreinoRecomendada, PreferenciaTreino.combinado);
   });
 }

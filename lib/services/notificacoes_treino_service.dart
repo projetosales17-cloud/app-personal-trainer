@@ -17,14 +17,16 @@ class NotificacoesTreinoService {
 
   /// Pede permissão e agenda os lembretes para todas as datas sugeridas da
   /// ficha. Retorna `false` (sem alterar a preferência salva) se a
-  /// permissão for negada.
-  Future<bool> ativar(FichaTreino ficha) async {
+  /// permissão for negada. [diasDaSemana], se informado, usa os dias da
+  /// semana escolhidos manualmente pela usuária (ver
+  /// `FichaTreino.datasPara`) em vez da distribuição automática.
+  Future<bool> ativar(FichaTreino ficha, {List<int>? diasDaSemana}) async {
     final permitido = await agendador.solicitarPermissao();
     if (!permitido) return false;
 
     final datas = <DateTime>{};
     for (final dia in ficha.dias) {
-      datas.addAll(ficha.datasPara(dia));
+      datas.addAll(ficha.datasPara(dia, diasDaSemana: diasDaSemana));
     }
     final ordenadas = datas.toList()..sort();
 

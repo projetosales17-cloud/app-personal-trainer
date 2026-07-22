@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 
 import '../models/registro_foto.dart';
 import '../services/progresso_repository.dart';
+import 'foto_detalhe_screen.dart';
 
-/// Comparação simples entre a foto mais antiga e a mais recente
-/// registradas. Timeline completa com todas as fotos intermediárias ainda
-/// não foi implementada (ver briefing do produto).
+/// Comparação entre a foto mais antiga e a mais recente registradas, mais
+/// uma linha do tempo completa com todas as fotos intermediárias.
 class AntesDepoisView extends StatefulWidget {
   AntesDepoisView({super.key, ProgressoRepository? repositorio})
     : repositorio = repositorio ?? ProgressoRepository();
@@ -19,7 +19,8 @@ class AntesDepoisView extends StatefulWidget {
 }
 
 class _AntesDepoisViewState extends State<AntesDepoisView> {
-  late final Future<List<RegistroFoto>> _fotosFuture = widget.repositorio.listarFotos();
+  late final Future<List<RegistroFoto>> _fotosFuture = widget.repositorio
+      .listarFotos();
 
   String _formatarData(DateTime data) {
     final dia = data.day.toString().padLeft(2, '0');
@@ -53,14 +54,77 @@ class _AntesDepoisViewState extends State<AntesDepoisView> {
         final antes = fotos.first;
         final depois = fotos.last;
 
-        return Padding(
+        return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(child: _CartaoFoto(titulo: 'Antes', foto: antes, formatarData: _formatarData)),
-              const SizedBox(width: 16),
-              Expanded(child: _CartaoFoto(titulo: 'Depois', foto: depois, formatarData: _formatarData)),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _CartaoFoto(
+                      titulo: 'Antes',
+                      foto: antes,
+                      formatarData: _formatarData,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _CartaoFoto(
+                      titulo: 'Depois',
+                      foto: depois,
+                      formatarData: _formatarData,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Linha do tempo completa',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 140,
+                child: ListView.separated(
+                  key: const Key('linha-do-tempo'),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: fotos.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 8),
+                  itemBuilder: (context, indice) {
+                    final foto = fotos[indice];
+                    return GestureDetector(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => FotoDetalheScreen(foto: foto),
+                        ),
+                      ),
+                      child: SizedBox(
+                        width: 100,
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: AspectRatio(
+                                aspectRatio: 3 / 4,
+                                child: Image.file(
+                                  File(foto.caminhoArquivo),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _formatarData(foto.data),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         );
@@ -70,7 +134,11 @@ class _AntesDepoisViewState extends State<AntesDepoisView> {
 }
 
 class _CartaoFoto extends StatelessWidget {
-  const _CartaoFoto({required this.titulo, required this.foto, required this.formatarData});
+  const _CartaoFoto({
+    required this.titulo,
+    required this.foto,
+    required this.formatarData,
+  });
 
   final String titulo;
   final RegistroFoto foto;
@@ -87,7 +155,10 @@ class _CartaoFoto extends StatelessWidget {
           child: Image.file(File(foto.caminhoArquivo), fit: BoxFit.cover),
         ),
         const SizedBox(height: 4),
-        Text(formatarData(foto.data), style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          formatarData(foto.data),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
       ],
     );
   }

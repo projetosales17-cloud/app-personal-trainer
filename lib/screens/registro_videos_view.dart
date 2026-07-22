@@ -99,8 +99,18 @@ class _RegistroVideosViewState extends State<RegistroVideosView> {
                   itemCount: videos.length,
                   itemBuilder: (context, indice) {
                     final video = videos[indice];
+                    final miniatura = video.caminhoMiniatura;
                     return ListTile(
-                      leading: const Icon(Icons.play_circle_outline),
+                      leading: miniatura == null
+                          ? const Icon(Icons.play_circle_outline)
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: SizedBox(
+                                width: 48,
+                                height: 48,
+                                child: Image.file(File(miniatura), fit: BoxFit.cover),
+                              ),
+                            ),
                       title: Text(_formatarData(video.data)),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Navigator.of(context).push(

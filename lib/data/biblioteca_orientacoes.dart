@@ -132,4 +132,67 @@ const bibliotecaOrientacoes = <Orientacao>[
         'dormir — mudanças pequenas e sustentáveis tendem a durar mais do que '
         'reformulações drásticas e difíceis de manter.',
   ),
+
+  // FAQ — perguntas frequentes, uma por tema (formato pergunta/resposta,
+  // ver briefing do produto: "artigos por tema, FAQ e vídeos curtos").
+  Orientacao(
+    id: 'faq-quantas-vezes-por-semana',
+    titulo: 'Quantas vezes por semana devo treinar?',
+    tema: TemaOrientacao.treino,
+    tipo: TipoConteudoOrientacao.faq,
+    corpo:
+        'Depende da sua frequência semanal escolhida na anamnese e do seu '
+        'nível de atividade. O app já gera sua ficha considerando isso — '
+        'você pode ajustar a frequência quando gerar uma nova ficha.',
+  ),
+  Orientacao(
+    id: 'faq-diario-conta-caloria',
+    titulo: 'O diário alimentar conta calorias?',
+    tema: TemaOrientacao.alimentacao,
+    tipo: TipoConteudoOrientacao.faq,
+    corpo:
+        'Não nesta versão. O diário registra o que você comeu de forma '
+        'livre, sem contagem calórica — o foco é criar o hábito de '
+        'acompanhar a alimentação, não controlar números.',
+  ),
+  Orientacao(
+    id: 'faq-nao-motivada',
+    titulo: 'O que fazer quando bater a falta de motivação?',
+    tema: TemaOrientacao.motivacao,
+    tipo: TipoConteudoOrientacao.faq,
+    corpo:
+        'Reduza a meta do dia em vez de pular o treino inteiro — um treino '
+        'curto mantém o hábito vivo. Motivação vem e vai; constância é o '
+        'que sustenta o resultado nos dias em que a motivação falta.',
+  ),
+  Orientacao(
+    id: 'faq-posso-treinar-fogachos',
+    titulo: 'Posso treinar tendo fogachos/calores da menopausa?',
+    tema: TemaOrientacao.menopausa,
+    tipo: TipoConteudoOrientacao.faq,
+    corpo:
+        'Em geral sim, ajustando intensidade e hidratação. Se os sintomas '
+        'forem intensos ou vierem acompanhados de outros sinais incomuns, '
+        'converse com seu médico antes de manter a rotina de treino.',
+  ),
+  Orientacao(
+    id: 'faq-quando-posso-treinar-bariatrica',
+    titulo: 'Quando posso voltar a treinar após a cirurgia bariátrica?',
+    tema: TemaOrientacao.posBariatrica,
+    tipo: TipoConteudoOrientacao.faq,
+    corpo:
+        'Isso é definido pela sua equipe médica, não pelo app — o tempo de '
+        'liberação varia por pessoa e tipo de cirurgia. Converse com seu '
+        'cirurgião e educador físico antes de retomar qualquer treino.',
+  ),
+  Orientacao(
+    id: 'faq-preciso-dormir-quanto',
+    titulo: 'Quantas horas de sono eu preciso para render no treino?',
+    tema: TemaOrientacao.habitos,
+    tipo: TipoConteudoOrientacao.faq,
+    corpo:
+        '7 a 9 horas é a faixa geralmente recomendada para adultas, embora '
+        'varie de pessoa para pessoa. Priorizar regularidade no horário de '
+        'dormir costuma ajudar tanto quanto a quantidade de horas.',
+  ),
 ];

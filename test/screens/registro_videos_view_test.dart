@@ -36,8 +36,17 @@ void main() {
     }
   });
 
+  // gerarMiniaturaVideo real faz chamada de platform channel — sem handler
+  // registrado no ambiente de teste, o que quebraria registrarVideo.
+  // Injetamos um fake que não faz nada por padrão; o teste dedicado à
+  // miniatura injeta o seu próprio.
+  ProgressoRepository criarRepositorio() => ProgressoRepository(
+    resolverDiretorioBase: () async => diretorioAppTemp,
+    gerarMiniaturaVideo: (_, _) async => null,
+  );
+
   testWidgets('Sem vídeos, mostra estado vazio', (tester) async {
-    final repositorio = ProgressoRepository(resolverDiretorioBase: () async => diretorioAppTemp);
+    final repositorio = criarRepositorio();
     await tester.pumpWidget(
       MaterialApp(home: Scaffold(body: RegistroVideosView(repositorio: repositorio))),
     );
@@ -47,7 +56,7 @@ void main() {
   });
 
   testWidgets('Com um vídeo já registrado, mostra na lista', (tester) async {
-    final repositorio = ProgressoRepository(resolverDiretorioBase: () async => diretorioAppTemp);
+    final repositorio = criarRepositorio();
     // registrarVideo faz E/S real de arquivo — precisa de runAsync() dentro
     // de um testWidgets, mesmo antes do pumpWidget.
     await tester.runAsync(() => repositorio.registrarVideo(arquivoOrigem));
@@ -59,11 +68,32 @@ void main() {
 
     expect(find.textContaining('Nenhum vídeo ainda'), findsNothing);
     expect(find.byType(ListTile), findsOneWidget);
+    expect(find.byIcon(Icons.play_circle_outline), findsOneWidget);
+  });
+
+  testWidgets('Com miniatura gerada, mostra a imagem em vez do ícone genérico', (tester) async {
+    final repositorio = ProgressoRepository(
+      resolverDiretorioBase: () async => diretorioAppTemp,
+      gerarMiniaturaVideo: (caminhoVideo, pastaDestino) async {
+        final miniatura = File('$pastaDestino/miniatura.jpg');
+        await miniatura.writeAsBytes(base64Decode(_pngBase64));
+        return miniatura.path;
+      },
+    );
+    await tester.runAsync(() => repositorio.registrarVideo(arquivoOrigem));
+
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: RegistroVideosView(repositorio: repositorio))),
+    );
+    await tester.pump();
+
+    expect(find.byIcon(Icons.play_circle_outline), findsNothing);
+    expect(find.byType(Image), findsOneWidget);
   });
 
   testWidgets('Tocar em "Câmera" aciona o seletor com a fonte câmera', (tester) async {
     ImageSource? fonteRecebida;
-    final repositorio = ProgressoRepository(resolverDiretorioBase: () async => diretorioAppTemp);
+    final repositorio = criarRepositorio();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -88,7 +118,7 @@ void main() {
 
   testWidgets('Tocar em "Galeria" aciona o seletor com a fonte galeria', (tester) async {
     ImageSource? fonteRecebida;
-    final repositorio = ProgressoRepository(resolverDiretorioBase: () async => diretorioAppTemp);
+    final repositorio = criarRepositorio();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -111,7 +141,7 @@ void main() {
   });
 
   testWidgets('Cancelar a seleção (retorna null) não adiciona nada', (tester) async {
-    final repositorio = ProgressoRepository(resolverDiretorioBase: () async => diretorioAppTemp);
+    final repositorio = criarRepositorio();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

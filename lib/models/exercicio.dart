@@ -57,8 +57,13 @@ extension EquipamentoLabel on Equipamento {
   };
 }
 
-/// Um exercício da biblioteca. `urlVideo` fica nulo por enquanto — ainda
-/// não há vídeos/GIFs de execução produzidos (ver briefing do produto).
+/// Um exercício da biblioteca. `caminhoImagem` fica nulo por enquanto para
+/// todos os exercícios — a demonstração visual foi decidida como imagem
+/// gerada por IA (personagem consistente), não vídeo/GIF nem banco de
+/// imagens licenciado (ver briefing do produto), mas a produção real
+/// dessas imagens é um passo externo que ainda não aconteceu. Quando
+/// existir, é um asset local do app (conteúdo pré-gravado, sem custo
+/// recorrente de geração por usuária).
 class Exercicio {
   const Exercicio({
     required this.id,
@@ -69,7 +74,7 @@ class Exercicio {
     required this.objetivos,
     required this.equipamento,
     required this.instrucoes,
-    this.urlVideo,
+    this.caminhoImagem,
   });
 
   final String id;
@@ -80,5 +85,5 @@ class Exercicio {
   final List<ObjetivoExercicio> objetivos;
   final Equipamento equipamento;
   final String instrucoes;
-  final String? urlVideo;
+  final String? caminhoImagem;
 }

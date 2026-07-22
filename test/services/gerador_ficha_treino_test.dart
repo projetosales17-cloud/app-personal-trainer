@@ -118,6 +118,31 @@ void main() {
     expect(equipamentos.length, greaterThan(2));
   });
 
+  test('perfil terceira idade evita exercícios avançados e de alto risco', () {
+    const anamneseTerceiraIdade = Anamnese(
+      idade: 68,
+      alturaCm: 160,
+      pesoAtualKg: 70,
+      objetivoPrincipal: Objetivo.terceiraIdade,
+      nivelAtividade: NivelAtividade.leve,
+      frequenciaSemanalDias: 3,
+    );
+
+    final ficha = gerador.gerar(anamneseTerceiraIdade);
+    const idsInseguros = {
+      'roda-abdominal',
+      'barra-fixa-assistida',
+      'elevacao-pelvica-barra',
+    };
+
+    for (final dia in ficha.dias) {
+      for (final exercicio in dia.exercicios) {
+        expect(exercicio.nivel, isNot(NivelExercicio.avancado));
+        expect(idsInseguros.contains(exercicio.id), isFalse);
+      }
+    }
+  });
+
   test('preferência só musculação (padrão) não inclui cardio', () {
     final ficha = gerador.gerar(_anamneseBase);
     for (final dia in ficha.dias) {

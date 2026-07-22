@@ -8,6 +8,7 @@ enum Objetivo {
   hipertrofia,
   performanceAtletica,
   saudeGeral,
+  terceiraIdade,
 }
 
 extension ObjetivoLabel on Objetivo {
@@ -17,6 +18,8 @@ extension ObjetivoLabel on Objetivo {
     Objetivo.hipertrofia => 'Hipertrofia',
     Objetivo.performanceAtletica => 'Performance atlética',
     Objetivo.saudeGeral => 'Saúde geral (ex: menopausa)',
+    Objetivo.terceiraIdade =>
+      'Terceira idade (mobilidade, equilíbrio e prevenção de quedas)',
   };
 }
 
@@ -51,6 +54,9 @@ extension PreferenciaTreinoRecomendada on Objetivo {
     Objetivo.emagrecimento => PreferenciaTreino.combinado,
     Objetivo.performanceAtletica => PreferenciaTreino.combinado,
     Objetivo.saudeGeral => PreferenciaTreino.combinado,
+    // Cardio leve de baixo impacto + mobilidade combina bem com o
+    // objetivo de terceira idade (ver GeradorFichaTreino).
+    Objetivo.terceiraIdade => PreferenciaTreino.combinado,
   };
 }
 

@@ -75,6 +75,24 @@ void main() {
     expect(await preferencias.notificacoesAtivadas(), isFalse);
   });
 
+  test('ativar repassa os dias da semana escolhidos para a ficha', () async {
+    final agendador = _AgendadorFake();
+    final service = NotificacoesTreinoService(
+      agendador: agendador,
+      preferenciasRepositorio: PreferenciasRepository(),
+    );
+    final ficha = FichaTreino(
+      dias: const [_dia1, _dia2],
+      geradaEm: DateTime(2026, 1, 5), // uma segunda-feira
+      validaAte: DateTime(2026, 1, 19),
+    );
+
+    await service.ativar(ficha, diasDaSemana: [3, 6]); // quarta e sábado
+
+    final diasDaSemanaAgendados = agendador.ultimasDatasAgendadas!.map((d) => d.weekday).toSet();
+    expect(diasDaSemanaAgendados, {3, 6});
+  });
+
   test('desativar cancela tudo e desliga a preferência', () async {
     final agendador = _AgendadorFake();
     final preferencias = PreferenciasRepository();
