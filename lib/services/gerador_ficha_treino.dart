@@ -1,16 +1,22 @@
 import '../models/anamnese.dart';
+import '../models/atividade_cardio.dart';
 import '../models/exercicio.dart';
 import '../models/ficha_treino.dart';
+import 'biblioteca_cardio_repository.dart';
 import 'biblioteca_exercicios_repository.dart';
 
 /// Gera uma ficha de treino a partir da anamnese, usando a biblioteca de
 /// exercícios. É uma primeira versão simples de personalização — não
 /// substitui a avaliação de um educador físico.
 class GeradorFichaTreino {
-  GeradorFichaTreino({BibliotecaExerciciosRepository? repositorio})
-    : repositorio = repositorio ?? BibliotecaExerciciosRepository();
+  GeradorFichaTreino({
+    BibliotecaExerciciosRepository? repositorio,
+    BibliotecaCardioRepository? repositorioCardio,
+  }) : repositorio = repositorio ?? BibliotecaExerciciosRepository(),
+       repositorioCardio = repositorioCardio ?? BibliotecaCardioRepository();
 
   final BibliotecaExerciciosRepository repositorio;
+  final BibliotecaCardioRepository repositorioCardio;
 
   static const duracaoValidadeDias = 30;
   static const _maxExerciciosPorGrupo = 3;
@@ -57,12 +63,20 @@ class GeradorFichaTreino {
         ? _equipamentosCasa
         : null;
 
+    final incluirMusculacao = anamnese.preferenciaTreino != PreferenciaTreino.soCardio;
+    final incluirCardio = anamnese.preferenciaTreino != PreferenciaTreino.soMusculacao;
+    final candidatosCardio = incluirCardio
+        ? repositorioCardio.filtrar(local: anamnese.localTreino)
+        : const <AtividadeCardio>[];
+
     final diasDeTreino = <DiaDeTreino>[];
     for (var indiceDia = 0; indiceDia < dias; indiceDia++) {
-      final gruposDoDia = [
-        for (var j = indiceDia; j < gruposDisponiveis.length; j += dias)
-          gruposDisponiveis[j],
-      ];
+      final gruposDoDia = incluirMusculacao
+          ? [
+              for (var j = indiceDia; j < gruposDisponiveis.length; j += dias)
+                gruposDisponiveis[j],
+            ]
+          : const <GrupoMuscular>[];
       final exercicios = <Exercicio>[
         for (final grupo in gruposDoDia)
           ..._escolherExercicios(
@@ -71,8 +85,16 @@ class GeradorFichaTreino {
             equipamentosPermitidos: equipamentosPermitidos,
           ),
       ];
+      final atividadesCardio = candidatosCardio.isNotEmpty
+          ? [candidatosCardio[indiceDia % candidatosCardio.length]]
+          : const <AtividadeCardio>[];
       diasDeTreino.add(
-        DiaDeTreino(dia: indiceDia + 1, gruposMusculares: gruposDoDia, exercicios: exercicios),
+        DiaDeTreino(
+          dia: indiceDia + 1,
+          gruposMusculares: gruposDoDia,
+          exercicios: exercicios,
+          atividadesCardio: atividadesCardio,
+        ),
       );
     }
 

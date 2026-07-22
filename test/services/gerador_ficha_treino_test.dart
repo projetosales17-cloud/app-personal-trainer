@@ -117,4 +117,68 @@ void main() {
         .toSet();
     expect(equipamentos.length, greaterThan(2));
   });
+
+  test('preferência só musculação (padrão) não inclui cardio', () {
+    final ficha = gerador.gerar(_anamneseBase);
+    for (final dia in ficha.dias) {
+      expect(dia.atividadesCardio, isEmpty);
+    }
+  });
+
+  test('preferência só cardio não inclui exercícios de musculação', () {
+    const anamneseSoCardio = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.emagrecimento,
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+      preferenciaTreino: PreferenciaTreino.soCardio,
+    );
+
+    final ficha = gerador.gerar(anamneseSoCardio);
+    for (final dia in ficha.dias) {
+      expect(dia.exercicios, isEmpty);
+      expect(dia.gruposMusculares, isEmpty);
+      expect(dia.atividadesCardio, isNotEmpty);
+    }
+  });
+
+  test('preferência combinada inclui musculação e cardio no mesmo dia', () {
+    const anamneseCombinada = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.emagrecimento,
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+      preferenciaTreino: PreferenciaTreino.combinado,
+    );
+
+    final ficha = gerador.gerar(anamneseCombinada);
+    for (final dia in ficha.dias) {
+      expect(dia.exercicios, isNotEmpty, reason: 'dia ${dia.dia}');
+      expect(dia.atividadesCardio, isNotEmpty, reason: 'dia ${dia.dia}');
+    }
+  });
+
+  test('cardio respeita o local de treino (casa não sugere esteira/academia)', () {
+    const anamneseCasaCardio = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.emagrecimento,
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+      localTreino: LocalTreino.casa,
+      preferenciaTreino: PreferenciaTreino.soCardio,
+    );
+
+    final ficha = gerador.gerar(anamneseCasaCardio);
+    for (final dia in ficha.dias) {
+      for (final atividade in dia.atividadesCardio) {
+        expect(atividade.local, LocalTreino.casa);
+      }
+    }
+  });
 }
