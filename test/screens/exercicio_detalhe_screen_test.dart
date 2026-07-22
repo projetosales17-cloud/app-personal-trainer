@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app_personal_trainer/data/biblioteca_exercicios.dart';
+import 'package:app_personal_trainer/models/exercicio.dart';
 import 'package:app_personal_trainer/models/registro_carga.dart';
 import 'package:app_personal_trainer/screens/exercicio_detalhe_screen.dart';
 import 'package:app_personal_trainer/services/treino_repository.dart';
@@ -136,5 +137,33 @@ void main() {
 
     expect(find.text('Cronômetro de descanso'), findsOneWidget);
     expect(find.byKey(const Key('texto-cronometro')), findsOneWidget);
+  });
+
+  testWidgets('Sem imagem de demonstração, mostra aviso e nenhuma imagem', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao)));
+    await tester.pump();
+
+    expect(find.textContaining('Imagem de demonstração em breve'), findsOneWidget);
+    expect(find.byType(Image), findsNothing);
+  });
+
+  testWidgets('Com imagem de demonstração, mostra a imagem e some o aviso', (tester) async {
+    final comImagem = Exercicio(
+      id: _flexao.id,
+      nome: _flexao.nome,
+      grupoMuscularPrincipal: _flexao.grupoMuscularPrincipal,
+      gruposMuscularesSecundarios: _flexao.gruposMuscularesSecundarios,
+      nivel: _flexao.nivel,
+      objetivos: _flexao.objetivos,
+      equipamento: _flexao.equipamento,
+      instrucoes: _flexao.instrucoes,
+      caminhoImagem: 'assets/exercicios/flexao-de-braco.png',
+    );
+
+    await tester.pumpWidget(MaterialApp(home: ExercicioDetalheScreen(exercicio: comImagem)));
+    await tester.pump();
+
+    expect(find.byType(Image), findsOneWidget);
+    expect(find.textContaining('Imagem de demonstração em breve'), findsNothing);
   });
 }
