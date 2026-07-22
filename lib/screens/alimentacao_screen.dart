@@ -5,16 +5,15 @@ import 'diario_alimentar_view.dart';
 import 'hidratacao_view.dart';
 import 'meu_cardapio_view.dart';
 import 'receitas_view.dart';
+import 'suplementos_view.dart';
 
-/// Suplementação ainda não foi implementada (ver briefing do produto —
-/// precisa de validação de nutricionista antes de virar conteúdo real).
 class AlimentacaoScreen extends StatelessWidget {
   const AlimentacaoScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 5,
+      length: 6,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Alimentação'),
@@ -26,6 +25,7 @@ class AlimentacaoScreen extends StatelessWidget {
               Tab(text: 'Receitas'),
               Tab(text: 'Diário'),
               Tab(text: 'Hidratação'),
+              Tab(text: 'Suplementos'),
             ],
           ),
         ),
@@ -36,6 +36,7 @@ class AlimentacaoScreen extends StatelessWidget {
             ReceitasView(),
             DiarioAlimentarView(),
             HidratacaoView(),
+            SuplementosView(),
           ],
         ),
       ),
