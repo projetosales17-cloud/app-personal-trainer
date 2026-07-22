@@ -46,7 +46,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
         await widget.preferenciasRepositorio.definirNotificacoesAtivadas(true);
       } else {
         final ficha = widget.geradorFicha.gerar(anamnese);
-        final concedido = await widget.notificacoesService.ativar(ficha);
+        final diasDaSemana = await widget.preferenciasRepositorio.diasDaSemanaEscolhidos();
+        final concedido = await widget.notificacoesService.ativar(
+          ficha,
+          diasDaSemana: diasDaSemana,
+        );
         if (!concedido && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Permissão de notificações negada.')),
