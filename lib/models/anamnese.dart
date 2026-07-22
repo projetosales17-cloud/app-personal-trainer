@@ -20,6 +20,15 @@ extension ObjetivoLabel on Objetivo {
   };
 }
 
+enum LocalTreino { academia, casa }
+
+extension LocalTreinoLabel on LocalTreino {
+  String get label => switch (this) {
+    LocalTreino.academia => 'Academia',
+    LocalTreino.casa => 'Em casa (sem aparelhos)',
+  };
+}
+
 enum NivelAtividade { sedentario, leve, moderado, intenso, muitoIntenso }
 
 extension NivelAtividadeLabel on NivelAtividade {
@@ -54,6 +63,9 @@ class Anamnese {
     required this.nivelAtividade,
     required this.frequenciaSemanalDias,
     this.regioesPriorizadas = const [],
+    // Anamneses salvas antes desse campo existir (ver fromJson) assumem
+    // academia, que era o único modo suportado pela geração de ficha até então.
+    this.localTreino = LocalTreino.academia,
   });
 
   final int idade;
@@ -71,6 +83,7 @@ class Anamnese {
   final NivelAtividade nivelAtividade;
   final int frequenciaSemanalDias;
   final List<String> regioesPriorizadas;
+  final LocalTreino localTreino;
 
   Map<String, dynamic> toJson() => {
     'idade': idade,
@@ -88,6 +101,7 @@ class Anamnese {
     'nivelAtividade': nivelAtividade.name,
     'frequenciaSemanalDias': frequenciaSemanalDias,
     'regioesPriorizadas': regioesPriorizadas,
+    'localTreino': localTreino.name,
   };
 
   factory Anamnese.fromJson(Map<String, dynamic> json) => Anamnese(
@@ -109,5 +123,6 @@ class Anamnese {
     frequenciaSemanalDias: json['frequenciaSemanalDias'] as int,
     regioesPriorizadas:
         (json['regioesPriorizadas'] as List?)?.cast<String>() ?? const [],
+    localTreino: LocalTreino.values.byName(json['localTreino'] as String? ?? 'academia'),
   );
 }

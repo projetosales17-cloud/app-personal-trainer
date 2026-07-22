@@ -75,6 +75,17 @@ const bibliotecaExercicios = <Exercicio>[
         'Com um cabo em cada mão, puxe ambos à frente do corpo em um '
         'movimento de arco, contraindo o peito no ponto final.',
   ),
+  Exercicio(
+    id: 'crucifixo-elastico',
+    nome: 'Crucifixo com elástico',
+    grupoMuscularPrincipal: GrupoMuscular.peito,
+    nivel: NivelExercicio.iniciante,
+    objetivos: [ObjetivoExercicio.hipertrofia, ObjetivoExercicio.emagrecimento],
+    equipamento: Equipamento.elastico,
+    instrucoes:
+        'Com o elástico preso atrás do corpo (porta ou ponto fixo), uma '
+        'ponta em cada mão, junte os braços à frente em movimento de arco.',
+  ),
 
   // Costas
   Exercicio(
@@ -146,6 +157,30 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Usando o apoio de uma máquina assistida ou elástico, puxe o '
         'corpo para cima até o queixo passar da barra.',
+  ),
+  Exercicio(
+    id: 'remada-elastico',
+    nome: 'Remada com elástico',
+    grupoMuscularPrincipal: GrupoMuscular.costas,
+    gruposMuscularesSecundarios: [GrupoMuscular.biceps],
+    nivel: NivelExercicio.iniciante,
+    objetivos: [ObjetivoExercicio.hipertrofia, ObjetivoExercicio.forca],
+    equipamento: Equipamento.elastico,
+    instrucoes:
+        'Com o elástico preso em um ponto fixo à frente, puxe as pontas '
+        'em direção à cintura, contraindo as escápulas.',
+  ),
+  Exercicio(
+    id: 'puxada-alta-elastico',
+    nome: 'Puxada alta com elástico',
+    grupoMuscularPrincipal: GrupoMuscular.costas,
+    gruposMuscularesSecundarios: [GrupoMuscular.biceps],
+    nivel: NivelExercicio.iniciante,
+    objetivos: [ObjetivoExercicio.hipertrofia],
+    equipamento: Equipamento.elastico,
+    instrucoes:
+        'Com o elástico preso em um ponto fixo acima da cabeça, puxe as '
+        'pontas para baixo em direção ao peito, mantendo o tronco estável.',
   ),
 
   // Ombro
@@ -219,6 +254,29 @@ const bibliotecaExercicios = <Exercicio>[
         'Em pé, empurre a barra a partir da altura dos ombros até '
         'estender totalmente os braços acima da cabeça.',
   ),
+  Exercicio(
+    id: 'desenvolvimento-elastico',
+    nome: 'Desenvolvimento com elástico',
+    grupoMuscularPrincipal: GrupoMuscular.ombro,
+    gruposMuscularesSecundarios: [GrupoMuscular.triceps],
+    nivel: NivelExercicio.iniciante,
+    objetivos: [ObjetivoExercicio.hipertrofia],
+    equipamento: Equipamento.elastico,
+    instrucoes:
+        'Com o elástico preso sob os pés, empurre as pontas para cima '
+        'até estender os braços acima da cabeça e desça controladamente.',
+  ),
+  Exercicio(
+    id: 'elevacao-lateral-elastico',
+    nome: 'Elevação lateral com elástico',
+    grupoMuscularPrincipal: GrupoMuscular.ombro,
+    nivel: NivelExercicio.iniciante,
+    objetivos: [ObjetivoExercicio.hipertrofia],
+    equipamento: Equipamento.elastico,
+    instrucoes:
+        'Com o elástico preso sob os pés, eleve os braços lateralmente '
+        'até a altura dos ombros, sem balançar o tronco.',
+  ),
 
   // Bíceps
   Exercicio(
@@ -284,6 +342,28 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Sentada, com o cotovelo apoiado na parte interna da coxa, '
         'flexione o braço elevando o halter lentamente.',
+  ),
+  Exercicio(
+    id: 'rosca-direta-elastico',
+    nome: 'Rosca direta com elástico',
+    grupoMuscularPrincipal: GrupoMuscular.biceps,
+    nivel: NivelExercicio.iniciante,
+    objetivos: [ObjetivoExercicio.hipertrofia],
+    equipamento: Equipamento.elastico,
+    instrucoes:
+        'Com o elástico preso sob os pés, flexione os cotovelos elevando '
+        'as pontas até a altura dos ombros, sem balançar.',
+  ),
+  Exercicio(
+    id: 'rosca-martelo-elastico',
+    nome: 'Rosca martelo com elástico',
+    grupoMuscularPrincipal: GrupoMuscular.biceps,
+    nivel: NivelExercicio.iniciante,
+    objetivos: [ObjetivoExercicio.hipertrofia],
+    equipamento: Equipamento.elastico,
+    instrucoes:
+        'Igual à rosca direta com elástico, mantendo as palmas voltadas '
+        'uma para a outra durante todo o movimento.',
   ),
 
   // Tríceps
@@ -354,6 +434,17 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com o tronco inclinado à frente e o braço junto ao corpo, '
         'estenda o cotovelo levando o halter para trás.',
+  ),
+  Exercicio(
+    id: 'triceps-elastico',
+    nome: 'Tríceps corda com elástico',
+    grupoMuscularPrincipal: GrupoMuscular.triceps,
+    nivel: NivelExercicio.iniciante,
+    objetivos: [ObjetivoExercicio.hipertrofia],
+    equipamento: Equipamento.elastico,
+    instrucoes:
+        'Com o elástico preso em um ponto fixo acima da cabeça e os '
+        'cotovelos junto ao corpo, estenda os braços empurrando para baixo.',
   ),
 
   // Perna

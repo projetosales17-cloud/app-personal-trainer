@@ -20,6 +20,7 @@ void main() {
       nivelAtividade: NivelAtividade.leve,
       frequenciaSemanalDias: 4,
       regioesPriorizadas: ['Fortalecer core'],
+      localTreino: LocalTreino.casa,
     );
 
     final reconstruido = Anamnese.fromJson(original.toJson());
@@ -39,6 +40,7 @@ void main() {
     expect(reconstruido.nivelAtividade, original.nivelAtividade);
     expect(reconstruido.frequenciaSemanalDias, original.frequenciaSemanalDias);
     expect(reconstruido.regioesPriorizadas, original.regioesPriorizadas);
+    expect(reconstruido.localTreino, original.localTreino);
   });
 
   test('fromJson usa valores padrão para campos opcionais ausentes', () {
@@ -58,5 +60,6 @@ void main() {
     expect(anamnese.restricoesAlimentares, isEmpty);
     expect(anamnese.lesoesLimitacoes, isEmpty);
     expect(anamnese.regioesPriorizadas, isEmpty);
+    expect(anamnese.localTreino, LocalTreino.academia);
   });
 }

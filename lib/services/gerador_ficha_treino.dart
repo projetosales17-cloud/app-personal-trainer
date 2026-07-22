@@ -36,6 +36,10 @@ class GeradorFichaTreino {
     Objetivo.saudeGeral: ObjetivoExercicio.mobilidade,
   };
 
+  /// Equipamentos disponíveis para quem treina em casa. Academia não tem
+  /// restrição de equipamento.
+  static const _equipamentosCasa = {Equipamento.nenhum, Equipamento.elastico};
+
   FichaTreino gerar(Anamnese anamnese) {
     final gruposExcluidos = anamnese.lesoesLimitacoes
         .map((lesao) => _mapaLesaoParaGrupo[lesao])
@@ -49,6 +53,9 @@ class GeradorFichaTreino {
 
     final dias = anamnese.frequenciaSemanalDias.clamp(1, 7);
     final objetivoExercicio = _mapaObjetivo[anamnese.objetivoPrincipal]!;
+    final equipamentosPermitidos = anamnese.localTreino == LocalTreino.casa
+        ? _equipamentosCasa
+        : null;
 
     final diasDeTreino = <DiaDeTreino>[];
     for (var indiceDia = 0; indiceDia < dias; indiceDia++) {
@@ -58,7 +65,11 @@ class GeradorFichaTreino {
       ];
       final exercicios = <Exercicio>[
         for (final grupo in gruposDoDia)
-          ..._escolherExercicios(grupo, objetivoExercicio),
+          ..._escolherExercicios(
+            grupo,
+            objetivoExercicio,
+            equipamentosPermitidos: equipamentosPermitidos,
+          ),
       ];
       diasDeTreino.add(
         DiaDeTreino(dia: indiceDia + 1, gruposMusculares: gruposDoDia, exercicios: exercicios),
@@ -73,8 +84,17 @@ class GeradorFichaTreino {
     );
   }
 
-  List<Exercicio> _escolherExercicios(GrupoMuscular grupo, ObjetivoExercicio objetivo) {
-    final candidatos = repositorio.filtrar(grupoMuscular: grupo);
+  List<Exercicio> _escolherExercicios(
+    GrupoMuscular grupo,
+    ObjetivoExercicio objetivo, {
+    Set<Equipamento>? equipamentosPermitidos,
+  }) {
+    var candidatos = repositorio.filtrar(grupoMuscular: grupo);
+    if (equipamentosPermitidos != null) {
+      candidatos = candidatos
+          .where((exercicio) => equipamentosPermitidos.contains(exercicio.equipamento))
+          .toList();
+    }
     final comObjetivo = candidatos.where((exercicio) => exercicio.objetivos.contains(objetivo));
     final base = comObjetivo.isNotEmpty ? comObjetivo.toList() : candidatos;
     final ordenados = [...base]..sort((a, b) => a.nivel.index.compareTo(b.nivel.index));
