@@ -20,6 +20,20 @@ extension GrupoMuscularLabel on GrupoMuscular {
     GrupoMuscular.gluteo => 'Glúteo',
     GrupoMuscular.abdomen => 'Abdômen',
   };
+
+  /// Ilustração genérica (SVG) usada como proxy visual enquanto a produção
+  /// real das imagens por IA (ver Exercicio.caminhoImagem) não acontece —
+  /// uma por grupo muscular, não por exercício individual.
+  String get ilustracaoPadrao => switch (this) {
+    GrupoMuscular.peito => 'assets/exercicios/peito.svg',
+    GrupoMuscular.costas => 'assets/exercicios/costas.svg',
+    GrupoMuscular.ombro => 'assets/exercicios/ombro.svg',
+    GrupoMuscular.biceps => 'assets/exercicios/biceps.svg',
+    GrupoMuscular.triceps => 'assets/exercicios/triceps.svg',
+    GrupoMuscular.perna => 'assets/exercicios/perna.svg',
+    GrupoMuscular.gluteo => 'assets/exercicios/gluteo.svg',
+    GrupoMuscular.abdomen => 'assets/exercicios/abdomen.svg',
+  };
 }
 
 enum NivelExercicio { iniciante, intermediario, avancado }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -134,20 +135,27 @@ void main() {
   testWidgets('Mostra o cronômetro de descanso', (tester) async {
     await tester.pumpWidget(MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao)));
     await tester.pump();
+    await tester.pump();
+    await _rolarAte(tester, find.byKey(const Key('texto-cronometro')));
 
     expect(find.text('Cronômetro de descanso'), findsOneWidget);
     expect(find.byKey(const Key('texto-cronometro')), findsOneWidget);
   });
 
-  testWidgets('Sem imagem de demonstração, mostra aviso e nenhuma imagem', (tester) async {
+  testWidgets('Sem imagem real, mostra a ilustração genérica do grupo muscular e o aviso', (
+    tester,
+  ) async {
     await tester.pumpWidget(MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao)));
     await tester.pump();
 
-    expect(find.textContaining('Imagem de demonstração em breve'), findsOneWidget);
+    expect(find.byType(SvgPicture), findsOneWidget);
     expect(find.byType(Image), findsNothing);
+    expect(find.textContaining('Ilustração genérica do grupo muscular'), findsOneWidget);
   });
 
-  testWidgets('Com imagem de demonstração, mostra a imagem e some o aviso', (tester) async {
+  testWidgets('Com imagem real, mostra a imagem e some o aviso de ilustração genérica', (
+    tester,
+  ) async {
     final comImagem = Exercicio(
       id: _flexao.id,
       nome: _flexao.nome,
@@ -164,6 +172,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(Image), findsOneWidget);
-    expect(find.textContaining('Imagem de demonstração em breve'), findsNothing);
+    expect(find.byType(SvgPicture), findsNothing);
+    expect(find.textContaining('Ilustração genérica do grupo muscular'), findsNothing);
   });
 }
