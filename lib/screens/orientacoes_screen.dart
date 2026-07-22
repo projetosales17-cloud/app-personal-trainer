@@ -16,6 +16,7 @@ class OrientacoesScreen extends StatefulWidget {
 
 class _OrientacoesScreenState extends State<OrientacoesScreen> {
   TemaOrientacao? _filtro;
+  TipoConteudoOrientacao? _filtroTipo;
   final _controladorBusca = TextEditingController();
   String _busca = '';
 
@@ -27,7 +28,11 @@ class _OrientacoesScreenState extends State<OrientacoesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final orientacoes = widget.repositorio.filtrar(tema: _filtro, busca: _busca);
+    final orientacoes = widget.repositorio.filtrar(
+      tema: _filtro,
+      tipo: _filtroTipo,
+      busca: _busca,
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Orientações')),
@@ -72,6 +77,33 @@ class _OrientacoesScreenState extends State<OrientacoesScreen> {
               ],
             ),
           ),
+          SizedBox(
+            height: 48,
+            child: ListView(
+              key: const Key('filtro-tipo-conteudo'),
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: const Text('Tudo'),
+                    selected: _filtroTipo == null,
+                    onSelected: (_) => setState(() => _filtroTipo = null),
+                  ),
+                ),
+                for (final tipo in TipoConteudoOrientacao.values)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(tipo.label),
+                      selected: _filtroTipo == tipo,
+                      onSelected: (_) => setState(() => _filtroTipo = tipo),
+                    ),
+                  ),
+              ],
+            ),
+          ),
           Expanded(
             child: orientacoes.isEmpty
                 ? const Center(child: Text('Nenhum conteúdo encontrado.'))
@@ -82,7 +114,11 @@ class _OrientacoesScreenState extends State<OrientacoesScreen> {
                       final orientacao = orientacoes[indice];
                       return ListTile(
                         title: Text(orientacao.titulo),
-                        subtitle: Text(orientacao.tema.label),
+                        subtitle: Text(
+                          orientacao.tipo == TipoConteudoOrientacao.faq
+                              ? 'FAQ · ${orientacao.tema.label}'
+                              : orientacao.tema.label,
+                        ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
