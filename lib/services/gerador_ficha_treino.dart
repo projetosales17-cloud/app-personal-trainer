@@ -46,6 +46,10 @@ class GeradorFichaTreino {
     'elevacao-pelvica-barra',
   };
 
+  /// Equipamentos disponíveis para quem treina em casa. Academia não tem
+  /// restrição de equipamento.
+  static const _equipamentosCasa = {Equipamento.nenhum, Equipamento.elastico};
+
   FichaTreino gerar(Anamnese anamnese) {
     final gruposExcluidos = anamnese.lesoesLimitacoes
         .map((lesao) => _mapaLesaoParaGrupo[lesao])
@@ -59,6 +63,9 @@ class GeradorFichaTreino {
 
     final dias = anamnese.frequenciaSemanalDias.clamp(1, 7);
     final objetivoExercicio = _mapaObjetivo[anamnese.objetivoPrincipal]!;
+    final equipamentosPermitidos = anamnese.localTreino == LocalTreino.casa
+        ? _equipamentosCasa
+        : null;
     final restringirTerceiraIdade = anamnese.objetivoPrincipal == Objetivo.terceiraIdade;
 
     final diasDeTreino = <DiaDeTreino>[];
@@ -72,6 +79,7 @@ class GeradorFichaTreino {
           ..._escolherExercicios(
             grupo,
             objetivoExercicio,
+            equipamentosPermitidos: equipamentosPermitidos,
             restringirTerceiraIdade: restringirTerceiraIdade,
           ),
       ];
@@ -91,9 +99,15 @@ class GeradorFichaTreino {
   List<Exercicio> _escolherExercicios(
     GrupoMuscular grupo,
     ObjetivoExercicio objetivo, {
+    Set<Equipamento>? equipamentosPermitidos,
     bool restringirTerceiraIdade = false,
   }) {
     var candidatos = repositorio.filtrar(grupoMuscular: grupo);
+    if (equipamentosPermitidos != null) {
+      candidatos = candidatos
+          .where((exercicio) => equipamentosPermitidos.contains(exercicio.equipamento))
+          .toList();
+    }
     if (restringirTerceiraIdade) {
       candidatos = candidatos
           .where(

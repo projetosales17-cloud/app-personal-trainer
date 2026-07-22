@@ -86,6 +86,38 @@ void main() {
     expect(gruposCobertos, GrupoMuscular.values.toSet());
   });
 
+  test('local de treino casa só usa exercícios de peso do corpo ou elástico', () {
+    const anamneseCasa = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.hipertrofia,
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 7,
+      localTreino: LocalTreino.casa,
+    );
+
+    final ficha = gerador.gerar(anamneseCasa);
+    for (final dia in ficha.dias) {
+      for (final exercicio in dia.exercicios) {
+        expect(
+          {Equipamento.nenhum, Equipamento.elastico}.contains(exercicio.equipamento),
+          isTrue,
+          reason: '${exercicio.nome} usa ${exercicio.equipamento}',
+        );
+      }
+    }
+  });
+
+  test('local de treino academia (padrão) não restringe equipamento', () {
+    final ficha = gerador.gerar(_anamneseBase);
+    final equipamentos = ficha.dias
+        .expand((d) => d.exercicios)
+        .map((e) => e.equipamento)
+        .toSet();
+    expect(equipamentos.length, greaterThan(2));
+  });
+
   test('perfil terceira idade evita exercícios avançados e de alto risco', () {
     const anamneseTerceiraIdade = Anamnese(
       idade: 68,

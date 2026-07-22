@@ -54,7 +54,7 @@ class OnboardingFlow extends StatefulWidget {
 
 class _OnboardingFlowState extends State<OnboardingFlow> {
   int _passo = 0;
-  static const _totalPassos = 10;
+  static const _totalPassos = 11;
 
   final _idadeController = TextEditingController();
   final _alturaController = TextEditingController();
@@ -73,6 +73,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   final Set<String> _lesoes = {};
   NivelAtividade? _nivelAtividade;
   int _frequenciaSemanalDias = 3;
+  LocalTreino? _localTreino;
   final Set<String> _regioes = {};
 
   bool _salvando = false;
@@ -106,6 +107,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           (_tipoCirurgiaController.text.trim().isNotEmpty &&
               int.tryParse(_mesesCirurgiaController.text) != null),
     7 => _nivelAtividade != null,
+    8 => _localTreino != null,
     _ => true,
   };
 
@@ -148,6 +150,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       nivelAtividade: _nivelAtividade!,
       frequenciaSemanalDias: _frequenciaSemanalDias,
       regioesPriorizadas: _regioes.toList(),
+      localTreino: _localTreino!,
     );
 
     await widget.repositorio.salvar(anamnese);
@@ -222,13 +225,15 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       case 7:
         return _passoAtividade();
       case 8:
+        return _passoLocalTreino();
+      case 9:
         return _passoMultiSelecao(
           titulo: 'Priorização de região corporal',
           opcoes: _regioesComuns,
           selecionadas: _regioes,
           outroController: null,
         );
-      case 9:
+      case 10:
         return _passoResumo();
       default:
         return const SizedBox.shrink();
@@ -417,6 +422,31 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     );
   }
 
+  Widget _passoLocalTreino() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Onde você vai treinar?', style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 16),
+        for (final opcao in LocalTreino.values)
+          RadioListTile<LocalTreino>(
+            contentPadding: EdgeInsets.zero,
+            title: Text(opcao.label),
+            value: opcao,
+            // ignore: deprecated_member_use
+            groupValue: _localTreino,
+            // ignore: deprecated_member_use
+            onChanged: (valor) => setState(() => _localTreino = valor),
+          ),
+        const SizedBox(height: 8),
+        Text(
+          'Sua ficha será montada com exercícios equivalentes para o modo escolhido.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+    );
+  }
+
   Widget _passoResumo() {
     if (_salvando) {
       return const Padding(
@@ -446,6 +476,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         Text('Peso atual: $pesoAtualKg kg'),
         Text('Nível de atividade: ${_nivelAtividade?.label ?? '-'}'),
         Text('Dias por semana: $_frequenciaSemanalDias'),
+        Text('Local de treino: ${_localTreino?.label ?? '-'}'),
         const Divider(height: 32),
         Text('IMC: $imc ($classificacaoImc)'),
         Text('Taxa Metabólica Basal: $tmb kcal/dia'),
