@@ -1,3 +1,4 @@
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,6 +7,7 @@ import 'package:app_personal_trainer/models/anamnese.dart';
 import 'package:app_personal_trainer/screens/perfil_screen.dart';
 import 'package:app_personal_trainer/services/agendador_notificacoes.dart';
 import 'package:app_personal_trainer/services/anamnese_repository.dart';
+import 'package:app_personal_trainer/services/auth_repository.dart';
 import 'package:app_personal_trainer/services/notificacoes_treino_service.dart';
 import 'package:app_personal_trainer/services/preferencias_repository.dart';
 
@@ -28,13 +30,17 @@ class _AgendadorFake implements AgendadorNotificacoes {
   }
 }
 
+AuthRepository _authComUsuaria({String email = 'usuaria@example.com'}) => AuthRepository(
+  auth: MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: 'uid-1', email: email)),
+);
+
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
   });
 
   testWidgets('Sem anamnese salva, pede para completar o onboarding', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: PerfilScreen()));
+    await tester.pumpWidget(MaterialApp(home: PerfilScreen(authRepositorio: _authComUsuaria())));
     await tester.pump();
     await tester.pump();
 
@@ -58,7 +64,12 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(home: PerfilScreen(anamneseRepositorio: anamneseRepositorio)),
+      MaterialApp(
+        home: PerfilScreen(
+          anamneseRepositorio: anamneseRepositorio,
+          authRepositorio: _authComUsuaria(),
+        ),
+      ),
     );
     await tester.pump();
     await tester.pump();
@@ -72,11 +83,41 @@ void main() {
     expect(find.text('Lactose'), findsOneWidget);
   });
 
+  testWidgets('Mostra o e-mail da conta logada', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PerfilScreen(authRepositorio: _authComUsuaria(email: 'maria@example.com')),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('maria@example.com'), findsOneWidget);
+  });
+
+  testWidgets('Tocar em "Sair da conta" chama o signOut', (tester) async {
+    final mockAuth = MockFirebaseAuth(
+      signedIn: true,
+      mockUser: MockUser(uid: 'uid-1', email: 'usuaria@example.com'),
+    );
+    await tester.pumpWidget(
+      MaterialApp(home: PerfilScreen(authRepositorio: AuthRepository(auth: mockAuth))),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('botao-sair')));
+    await tester.pump();
+
+    expect(mockAuth.currentUser, isNull);
+  });
+
   testWidgets('Alternar o switch de notificações persiste a preferência', (tester) async {
     final preferenciasRepositorio = PreferenciasRepository();
     await tester.pumpWidget(
       MaterialApp(
         home: PerfilScreen(
+          authRepositorio: _authComUsuaria(),
           preferenciasRepositorio: preferenciasRepositorio,
           notificacoesService: NotificacoesTreinoService(
             agendador: _AgendadorFake(),
@@ -124,6 +165,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: PerfilScreen(
+            authRepositorio: _authComUsuaria(),
             anamneseRepositorio: anamneseRepositorio,
             preferenciasRepositorio: preferenciasRepositorio,
             notificacoesService: NotificacoesTreinoService(
@@ -170,6 +212,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: PerfilScreen(
+            authRepositorio: _authComUsuaria(),
             anamneseRepositorio: anamneseRepositorio,
             preferenciasRepositorio: preferenciasRepositorio,
             notificacoesService: NotificacoesTreinoService(
@@ -195,11 +238,17 @@ void main() {
   );
 
   testWidgets('Mostra avisos de assinatura e suporte ainda pendentes', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: PerfilScreen()));
+    await tester.pumpWidget(MaterialApp(home: PerfilScreen(authRepositorio: _authComUsuaria())));
     await tester.pump();
     await tester.pump();
 
-    expect(find.textContaining('depende de uma decisão de'), findsOneWidget);
-    expect(find.textContaining('Canal de suporte em breve'), findsOneWidget);
+    expect(find.textContaining('cobrança de assinatura ainda não'), findsOneWidget);
+    // "Suporte" fica abaixo da dobra na viewport de teste (a nova seção
+    // "Conta" empurrou o conteúdo) — usamos skipOffstage:false, já
+    // construído com o texto certo, só não visível sem rolar.
+    expect(
+      find.textContaining('Canal de suporte em breve', skipOffstage: false),
+      findsOneWidget,
+    );
   });
 }

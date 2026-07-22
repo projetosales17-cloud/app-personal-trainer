@@ -40,6 +40,9 @@ dependencies:
   video_player: ^2.13.0
   flutter_local_notifications: ^22.1.0
   timezone: ^0.11.1
+  firebase_core: ^4.12.1
+  firebase_auth: ^6.5.6
+  cloud_firestore: ^6.7.1
 
 dev_dependencies:
   flutter_test:
@@ -51,6 +54,9 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  firebase_auth_mocks: ^0.15.2
+  fake_cloud_firestore: ^4.2.0
+  mock_exceptions: ^0.8.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

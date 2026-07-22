@@ -37,11 +37,10 @@ const _regioesComuns = [
   'Fortalecer core',
 ];
 
-/// Fluxo completo de onboarding: boas-vindas, licença, conta e anamnese em
-/// etapas. Ao concluir, salva a anamnese localmente e chama [onConcluido].
-///
-/// Licença e conta ainda não têm backend — os dados são só coletados na UI
-/// por enquanto (ver decisão pendente de stack de backend/autenticação).
+/// Fluxo de onboarding da anamnese, em etapas. A conta (e-mail/senha) já
+/// foi criada antes disso, nas telas de login/cadastro — ver
+/// AutenticacaoGate. Ao concluir, salva a anamnese localmente e chama
+/// [onConcluido].
 class OnboardingFlow extends StatefulWidget {
   OnboardingFlow({super.key, required this.onConcluido, AnamneseRepository? repositorio})
     : repositorio = repositorio ?? AnamneseRepository();
@@ -55,12 +54,8 @@ class OnboardingFlow extends StatefulWidget {
 
 class _OnboardingFlowState extends State<OnboardingFlow> {
   int _passo = 0;
-  static const _totalPassos = 12;
+  static const _totalPassos = 10;
 
-  final _licencaController = TextEditingController();
-  final _nomeController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _senhaController = TextEditingController();
   final _idadeController = TextEditingController();
   final _alturaController = TextEditingController();
   final _pesoAtualController = TextEditingController();
@@ -71,7 +66,6 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   final _restricaoOutraController = TextEditingController();
   final _lesaoOutraController = TextEditingController();
 
-  bool _aceiteTermos = false;
   Objetivo? _objetivo;
   bool _cirurgiaBariatrica = false;
   String _condicaoHormonal = _condicoesHormonais.first;
@@ -86,10 +80,6 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   @override
   void dispose() {
     for (final controller in [
-      _licencaController,
-      _nomeController,
-      _emailController,
-      _senhaController,
       _idadeController,
       _alturaController,
       _pesoAtualController,
@@ -106,22 +96,16 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   }
 
   bool get _podeAvancar => switch (_passo) {
-    1 => _licencaController.text.trim().isNotEmpty,
-    2 =>
-      _nomeController.text.trim().isNotEmpty &&
-          RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(_emailController.text.trim()) &&
-          _senhaController.text.length >= 6 &&
-          _aceiteTermos,
-    3 =>
+    1 =>
       double.tryParse(_idadeController.text.replaceAll(',', '.')) != null &&
           double.tryParse(_alturaController.text.replaceAll(',', '.')) != null &&
           double.tryParse(_pesoAtualController.text.replaceAll(',', '.')) != null,
-    4 => _objetivo != null,
-    5 =>
+    2 => _objetivo != null,
+    3 =>
       !_cirurgiaBariatrica ||
           (_tipoCirurgiaController.text.trim().isNotEmpty &&
               int.tryParse(_mesesCirurgiaController.text) != null),
-    9 => _nivelAtividade != null,
+    7 => _nivelAtividade != null,
     _ => true,
   };
 
@@ -214,87 +198,41 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               'Isso leva só alguns minutos.',
         );
       case 1:
-        return _CampoTexto(
-          titulo: 'Licença',
-          label: 'Chave de licença',
-          controller: _licencaController,
-          onChanged: (_) => setState(() {}),
-        );
-      case 2:
-        return _passoConta();
-      case 3:
         return _passoDadosBasicos();
-      case 4:
+      case 2:
         return _passoObjetivo();
-      case 5:
+      case 3:
         return _passoBariatrica();
-      case 6:
+      case 4:
         return _passoCondicaoHormonal();
-      case 7:
+      case 5:
         return _passoMultiSelecao(
           titulo: 'Restrições alimentares ou alergias',
           opcoes: _restricoesComuns,
           selecionadas: _restricoes,
           outroController: _restricaoOutraController,
         );
-      case 8:
+      case 6:
         return _passoMultiSelecao(
           titulo: 'Lesões ou limitações físicas',
           opcoes: _lesoesComuns,
           selecionadas: _lesoes,
           outroController: _lesaoOutraController,
         );
-      case 9:
+      case 7:
         return _passoAtividade();
-      case 10:
+      case 8:
         return _passoMultiSelecao(
           titulo: 'Priorização de região corporal',
           opcoes: _regioesComuns,
           selecionadas: _regioes,
           outroController: null,
         );
-      case 11:
+      case 9:
         return _passoResumo();
       default:
         return const SizedBox.shrink();
     }
-  }
-
-  Widget _passoConta() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Crie sua conta', style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _nomeController,
-          decoration: const InputDecoration(labelText: 'Nome'),
-          onChanged: (_) => setState(() {}),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _emailController,
-          decoration: const InputDecoration(labelText: 'E-mail'),
-          keyboardType: TextInputType.emailAddress,
-          onChanged: (_) => setState(() {}),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _senhaController,
-          decoration: const InputDecoration(labelText: 'Senha (mín. 6 caracteres)'),
-          obscureText: true,
-          onChanged: (_) => setState(() {}),
-        ),
-        const SizedBox(height: 12),
-        CheckboxListTile(
-          contentPadding: EdgeInsets.zero,
-          value: _aceiteTermos,
-          onChanged: (valor) => setState(() => _aceiteTermos = valor ?? false),
-          title: const Text('Li e aceito os termos de uso e a política de privacidade'),
-          controlAffinity: ListTileControlAffinity.leading,
-        ),
-      ],
-    );
   }
 
   Widget _passoDadosBasicos() {
@@ -547,36 +485,6 @@ class _TextoPasso extends StatelessWidget {
         Text(titulo, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 16),
         Text(texto, style: Theme.of(context).textTheme.bodyLarge),
-      ],
-    );
-  }
-}
-
-class _CampoTexto extends StatelessWidget {
-  const _CampoTexto({
-    required this.titulo,
-    required this.label,
-    required this.controller,
-    required this.onChanged,
-  });
-
-  final String titulo;
-  final String label;
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(titulo, style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 16),
-        TextField(
-          controller: controller,
-          decoration: InputDecoration(labelText: label),
-          onChanged: onChanged,
-        ),
       ],
     );
   }

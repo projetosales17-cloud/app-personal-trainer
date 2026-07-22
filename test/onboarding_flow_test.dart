@@ -15,19 +15,23 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('Botão Avançar fica desabilitado até a licença ser preenchida', (tester) async {
+  testWidgets('Botão Avançar fica desabilitado até os dados básicos serem preenchidos', (
+    tester,
+  ) async {
     var concluido = false;
     await tester.pumpWidget(MaterialApp(
       home: OnboardingFlow(onConcluido: () => concluido = true),
     ));
 
-    await _avancar(tester); // boas-vindas -> licença
+    await _avancar(tester); // boas-vindas -> dados básicos
 
     final botaoDesabilitado =
         tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Avançar'));
     expect(botaoDesabilitado.onPressed, isNull);
 
-    await tester.enterText(find.byType(TextField), 'ABC-123');
+    await tester.enterText(find.byType(TextField).at(0), '30');
+    await tester.enterText(find.byType(TextField).at(1), '170');
+    await tester.enterText(find.byType(TextField).at(2), '65');
     await tester.pump();
 
     final botaoHabilitado =
@@ -45,18 +49,7 @@ void main() {
       home: OnboardingFlow(onConcluido: () => concluido = true, repositorio: repositorio),
     ));
 
-    await _avancar(tester); // boas-vindas -> licença
-
-    await tester.enterText(find.byType(TextField), 'ABC-123');
-    await tester.pump();
-    await _avancar(tester); // licença -> conta
-
-    await tester.enterText(find.byType(TextField).at(0), 'Maria');
-    await tester.enterText(find.byType(TextField).at(1), 'maria@example.com');
-    await tester.enterText(find.byType(TextField).at(2), 'senha123');
-    await tester.tap(find.byType(CheckboxListTile));
-    await tester.pump();
-    await _avancar(tester); // conta -> dados básicos
+    await _avancar(tester); // boas-vindas -> dados básicos
 
     await tester.enterText(find.byType(TextField).at(0), '30');
     await tester.enterText(find.byType(TextField).at(1), '170');
@@ -108,18 +101,7 @@ void main() {
       home: OnboardingFlow(onConcluido: () {}),
     ));
 
-    await _avancar(tester); // boas-vindas -> licença
-
-    await tester.enterText(find.byType(TextField), 'ABC-123');
-    await tester.pump();
-    await _avancar(tester); // licença -> conta
-
-    await tester.enterText(find.byType(TextField).at(0), 'Maria');
-    await tester.enterText(find.byType(TextField).at(1), 'maria@example.com');
-    await tester.enterText(find.byType(TextField).at(2), 'senha123');
-    await tester.tap(find.byType(CheckboxListTile));
-    await tester.pump();
-    await _avancar(tester); // conta -> dados básicos
+    await _avancar(tester); // boas-vindas -> dados básicos
 
     await tester.enterText(find.byType(TextField).at(0), '30');
     await tester.enterText(find.byType(TextField).at(1), '175');

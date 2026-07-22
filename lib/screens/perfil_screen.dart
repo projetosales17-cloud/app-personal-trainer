@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../models/anamnese.dart';
 import '../services/anamnese_repository.dart';
+import '../services/auth_repository.dart';
 import '../services/gerador_ficha_treino.dart';
 import '../services/notificacoes_treino_service.dart';
 import '../services/preferencias_repository.dart';
 
-/// Assinatura/licença ainda depende de uma decisão de backend/autenticação
-/// (ver briefing do produto) — por enquanto só um aviso. Central de suporte
-/// também ainda não existe.
+/// Assinatura/pagamento ainda não está implementado (ver briefing do
+/// produto) — conta e login já são reais (Firebase Authentication).
+/// Central de suporte também ainda não existe.
 class PerfilScreen extends StatefulWidget {
   PerfilScreen({
     super.key,
@@ -16,15 +17,18 @@ class PerfilScreen extends StatefulWidget {
     PreferenciasRepository? preferenciasRepositorio,
     GeradorFichaTreino? geradorFicha,
     NotificacoesTreinoService? notificacoesService,
+    AuthRepository? authRepositorio,
   }) : anamneseRepositorio = anamneseRepositorio ?? AnamneseRepository(),
        preferenciasRepositorio = preferenciasRepositorio ?? PreferenciasRepository(),
        geradorFicha = geradorFicha ?? GeradorFichaTreino(),
-       notificacoesService = notificacoesService ?? NotificacoesTreinoService();
+       notificacoesService = notificacoesService ?? NotificacoesTreinoService(),
+       authRepositorio = authRepositorio ?? AuthRepository();
 
   final AnamneseRepository anamneseRepositorio;
   final PreferenciasRepository preferenciasRepositorio;
   final GeradorFichaTreino geradorFicha;
   final NotificacoesTreinoService notificacoesService;
+  final AuthRepository authRepositorio;
 
   @override
   State<PerfilScreen> createState() => _PerfilScreenState();
@@ -98,14 +102,34 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              Text('Assinatura e licença', style: Theme.of(context).textTheme.titleMedium),
+              Text('Conta', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.authRepositorio.usuarioAtual?.email ?? '—'),
+                      const SizedBox(height: 12),
+                      OutlinedButton(
+                        key: const Key('botao-sair'),
+                        onPressed: () => widget.authRepositorio.sair(),
+                        child: const Text('Sair da conta'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text('Assinatura', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               const Card(
                 child: Padding(
                   padding: EdgeInsets.all(16),
                   child: Text(
-                    'A gestão de assinatura e licença ainda depende de uma decisão de '
-                    'backend/autenticação e não está disponível nesta versão.',
+                    'A conta e o login já são reais. A cobrança de assinatura ainda não '
+                    'está disponível nesta versão.',
                   ),
                 ),
               ),
