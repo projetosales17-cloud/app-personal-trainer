@@ -21,18 +21,19 @@ extension GrupoMuscularLabel on GrupoMuscular {
     GrupoMuscular.abdomen => 'Abdômen',
   };
 
-  /// Ilustração genérica (SVG) usada como proxy visual enquanto a produção
-  /// real das imagens por IA (ver Exercicio.caminhoImagem) não acontece —
-  /// uma por grupo muscular, não por exercício individual.
+  /// Ilustração genérica usada como proxy visual enquanto não existe uma
+  /// imagem real por exercício (ver Exercicio.caminhoImagem) — uma por
+  /// grupo muscular, com a personagem consistente do app (ver
+  /// docs/personagem-ia-exercicios.md), não por exercício individual.
   String get ilustracaoPadrao => switch (this) {
-    GrupoMuscular.peito => 'assets/exercicios/peito.svg',
-    GrupoMuscular.costas => 'assets/exercicios/costas.svg',
-    GrupoMuscular.ombro => 'assets/exercicios/ombro.svg',
-    GrupoMuscular.biceps => 'assets/exercicios/biceps.svg',
-    GrupoMuscular.triceps => 'assets/exercicios/triceps.svg',
-    GrupoMuscular.perna => 'assets/exercicios/perna.svg',
-    GrupoMuscular.gluteo => 'assets/exercicios/gluteo.svg',
-    GrupoMuscular.abdomen => 'assets/exercicios/abdomen.svg',
+    GrupoMuscular.peito => 'assets/personagem/peito.jpg',
+    GrupoMuscular.costas => 'assets/personagem/costas.jpg',
+    GrupoMuscular.ombro => 'assets/personagem/ombro.jpg',
+    GrupoMuscular.biceps => 'assets/personagem/biceps.jpg',
+    GrupoMuscular.triceps => 'assets/personagem/triceps.jpg',
+    GrupoMuscular.perna => 'assets/personagem/perna.jpg',
+    GrupoMuscular.gluteo => 'assets/personagem/gluteo.jpg',
+    GrupoMuscular.abdomen => 'assets/personagem/abdomen.jpg',
   };
 }
 

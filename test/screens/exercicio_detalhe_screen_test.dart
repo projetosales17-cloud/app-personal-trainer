@@ -148,8 +148,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao)));
     await tester.pump();
 
-    expect(find.byType(SvgPicture), findsOneWidget);
-    expect(find.byType(Image), findsNothing);
+    expect(find.byType(Image), findsOneWidget);
     expect(find.textContaining('Ilustração genérica do grupo muscular'), findsOneWidget);
   });
 
