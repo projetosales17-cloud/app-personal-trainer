@@ -6,12 +6,16 @@ import '../screens/orientacoes_screen.dart';
 import '../screens/perfil_screen.dart';
 import '../screens/progresso_screen.dart';
 import '../screens/treino_screen.dart';
+import '../services/auth_repository.dart';
 
 /// Estrutura de navegação principal do app, uma aba por seção definida
 /// no briefing do produto (Home, Treino, Alimentação, Progresso,
 /// Orientações, Perfil).
 class MainNavigation extends StatefulWidget {
-  const MainNavigation({super.key});
+  MainNavigation({super.key, AuthRepository? authRepositorio})
+    : authRepositorio = authRepositorio ?? AuthRepository();
+
+  final AuthRepository authRepositorio;
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
@@ -20,13 +24,13 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _indiceAtual = 0;
 
-  final _telas = [
+  late final _telas = [
     HomeScreen(),
     const TreinoScreen(),
     const AlimentacaoScreen(),
     const ProgressoScreen(),
     OrientacoesScreen(),
-    PerfilScreen(),
+    PerfilScreen(authRepositorio: widget.authRepositorio),
   ];
 
   static const _itens = [

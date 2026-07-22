@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 
-import 'onboarding_gate.dart';
+import 'autenticacao_gate.dart';
+import 'services/auth_repository.dart';
+import 'services/sessao_unica_service.dart';
 
 class App extends StatelessWidget {
-  const App({super.key});
+  App({super.key, AuthRepository? authRepositorio, SessaoUnicaService? sessaoUnicaService})
+    : authRepositorio = authRepositorio ?? AuthRepository(),
+      sessaoUnicaService = sessaoUnicaService ?? SessaoUnicaService();
+
+  final AuthRepository authRepositorio;
+  final SessaoUnicaService sessaoUnicaService;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +21,10 @@ class App extends StatelessWidget {
         colorSchemeSeed: Colors.deepPurple,
         useMaterial3: true,
       ),
-      home: OnboardingGate(),
+      home: AutenticacaoGate(
+        authRepositorio: authRepositorio,
+        sessaoUnicaService: sessaoUnicaService,
+      ),
       debugShowCheckedModeBanner: false,
     );
   }
