@@ -106,6 +106,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com o tronco inclinado à frente e as costas retas, puxe os '
         'halteres em direção à cintura, contraindo as escápulas.',
+    caminhoImagem: 'assets/personagem/remada-curvada-halteres.jpg',
   ),
   Exercicio(
     id: 'remada-unilateral-halter',
@@ -118,6 +119,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Apoiando um joelho e uma mão no banco, puxe o halter com a outra '
         'mão em direção à cintura, mantendo o tronco estável.',
+    caminhoImagem: 'assets/personagem/remada-unilateral-halter.jpg',
   ),
   Exercicio(
     id: 'puxada-frontal-polia',
@@ -130,6 +132,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Sentada, puxe a barra em direção à parte superior do peito, '
         'contraindo as costas e evitando balançar o tronco.',
+    caminhoImagem: 'assets/personagem/puxada-frontal-polia.jpg',
   ),
   Exercicio(
     id: 'remada-baixa-cabo',
@@ -141,6 +144,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Sentada com os joelhos levemente flexionados, puxe o cabo em '
         'direção ao abdômen, mantendo a coluna ereta.',
+    caminhoImagem: 'assets/personagem/remada-baixa-cabo.jpg',
   ),
   Exercicio(
     id: 'superman',
@@ -152,6 +156,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Deitada de bruços, eleve simultaneamente braços e pernas, '
         'contraindo a lombar, e volte controladamente.',
+    caminhoImagem: 'assets/personagem/superman.jpg',
   ),
   Exercicio(
     id: 'barra-fixa-assistida',
@@ -164,6 +169,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Usando o apoio de uma máquina assistida ou elástico, puxe o '
         'corpo para cima até o queixo passar da barra.',
+    caminhoImagem: 'assets/personagem/barra-fixa-assistida.jpg',
   ),
   Exercicio(
     id: 'remada-elastico',
@@ -176,6 +182,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com o elástico preso em um ponto fixo à frente, puxe as pontas '
         'em direção à cintura, contraindo as escápulas.',
+    caminhoImagem: 'assets/personagem/remada-elastico.jpg',
   ),
   Exercicio(
     id: 'puxada-alta-elastico',
@@ -188,6 +195,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com o elástico preso em um ponto fixo acima da cabeça, puxe as '
         'pontas para baixo em direção ao peito, mantendo o tronco estável.',
+    caminhoImagem: 'assets/personagem/puxada-alta-elastico.jpg',
   ),
 
   // Ombro

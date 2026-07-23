@@ -23,7 +23,11 @@ Notas do processo desta rodada:
 - O menu de download tem 3 opções de resolução (1K/2K/4K) — usar sempre **1K "Tamanho original"** (2K/4K exigem plano pago).
 - Todas as 7 imagens vieram anatomicamente corretas já na primeira geração (pegada, cotovelos, apoio dos pés, sem punhos torcidos), sem precisar reforçar prompt negativo.
 
-**Ainda não feito**: imagens por exercício individual dos outros 7 grupos musculares (Costas, Ombro, Bíceps, Tríceps, Perna, Glúteo, Abdômen) — ~48 exercícios da biblioteca continuam sem `caminhoImagem` próprio, usando a ilustração genérica do grupo.
+**Terceiro lote gerado e integrado**: as 8 imagens individuais do grupo **Costas** (remada curvada com halteres, remada unilateral com halter, puxada frontal na polia, remada baixa no cabo, superman, barra fixa assistida, remada com elástico, puxada alta com elástico), mesmo fluxo do lote de Peito (`@Yara` no prompt do Flow, usuário clica "Baixar" manualmente). `Exercicio.caminhoImagem` de cada um dos 8 exercícios de Costas em `lib/data/biblioteca_exercicios.dart` aponta pro arquivo correspondente.
+
+Nota desta rodada: 1 das 12 gerações (3 exercícios × 4 variantes cada, aproximadamente) foi bloqueada pelo filtro de conteúdo do Flow ("Esta geração pode violar nossas políticas") em poses com elástico — sem padrão claro identificado, as outras variantes do mesmo prompt passaram normalmente. Não foi necessário reformular o prompt, só escolher entre as variantes que geraram.
+
+**Ainda não feito**: imagens por exercício individual dos outros 6 grupos musculares (Ombro, Bíceps, Tríceps, Perna, Glúteo, Abdômen) — ~40 exercícios da biblioteca continuam sem `caminhoImagem` próprio, usando a ilustração genérica do grupo.
 
 ## 1. Personagem — descrição fixa
 
