@@ -14,7 +14,16 @@ Notas do processo real:
 - Pequena variação notada: a imagem de bíceps saiu com braços mais definidos/musculosos que as demais (a IA "flexionou" mais ao interpretar "bicep curl position"). Aceitável por ora, mas se for gerar novo lote, vale adicionar "consistent moderate muscle tone, not more defined than in other poses" ao prompt dessa pose especificamente.
 - Baixar a imagem certa do histórico do Flow por navegação/hover foi pouco confiável (a ferramenta às vezes ativa o botão de download de uma miniatura diferente da que parece selecionada). O método confiável foi: gerar a pose, conferir visualmente o resultado ainda fresco na tela, e baixar imediatamente — não confiar em voltar ao histórico depois.
 
-**Ainda não feito**: imagens por exercício individual (hoje é só 1 imagem genérica por grupo muscular, os ~55 exercícios da biblioteca continuam sem `caminhoImagem` próprio).
+## Status (2026-07-23)
+
+**Segundo lote gerado e integrado**: as 7 imagens individuais do grupo **Peito** (flexão de braço, flexão com pés elevados, supino reto com halteres, supino reto com barra, crucifixo com halteres, crossover no cabo, crucifixo com elástico), via Google Flow, usando o recurso "Personagens" nativo do Flow (`@Yara` no prompt) em vez de re-descrever a personagem em texto a cada geração — mesma consistência visual, menos repetição. `Exercicio.caminhoImagem` de cada um dos 7 exercícios de Peito em `lib/data/biblioteca_exercicios.dart` aponta para `assets/personagem/<id-do-exercicio>.jpg`.
+
+Notas do processo desta rodada:
+- O botão de download do Flow falhou silenciosamente quando clicado via automação (sem diálogo, sem erro, sem arquivo salvo) — o clique manual do usuário no mesmo botão funcionou normalmente todas as vezes. Causa não identificada. Fluxo que funcionou: gero e escolho a melhor variante, aviso qual botão clicar, o usuário clica "Baixar" → "1K — Tamanho original", confirmo o arquivo em `Downloads` e movo/renomeio pra `assets/personagem/`.
+- O menu de download tem 3 opções de resolução (1K/2K/4K) — usar sempre **1K "Tamanho original"** (2K/4K exigem plano pago).
+- Todas as 7 imagens vieram anatomicamente corretas já na primeira geração (pegada, cotovelos, apoio dos pés, sem punhos torcidos), sem precisar reforçar prompt negativo.
+
+**Ainda não feito**: imagens por exercício individual dos outros 7 grupos musculares (Costas, Ombro, Bíceps, Tríceps, Perna, Glúteo, Abdômen) — ~48 exercícios da biblioteca continuam sem `caminhoImagem` próprio, usando a ilustração genérica do grupo.
 
 ## 1. Personagem — descrição fixa
 

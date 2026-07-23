@@ -10,6 +10,7 @@ import 'package:app_personal_trainer/screens/exercicio_detalhe_screen.dart';
 import 'package:app_personal_trainer/services/treino_repository.dart';
 
 final _flexao = bibliotecaExercicios.first;
+final _semImagem = bibliotecaExercicios.firstWhere((e) => e.caminhoImagem == null);
 
 const _lista = Key('lista-exercicio-detalhe');
 
@@ -145,7 +146,7 @@ void main() {
   testWidgets('Sem imagem real, mostra a ilustração genérica do grupo muscular e o aviso', (
     tester,
   ) async {
-    await tester.pumpWidget(MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao)));
+    await tester.pumpWidget(MaterialApp(home: ExercicioDetalheScreen(exercicio: _semImagem)));
     await tester.pump();
 
     expect(find.byType(Image), findsOneWidget);

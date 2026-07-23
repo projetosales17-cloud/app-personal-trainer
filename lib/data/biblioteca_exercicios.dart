@@ -16,6 +16,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com as mãos apoiadas no chão na largura dos ombros, desça o corpo '
         'mantendo o core contraído e empurre de volta até estender os braços.',
+    caminhoImagem: 'assets/personagem/flexao-de-braco.jpg',
   ),
   Exercicio(
     id: 'flexao-pes-elevados',
@@ -28,6 +29,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Apoie os pés em um banco e as mãos no chão. Execute a flexão '
         'normalmente — a inclinação aumenta a exigência na parte superior do peito.',
+    caminhoImagem: 'assets/personagem/flexao-pes-elevados.jpg',
   ),
   Exercicio(
     id: 'supino-reto-halteres',
@@ -40,6 +42,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Deitada em um banco, empurre os halteres para cima até estender os '
         'braços, depois desça de forma controlada até a altura do peito.',
+    caminhoImagem: 'assets/personagem/supino-reto-halteres.jpg',
   ),
   Exercicio(
     id: 'supino-reto-barra',
@@ -52,6 +55,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Deitada em um banco, segure a barra um pouco mais afastada que a '
         'largura dos ombros e desça até tocar levemente o peito, depois empurre para cima.',
+    caminhoImagem: 'assets/personagem/supino-reto-barra.jpg',
   ),
   Exercicio(
     id: 'crucifixo-halteres',
@@ -63,6 +67,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Deitada em um banco, com os braços levemente flexionados, abra os '
         'halteres lateralmente até sentir alongar o peito e volte controladamente.',
+    caminhoImagem: 'assets/personagem/crucifixo-halteres.jpg',
   ),
   Exercicio(
     id: 'crossover-cabo',
@@ -74,6 +79,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com um cabo em cada mão, puxe ambos à frente do corpo em um '
         'movimento de arco, contraindo o peito no ponto final.',
+    caminhoImagem: 'assets/personagem/crossover-cabo.jpg',
   ),
   Exercicio(
     id: 'crucifixo-elastico',
@@ -85,6 +91,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com o elástico preso atrás do corpo (porta ou ponto fixo), uma '
         'ponta em cada mão, junte os braços à frente em movimento de arco.',
+    caminhoImagem: 'assets/personagem/crucifixo-elastico.jpg',
   ),
 
   // Costas
