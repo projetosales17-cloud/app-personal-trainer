@@ -210,6 +210,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Sentada ou em pé, empurre os halteres para cima até estender os '
         'braços acima da cabeça e desça controladamente.',
+    caminhoImagem: 'assets/personagem/desenvolvimento-halteres.jpg',
   ),
   Exercicio(
     id: 'elevacao-lateral',
@@ -221,6 +222,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com os braços ao lado do corpo, eleve os halteres lateralmente '
         'até a altura dos ombros, sem balançar o tronco.',
+    caminhoImagem: 'assets/personagem/elevacao-lateral.jpg',
   ),
   Exercicio(
     id: 'elevacao-frontal',
