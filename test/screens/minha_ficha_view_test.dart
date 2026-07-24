@@ -197,4 +197,73 @@ void main() {
     expect(tester.widget<CheckboxListTile>(find.byKey(chaveHoje)).value, isTrue);
     expect(await checkinRepositorio.foiConcluido(hoje, 1), isTrue);
   });
+
+  testWidgets(
+    '2 treinos seguidos pulados mostram o aviso de retomada e reduzem a ficha',
+    (tester) async {
+      final anamneseRepositorio = AnamneseRepository();
+      await anamneseRepositorio.salvar(
+        const Anamnese(
+          idade: 30,
+          alturaCm: 170,
+          pesoAtualKg: 65,
+          objetivoPrincipal: Objetivo.hipertrofia,
+          nivelAtividade: NivelAtividade.moderado,
+          frequenciaSemanalDias: 1,
+        ),
+      );
+      final preferenciasRepositorio = PreferenciasRepository();
+      await preferenciasRepositorio.definirDiasDaSemanaEscolhidos([DateTime.now().weekday]);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MinhaFichaView(
+            anamneseRepositorio: anamneseRepositorio,
+            preferenciasRepositorio: preferenciasRepositorio,
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.textContaining('pulou os últimos treinos'), findsOneWidget);
+    },
+  );
+
+  testWidgets('Com check-in recente, não mostra o aviso de retomada', (tester) async {
+    final anamneseRepositorio = AnamneseRepository();
+    await anamneseRepositorio.salvar(
+      const Anamnese(
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 1,
+      ),
+    );
+    final preferenciasRepositorio = PreferenciasRepository();
+    await preferenciasRepositorio.definirDiasDaSemanaEscolhidos([DateTime.now().weekday]);
+    final checkinRepositorio = CheckinTreinoRepository();
+    await checkinRepositorio.marcarConcluido(
+      DateTime.now().subtract(const Duration(days: 7)),
+      1,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MinhaFichaView(
+          anamneseRepositorio: anamneseRepositorio,
+          preferenciasRepositorio: preferenciasRepositorio,
+          checkinRepositorio: checkinRepositorio,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.textContaining('pulou os últimos treinos'), findsNothing);
+  });
 }

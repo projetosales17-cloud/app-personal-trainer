@@ -62,7 +62,11 @@ class GeradorFichaTreino {
   /// briefing do produto).
   static const _diasRestricaoAbdomenPosParto = 84;
 
-  FichaTreino gerar(Anamnese anamnese) {
+  /// [reduzirVolumeRetomada] vem do `MotorAderencia` (ver briefing do
+  /// produto): quando a usuária pulou treinos consecutivos, a próxima
+  /// ficha vem com volume reduzido e sem nível avançado, como uma sessão
+  /// de retomada mais leve.
+  FichaTreino gerar(Anamnese anamnese, {bool reduzirVolumeRetomada = false}) {
     final emRestricaoAbdomenPosParto = anamnese.dataParto != null &&
         DateTime.now().difference(anamnese.dataParto!).inDays < _diasRestricaoAbdomenPosParto;
 
@@ -91,9 +95,9 @@ class GeradorFichaTreino {
     // (sem nível avançado); fase lútea só reduz intensidade. Folicular e
     // ovulação não têm restrição — são as fases de mais energia/força.
     final faseCiclo = anamnese.faseCiclo;
-    final excluirNivelAvancadoPorCiclo =
-        faseCiclo == FaseCiclo.menstrual || faseCiclo == FaseCiclo.lutea;
-    final maxExerciciosPorGrupo = faseCiclo == FaseCiclo.menstrual
+    final excluirNivelAvancado =
+        faseCiclo == FaseCiclo.menstrual || faseCiclo == FaseCiclo.lutea || reduzirVolumeRetomada;
+    final maxExerciciosPorGrupo = (faseCiclo == FaseCiclo.menstrual || reduzirVolumeRetomada)
         ? _maxExerciciosPorGrupo - 1
         : _maxExerciciosPorGrupo;
 
@@ -118,7 +122,7 @@ class GeradorFichaTreino {
             objetivoExercicio,
             equipamentosPermitidos: equipamentosPermitidos,
             restringirTerceiraIdade: restringirTerceiraIdade,
-            excluirNivelAvancado: excluirNivelAvancadoPorCiclo,
+            excluirNivelAvancado: excluirNivelAvancado,
             maxExercicios: maxExerciciosPorGrupo,
           ),
       ];

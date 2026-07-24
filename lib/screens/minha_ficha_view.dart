@@ -8,6 +8,7 @@ import '../services/anamnese_repository.dart';
 import '../services/biblioteca_exercicios_repository.dart';
 import '../services/checkin_treino_repository.dart';
 import '../services/gerador_ficha_treino.dart';
+import '../services/motor_aderencia.dart';
 import '../services/preferencias_repository.dart';
 import 'exercicio_detalhe_screen.dart';
 
@@ -20,15 +21,18 @@ class MinhaFichaView extends StatefulWidget {
     BibliotecaExerciciosRepository? bibliotecaRepositorio,
     PreferenciasRepository? preferenciasRepositorio,
     CheckinTreinoRepository? checkinRepositorio,
+    MotorAderencia? motorAderencia,
   }) : anamneseRepositorio = anamneseRepositorio ?? AnamneseRepository(),
        geradorFicha = GeradorFichaTreino(repositorio: bibliotecaRepositorio),
        preferenciasRepositorio = preferenciasRepositorio ?? PreferenciasRepository(),
-       checkinRepositorio = checkinRepositorio ?? CheckinTreinoRepository();
+       checkinRepositorio = checkinRepositorio ?? CheckinTreinoRepository(),
+       motorAderencia = motorAderencia ?? MotorAderencia();
 
   final AnamneseRepository anamneseRepositorio;
   final GeradorFichaTreino geradorFicha;
   final PreferenciasRepository preferenciasRepositorio;
   final CheckinTreinoRepository checkinRepositorio;
+  final MotorAderencia motorAderencia;
 
   @override
   State<MinhaFichaView> createState() => _MinhaFichaViewState();
@@ -86,8 +90,6 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
           );
         }
 
-        final ficha = widget.geradorFicha.gerar(anamnese);
-
         return FutureBuilder<List<int>?>(
           future: _diasDaSemanaFuture,
           builder: (context, diasSnapshot) {
@@ -105,6 +107,14 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                 }
 
                 final checkins = checkinsSnapshot.data ?? const [];
+                final aderencia = widget.motorAderencia.avaliar(
+                  diasDaSemanaEsperados: diasDaSemana,
+                  datasCheckin: [for (final c in checkins) c.data],
+                );
+                final ficha = widget.geradorFicha.gerar(
+                  anamnese,
+                  reduzirVolumeRetomada: aderencia.emAlerta,
+                );
 
                 return ListView(
                   padding: const EdgeInsets.all(16),
@@ -113,6 +123,19 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                       'Válida até ${_formatarData(ficha.validaAte)}',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
+                    if (aderencia.emAlerta) ...[
+                      const SizedBox(height: 8),
+                      Card(
+                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Text(
+                            aderencia.mensagem!,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     _SeletorDiasDaSemana(
                       quantidadeDias: ficha.dias.length,
