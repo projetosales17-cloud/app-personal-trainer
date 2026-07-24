@@ -6,7 +6,17 @@ import 'package:app_personal_trainer/models/anamnese.dart';
 import 'package:app_personal_trainer/screens/minha_ficha_view.dart';
 import 'package:app_personal_trainer/services/anamnese_repository.dart';
 import 'package:app_personal_trainer/services/checkin_treino_repository.dart';
+import 'package:app_personal_trainer/services/notificador_conquistas.dart';
 import 'package:app_personal_trainer/services/preferencias_repository.dart';
+
+class _NotificadorFake implements NotificadorConquistas {
+  final chamadas = <String>[];
+
+  @override
+  Future<void> notificar({required String titulo, required String corpo}) async {
+    chamadas.add(titulo);
+  }
+}
 
 void main() {
   setUp(() {
@@ -265,5 +275,76 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(find.textContaining('pulou os últimos treinos'), findsNothing);
+  });
+
+  testWidgets('Mostra o cartão de gamificação com streak e pontos', (tester) async {
+    final anamneseRepositorio = AnamneseRepository();
+    await anamneseRepositorio.salvar(
+      const Anamnese(
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(home: MinhaFichaView(anamneseRepositorio: anamneseRepositorio)),
+    );
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.textContaining('Streak: 0 dia(s)'), findsOneWidget);
+    expect(find.textContaining('0 pontos'), findsOneWidget);
+  });
+
+  testWidgets('Bater um marco de streak (3 dias) dispara uma notificação de conquista', (
+    tester,
+  ) async {
+    final anamneseRepositorio = AnamneseRepository();
+    await anamneseRepositorio.salvar(
+      const Anamnese(
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 1,
+      ),
+    );
+    final preferenciasRepositorio = PreferenciasRepository();
+    final hoje = DateTime.now();
+    await preferenciasRepositorio.definirDiasDaSemanaEscolhidos([hoje.weekday]);
+    final checkinRepositorio = CheckinTreinoRepository();
+    await checkinRepositorio.marcarConcluido(hoje.subtract(const Duration(days: 7)), 1);
+    await checkinRepositorio.marcarConcluido(hoje.subtract(const Duration(days: 14)), 1);
+    final notificador = _NotificadorFake();
+    final chaveHoje = Key('checkin-dia-1-${hoje.toIso8601String().substring(0, 10)}');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MinhaFichaView(
+          anamneseRepositorio: anamneseRepositorio,
+          preferenciasRepositorio: preferenciasRepositorio,
+          checkinRepositorio: checkinRepositorio,
+          notificadorConquistas: notificador,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(notificador.chamadas, isEmpty);
+
+    await tester.tap(find.byKey(chaveHoje));
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(notificador.chamadas, ['Sequência de 3 dias!']);
   });
 }
