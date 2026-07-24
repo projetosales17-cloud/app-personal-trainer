@@ -63,7 +63,9 @@ void main() {
 
     await _avancar(tester); // bariátrica (não) -> condição hormonal
 
-    await _avancar(tester); // condição hormonal (padrão) -> restrições
+    await _avancar(tester); // condição hormonal (padrão) -> ciclo menstrual
+
+    await _avancar(tester); // ciclo menstrual (padrão) -> restrições
 
     await _avancar(tester); // restrições -> lesões
 
@@ -120,7 +122,9 @@ void main() {
     await _avancar(tester); // objetivo -> cirurgia bariátrica
 
     await _avancar(tester); // bariátrica (não) -> condição hormonal
-    await _avancar(tester); // condição hormonal (padrão) -> restrições
+    await _avancar(tester); // condição hormonal (padrão) -> ciclo menstrual
+
+    await _avancar(tester); // ciclo menstrual (padrão) -> restrições
     await _avancar(tester); // restrições -> lesões
     await _avancar(tester); // lesões -> atividade
 
@@ -140,5 +144,58 @@ void main() {
     expect(find.text('Taxa Metabólica Basal: 1482.75 kcal/dia'), findsOneWidget);
     expect(find.text('Gasto calórico diário estimado: 2298.26 kcal'), findsOneWidget);
     expect(find.textContaining('ATENÇÃO'), findsNothing);
+  });
+
+  testWidgets('Desligar "ciclo regular" salva sem data da última menstruação', (tester) async {
+    final repositorio = AnamneseRepository();
+
+    await tester.pumpWidget(MaterialApp(
+      home: OnboardingFlow(onConcluido: () {}, repositorio: repositorio),
+    ));
+
+    await _avancar(tester); // boas-vindas -> dados básicos
+
+    await tester.enterText(find.byType(TextField).at(0), '48');
+    await tester.enterText(find.byType(TextField).at(1), '165');
+    await tester.enterText(find.byType(TextField).at(2), '70');
+    await tester.pump();
+    await _avancar(tester); // dados básicos -> objetivo
+
+    await tester.tap(find.text('Saúde geral (ex: menopausa)'));
+    await tester.pump();
+    await _avancar(tester); // objetivo -> cirurgia bariátrica
+
+    await _avancar(tester); // bariátrica (não) -> condição hormonal
+    await _avancar(tester); // condição hormonal (padrão) -> ciclo menstrual
+
+    expect(find.text('Data da última menstruação'), findsOneWidget);
+    await tester.tap(find.widgetWithText(SwitchListTile, 'Meu ciclo é regular'));
+    await tester.pump();
+    expect(find.text('Data da última menstruação'), findsNothing);
+
+    await _avancar(tester); // ciclo menstrual (irregular) -> restrições
+    await _avancar(tester); // restrições -> lesões
+    await _avancar(tester); // lesões -> atividade
+
+    await tester.tap(find.text('Leve'));
+    await tester.pump();
+    await _avancar(tester); // atividade -> local de treino
+
+    await tester.tap(find.text('Academia'));
+    await tester.pump();
+    await _avancar(tester); // local de treino -> preferência de treino
+
+    await _avancar(tester); // preferência de treino -> priorização de região
+    await _avancar(tester); // priorização de região -> resumo
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Concluir'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final salvo = await repositorio.carregar();
+    expect(salvo, isNotNull);
+    expect(salvo!.cicloMenstrualRegular, isFalse);
+    expect(salvo.dataUltimaMenstruacao, isNull);
+    expect(salvo.faseCiclo, isNull);
   });
 }

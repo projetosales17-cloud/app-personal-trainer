@@ -4,7 +4,7 @@ import 'package:app_personal_trainer/models/anamnese.dart';
 
 void main() {
   test('toJson/fromJson preserva todos os campos', () {
-    const original = Anamnese(
+    final original = Anamnese(
       idade: 35,
       alturaCm: 165,
       pesoAtualKg: 80,
@@ -22,6 +22,8 @@ void main() {
       regioesPriorizadas: ['Fortalecer core'],
       localTreino: LocalTreino.casa,
       preferenciaTreino: PreferenciaTreino.combinado,
+      cicloMenstrualRegular: true,
+      dataUltimaMenstruacao: DateTime(2026, 1, 1),
     );
 
     final reconstruido = Anamnese.fromJson(original.toJson());
@@ -43,6 +45,8 @@ void main() {
     expect(reconstruido.regioesPriorizadas, original.regioesPriorizadas);
     expect(reconstruido.localTreino, original.localTreino);
     expect(reconstruido.preferenciaTreino, original.preferenciaTreino);
+    expect(reconstruido.cicloMenstrualRegular, original.cicloMenstrualRegular);
+    expect(reconstruido.dataUltimaMenstruacao, original.dataUltimaMenstruacao);
   });
 
   test('fromJson usa valores padrão para campos opcionais ausentes', () {
@@ -64,6 +68,45 @@ void main() {
     expect(anamnese.regioesPriorizadas, isEmpty);
     expect(anamnese.localTreino, LocalTreino.academia);
     expect(anamnese.preferenciaTreino, PreferenciaTreino.soMusculacao);
+    expect(anamnese.cicloMenstrualRegular, isTrue);
+    expect(anamnese.dataUltimaMenstruacao, isNull);
+  });
+
+  test('faseCiclo é null sem data da última menstruação ou com ciclo irregular', () {
+    const semData = Anamnese(
+      idade: 25,
+      alturaCm: 160,
+      pesoAtualKg: 55,
+      objetivoPrincipal: Objetivo.tonificacao,
+      nivelAtividade: NivelAtividade.leve,
+      frequenciaSemanalDias: 3,
+    );
+    expect(semData.faseCiclo, isNull);
+
+    final cicloIrregular = Anamnese(
+      idade: 25,
+      alturaCm: 160,
+      pesoAtualKg: 55,
+      objetivoPrincipal: Objetivo.tonificacao,
+      nivelAtividade: NivelAtividade.leve,
+      frequenciaSemanalDias: 3,
+      cicloMenstrualRegular: false,
+      dataUltimaMenstruacao: DateTime.now(),
+    );
+    expect(cicloIrregular.faseCiclo, isNull);
+  });
+
+  test('faseCiclo calcula a partir da data da última menstruação quando regular', () {
+    final anamnese = Anamnese(
+      idade: 25,
+      alturaCm: 160,
+      pesoAtualKg: 55,
+      objetivoPrincipal: Objetivo.tonificacao,
+      nivelAtividade: NivelAtividade.leve,
+      frequenciaSemanalDias: 3,
+      dataUltimaMenstruacao: DateTime.now(),
+    );
+    expect(anamnese.faseCiclo, FaseCiclo.menstrual);
   });
 
   test('recomendação de preferência de treino por objetivo', () {
