@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../models/anamnese.dart';
+import '../models/checkin_treino.dart';
 import '../models/exercicio.dart';
 import '../models/ficha_treino.dart';
 import '../services/anamnese_repository.dart';
 import '../services/biblioteca_exercicios_repository.dart';
+import '../services/checkin_treino_repository.dart';
 import '../services/gerador_ficha_treino.dart';
 import '../services/preferencias_repository.dart';
 import 'exercicio_detalhe_screen.dart';
@@ -17,13 +19,16 @@ class MinhaFichaView extends StatefulWidget {
     AnamneseRepository? anamneseRepositorio,
     BibliotecaExerciciosRepository? bibliotecaRepositorio,
     PreferenciasRepository? preferenciasRepositorio,
+    CheckinTreinoRepository? checkinRepositorio,
   }) : anamneseRepositorio = anamneseRepositorio ?? AnamneseRepository(),
        geradorFicha = GeradorFichaTreino(repositorio: bibliotecaRepositorio),
-       preferenciasRepositorio = preferenciasRepositorio ?? PreferenciasRepository();
+       preferenciasRepositorio = preferenciasRepositorio ?? PreferenciasRepository(),
+       checkinRepositorio = checkinRepositorio ?? CheckinTreinoRepository();
 
   final AnamneseRepository anamneseRepositorio;
   final GeradorFichaTreino geradorFicha;
   final PreferenciasRepository preferenciasRepositorio;
+  final CheckinTreinoRepository checkinRepositorio;
 
   @override
   State<MinhaFichaView> createState() => _MinhaFichaViewState();
@@ -39,11 +44,23 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
   late final Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
   late Future<List<int>?> _diasDaSemanaFuture =
       widget.preferenciasRepositorio.diasDaSemanaEscolhidos();
+  late Future<List<CheckinTreino>> _checkinsFuture = widget.checkinRepositorio.listar();
 
   Future<void> _salvarDiasDaSemana(List<int> diasDaSemana) async {
     await widget.preferenciasRepositorio.definirDiasDaSemanaEscolhidos(diasDaSemana);
     setState(() {
       _diasDaSemanaFuture = widget.preferenciasRepositorio.diasDaSemanaEscolhidos();
+    });
+  }
+
+  Future<void> _alternarConcluido(DateTime data, int diaFicha, bool concluido) async {
+    if (concluido) {
+      await widget.checkinRepositorio.marcarConcluido(data, diaFicha);
+    } else {
+      await widget.checkinRepositorio.desmarcarConcluido(data, diaFicha);
+    }
+    setState(() {
+      _checkinsFuture = widget.checkinRepositorio.listar();
     });
   }
 
@@ -80,26 +97,39 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
 
             final diasDaSemana = diasSnapshot.data;
 
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                Text(
-                  'Válida até ${_formatarData(ficha.validaAte)}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 16),
-                _SeletorDiasDaSemana(
-                  quantidadeDias: ficha.dias.length,
-                  diasIniciais: diasDaSemana,
-                  aoSalvar: _salvarDiasDaSemana,
-                ),
-                const SizedBox(height: 16),
-                for (final dia in ficha.dias)
-                  _DiaDeTreinoCard(
-                    dia: dia,
-                    datas: ficha.datasPara(dia, diasDaSemana: diasDaSemana),
-                  ),
-              ],
+            return FutureBuilder<List<CheckinTreino>>(
+              future: _checkinsFuture,
+              builder: (context, checkinsSnapshot) {
+                if (checkinsSnapshot.connectionState != ConnectionState.done) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final checkins = checkinsSnapshot.data ?? const [];
+
+                return ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    Text(
+                      'Válida até ${_formatarData(ficha.validaAte)}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 16),
+                    _SeletorDiasDaSemana(
+                      quantidadeDias: ficha.dias.length,
+                      diasIniciais: diasDaSemana,
+                      aoSalvar: _salvarDiasDaSemana,
+                    ),
+                    const SizedBox(height: 16),
+                    for (final dia in ficha.dias)
+                      _DiaDeTreinoCard(
+                        dia: dia,
+                        datas: ficha.datasPara(dia, diasDaSemana: diasDaSemana),
+                        checkins: checkins,
+                        aoAlternarConcluido: _alternarConcluido,
+                      ),
+                  ],
+                );
+              },
             );
           },
         );
@@ -192,10 +222,24 @@ class _SeletorDiasDaSemanaState extends State<_SeletorDiasDaSemana> {
 }
 
 class _DiaDeTreinoCard extends StatelessWidget {
-  const _DiaDeTreinoCard({required this.dia, required this.datas});
+  const _DiaDeTreinoCard({
+    required this.dia,
+    required this.datas,
+    required this.checkins,
+    required this.aoAlternarConcluido,
+  });
 
   final DiaDeTreino dia;
   final List<DateTime> datas;
+  final List<CheckinTreino> checkins;
+  final Future<void> Function(DateTime data, int diaFicha, bool concluido) aoAlternarConcluido;
+
+  bool _concluido(DateTime data) {
+    final dataNormalizada = DateTime(data.year, data.month, data.day);
+    return checkins.any(
+      (c) => c.data == dataNormalizada && c.diaFicha == dia.dia,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -209,10 +253,17 @@ class _DiaDeTreinoCard extends StatelessWidget {
             Text('Dia ${dia.dia}', style: Theme.of(context).textTheme.titleMedium),
             if (datas.isNotEmpty) ...[
               const SizedBox(height: 4),
-              Text(
-                'Datas sugeridas: ${datas.map(_formatarData).join(', ')}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text('Datas sugeridas:', style: Theme.of(context).textTheme.bodySmall),
+              for (final data in datas)
+                CheckboxListTile(
+                  key: Key('checkin-dia-${dia.dia}-${data.toIso8601String().substring(0, 10)}'),
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  dense: true,
+                  title: Text(_formatarData(data)),
+                  value: _concluido(data),
+                  onChanged: (marcado) => aoAlternarConcluido(data, dia.dia, marcado ?? false),
+                ),
             ],
             const SizedBox(height: 8),
             Wrap(
