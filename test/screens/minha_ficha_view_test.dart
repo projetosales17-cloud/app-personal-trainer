@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app_personal_trainer/models/anamnese.dart';
 import 'package:app_personal_trainer/screens/minha_ficha_view.dart';
 import 'package:app_personal_trainer/services/anamnese_repository.dart';
+import 'package:app_personal_trainer/services/checkin_treino_repository.dart';
 import 'package:app_personal_trainer/services/preferencias_repository.dart';
 
 void main() {
@@ -153,5 +154,47 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(await preferenciasRepositorio.diasDaSemanaEscolhidos(), [2, 5]);
+  });
+
+  testWidgets('Marcar o check-in do dia 1 de hoje persiste e reflete na tela', (tester) async {
+    final anamneseRepositorio = AnamneseRepository();
+    await anamneseRepositorio.salvar(
+      const Anamnese(
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+    final checkinRepositorio = CheckinTreinoRepository();
+    final hoje = DateTime.now();
+    final chaveHoje = Key(
+      'checkin-dia-1-${hoje.toIso8601String().substring(0, 10)}',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MinhaFichaView(
+          anamneseRepositorio: anamneseRepositorio,
+          checkinRepositorio: checkinRepositorio,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(tester.widget<CheckboxListTile>(find.byKey(chaveHoje)).value, isFalse);
+    expect(await checkinRepositorio.foiConcluido(hoje, 1), isFalse);
+
+    await tester.tap(find.byKey(chaveHoje));
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(tester.widget<CheckboxListTile>(find.byKey(chaveHoje)).value, isTrue);
+    expect(await checkinRepositorio.foiConcluido(hoje, 1), isTrue);
   });
 }
