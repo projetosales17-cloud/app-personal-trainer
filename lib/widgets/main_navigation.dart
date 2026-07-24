@@ -7,11 +7,12 @@ import '../screens/orientacoes_screen.dart';
 import '../screens/perfil_screen.dart';
 import '../screens/progresso_screen.dart';
 import '../screens/treino_screen.dart';
+import '../screens/vitrine_produtos_screen.dart';
 import '../services/auth_repository.dart';
 
 /// Estrutura de navegação principal do app, uma aba por seção definida
 /// no briefing do produto (Home, Treino, Alimentação, Progresso,
-/// Comunidade, Orientações, Perfil).
+/// Comunidade, Orientações, Loja, Perfil).
 class MainNavigation extends StatefulWidget {
   MainNavigation({super.key, AuthRepository? authRepositorio})
     : authRepositorio = authRepositorio ?? AuthRepository();
@@ -32,6 +33,7 @@ class _MainNavigationState extends State<MainNavigation> {
     const ProgressoScreen(),
     ComunidadeScreen(),
     OrientacoesScreen(),
+    VitrineProdutosScreen(),
     PerfilScreen(authRepositorio: widget.authRepositorio),
   ];
 
@@ -42,6 +44,7 @@ class _MainNavigationState extends State<MainNavigation> {
     NavigationDestination(icon: Icon(Icons.show_chart_outlined), selectedIcon: Icon(Icons.show_chart), label: 'Progresso'),
     NavigationDestination(icon: Icon(Icons.groups_outlined), selectedIcon: Icon(Icons.groups), label: 'Comunidade'),
     NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: 'Orientações'),
+    NavigationDestination(icon: Icon(Icons.shopping_bag_outlined), selectedIcon: Icon(Icons.shopping_bag), label: 'Loja'),
     NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Perfil'),
   ];
 
