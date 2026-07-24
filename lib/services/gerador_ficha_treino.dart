@@ -56,11 +56,23 @@ class GeradorFichaTreino {
   /// restrição de equipamento.
   static const _equipamentosCasa = {Equipamento.nenhum, Equipamento.elastico};
 
+  /// Período de precaução pós-parto em que exercícios de abdômen ficam
+  /// bloqueados por padrão (~12 semanas), até liberação médica — regra
+  /// simples de segurança, não substitui avaliação profissional (ver
+  /// briefing do produto).
+  static const _diasRestricaoAbdomenPosParto = 84;
+
   FichaTreino gerar(Anamnese anamnese) {
+    final emRestricaoAbdomenPosParto = anamnese.dataParto != null &&
+        DateTime.now().difference(anamnese.dataParto!).inDays < _diasRestricaoAbdomenPosParto;
+
     final gruposExcluidos = anamnese.lesoesLimitacoes
         .map((lesao) => _mapaLesaoParaGrupo[lesao])
         .whereType<GrupoMuscular>()
         .toSet();
+    if (emRestricaoAbdomenPosParto) {
+      gruposExcluidos.add(GrupoMuscular.abdomen);
+    }
 
     final gruposDisponiveis = [
       for (final grupo in GrupoMuscular.values)

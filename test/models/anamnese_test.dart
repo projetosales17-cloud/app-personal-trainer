@@ -22,6 +22,7 @@ void main() {
       regioesPriorizadas: ['Fortalecer core'],
       localTreino: LocalTreino.casa,
       preferenciaTreino: PreferenciaTreino.combinado,
+      dataParto: DateTime(2026, 1, 1),
       cicloMenstrualRegular: true,
       dataUltimaMenstruacao: DateTime(2026, 1, 1),
     );
@@ -45,6 +46,7 @@ void main() {
     expect(reconstruido.regioesPriorizadas, original.regioesPriorizadas);
     expect(reconstruido.localTreino, original.localTreino);
     expect(reconstruido.preferenciaTreino, original.preferenciaTreino);
+    expect(reconstruido.dataParto, original.dataParto);
     expect(reconstruido.cicloMenstrualRegular, original.cicloMenstrualRegular);
     expect(reconstruido.dataUltimaMenstruacao, original.dataUltimaMenstruacao);
   });
@@ -68,6 +70,7 @@ void main() {
     expect(anamnese.regioesPriorizadas, isEmpty);
     expect(anamnese.localTreino, LocalTreino.academia);
     expect(anamnese.preferenciaTreino, PreferenciaTreino.soMusculacao);
+    expect(anamnese.dataParto, isNull);
     expect(anamnese.cicloMenstrualRegular, isTrue);
     expect(anamnese.dataUltimaMenstruacao, isNull);
   });

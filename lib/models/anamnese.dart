@@ -102,6 +102,10 @@ class Anamnese {
     // Idem: antes de existir cardio na ficha, o comportamento era sempre
     // "só musculação".
     this.preferenciaTreino = PreferenciaTreino.soMusculacao,
+    // Campo opcional (ver briefing do produto): quando informado, o
+    // GeradorFichaTreino bloqueia exercícios de abdômen por um período
+    // determinado após o parto, até liberação médica.
+    this.dataParto,
     // Campo opcional (ver briefing do produto): quem está na menopausa,
     // pós-bariátrica ou tem ciclo irregular pode deixar cicloMenstrualRegular
     // em false e pular esse ajuste sem penalidade.
@@ -126,6 +130,7 @@ class Anamnese {
   final List<String> regioesPriorizadas;
   final LocalTreino localTreino;
   final PreferenciaTreino preferenciaTreino;
+  final DateTime? dataParto;
   final bool cicloMenstrualRegular;
   final DateTime? dataUltimaMenstruacao;
 
@@ -154,6 +159,7 @@ class Anamnese {
     'regioesPriorizadas': regioesPriorizadas,
     'localTreino': localTreino.name,
     'preferenciaTreino': preferenciaTreino.name,
+    'dataParto': dataParto?.toIso8601String(),
     'cicloMenstrualRegular': cicloMenstrualRegular,
     'dataUltimaMenstruacao': dataUltimaMenstruacao?.toIso8601String(),
   };
@@ -181,6 +187,7 @@ class Anamnese {
     preferenciaTreino: PreferenciaTreino.values.byName(
       json['preferenciaTreino'] as String? ?? 'soMusculacao',
     ),
+    dataParto: json['dataParto'] != null ? DateTime.parse(json['dataParto'] as String) : null,
     cicloMenstrualRegular: json['cicloMenstrualRegular'] as bool? ?? true,
     dataUltimaMenstruacao: json['dataUltimaMenstruacao'] != null
         ? DateTime.parse(json['dataUltimaMenstruacao'] as String)
