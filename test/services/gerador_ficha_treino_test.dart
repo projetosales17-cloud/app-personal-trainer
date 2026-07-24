@@ -206,4 +206,49 @@ void main() {
       }
     }
   });
+
+  test('bloqueia exercícios de abdômen dentro do período pós-parto', () {
+    final anamnesePosParto = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.hipertrofia,
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 7,
+      dataParto: DateTime.now().subtract(const Duration(days: 30)),
+    );
+
+    final ficha = gerador.gerar(anamnesePosParto);
+    final gruposCobertos = ficha.dias.expand((d) => d.gruposMusculares).toSet();
+
+    expect(gruposCobertos.contains(GrupoMuscular.abdomen), isFalse);
+    for (final dia in ficha.dias) {
+      for (final exercicio in dia.exercicios) {
+        expect(exercicio.grupoMuscularPrincipal, isNot(GrupoMuscular.abdomen));
+      }
+    }
+  });
+
+  test('libera abdômen depois que o período pós-parto termina', () {
+    final anamneseParaAntiga = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.hipertrofia,
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 7,
+      dataParto: DateTime.now().subtract(const Duration(days: 100)),
+    );
+
+    final ficha = gerador.gerar(anamneseParaAntiga);
+    final gruposCobertos = ficha.dias.expand((d) => d.gruposMusculares).toSet();
+
+    expect(gruposCobertos, GrupoMuscular.values.toSet());
+  });
+
+  test('sem data de parto informada, não restringe abdômen', () {
+    final ficha = gerador.gerar(_anamneseBase);
+    final gruposCobertos = ficha.dias.expand((d) => d.gruposMusculares).toSet();
+    expect(gruposCobertos, GrupoMuscular.values.toSet());
+  });
 }

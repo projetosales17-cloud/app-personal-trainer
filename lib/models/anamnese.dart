@@ -100,6 +100,10 @@ class Anamnese {
     // Idem: antes de existir cardio na ficha, o comportamento era sempre
     // "só musculação".
     this.preferenciaTreino = PreferenciaTreino.soMusculacao,
+    // Campo opcional (ver briefing do produto): quando informado, o
+    // GeradorFichaTreino bloqueia exercícios de abdômen por um período
+    // determinado após o parto, até liberação médica.
+    this.dataParto,
   });
 
   final int idade;
@@ -119,6 +123,7 @@ class Anamnese {
   final List<String> regioesPriorizadas;
   final LocalTreino localTreino;
   final PreferenciaTreino preferenciaTreino;
+  final DateTime? dataParto;
 
   Map<String, dynamic> toJson() => {
     'idade': idade,
@@ -138,6 +143,7 @@ class Anamnese {
     'regioesPriorizadas': regioesPriorizadas,
     'localTreino': localTreino.name,
     'preferenciaTreino': preferenciaTreino.name,
+    'dataParto': dataParto?.toIso8601String(),
   };
 
   factory Anamnese.fromJson(Map<String, dynamic> json) => Anamnese(
@@ -163,5 +169,6 @@ class Anamnese {
     preferenciaTreino: PreferenciaTreino.values.byName(
       json['preferenciaTreino'] as String? ?? 'soMusculacao',
     ),
+    dataParto: json['dataParto'] != null ? DateTime.parse(json['dataParto'] as String) : null,
   );
 }

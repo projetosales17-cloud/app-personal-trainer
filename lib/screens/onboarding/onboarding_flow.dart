@@ -54,7 +54,7 @@ class OnboardingFlow extends StatefulWidget {
 
 class _OnboardingFlowState extends State<OnboardingFlow> {
   int _passo = 0;
-  static const _totalPassos = 12;
+  static const _totalPassos = 13;
 
   final _idadeController = TextEditingController();
   final _alturaController = TextEditingController();
@@ -71,6 +71,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   String _condicaoHormonal = _condicoesHormonais.first;
   final Set<String> _restricoes = {};
   final Set<String> _lesoes = {};
+  bool _teveParto = false;
+  DateTime? _dataParto;
   NivelAtividade? _nivelAtividade;
   int _frequenciaSemanalDias = 3;
   LocalTreino? _localTreino;
@@ -107,9 +109,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       !_cirurgiaBariatrica ||
           (_tipoCirurgiaController.text.trim().isNotEmpty &&
               int.tryParse(_mesesCirurgiaController.text) != null),
-    7 => _nivelAtividade != null,
-    8 => _localTreino != null,
-    9 => _preferenciaTreino != null,
+    8 => _nivelAtividade != null,
+    9 => _localTreino != null,
+    10 => _preferenciaTreino != null,
     _ => true,
   };
 
@@ -123,7 +125,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       // Pré-seleciona o caminho recomendado pelo app para o objetivo já
       // escolhido — a usuária pode trocar antes de confirmar (ver briefing
       // do produto: "o app sempre orienta qual seria o caminho recomendado").
-      if (_passo == 9 && _preferenciaTreino == null && _objetivo != null) {
+      if (_passo == 10 && _preferenciaTreino == null && _objetivo != null) {
         _preferenciaTreino = _objetivo!.preferenciaTreinoRecomendada;
       }
     });
@@ -162,6 +164,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       regioesPriorizadas: _regioes.toList(),
       localTreino: _localTreino!,
       preferenciaTreino: _preferenciaTreino!,
+      dataParto: _teveParto ? _dataParto : null,
     );
 
     await widget.repositorio.salvar(anamnese);
@@ -234,19 +237,21 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           outroController: _lesaoOutraController,
         );
       case 7:
-        return _passoAtividade();
+        return _passoPosParto();
       case 8:
-        return _passoLocalTreino();
+        return _passoAtividade();
       case 9:
-        return _passoPreferenciaTreino();
+        return _passoLocalTreino();
       case 10:
+        return _passoPreferenciaTreino();
+      case 11:
         return _passoMultiSelecao(
           titulo: 'Priorização de região corporal',
           opcoes: _regioesComuns,
           selecionadas: _regioes,
           outroController: null,
         );
-      case 11:
+      case 12:
         return _passoResumo();
       default:
         return const SizedBox.shrink();
@@ -363,6 +368,55 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           ),
       ],
     );
+  }
+
+  Widget _passoPosParto() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Pós-parto (opcional)', style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 8),
+        Text(
+          'Se você teve um parto recente, o app evita exercícios de abdômen '
+          'por um tempo, até liberação médica.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 16),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Tive um parto recente'),
+          value: _teveParto,
+          onChanged: (valor) => setState(() => _teveParto = valor),
+        ),
+        if (_teveParto) ...[
+          const SizedBox(height: 12),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(
+              _dataParto == null ? 'Data do parto' : 'Data do parto: ${_formatarData(_dataParto!)}',
+            ),
+            trailing: const Icon(Icons.calendar_today_outlined),
+            onTap: () async {
+              final selecionada = await showDatePicker(
+                context: context,
+                initialDate: _dataParto ?? DateTime.now(),
+                firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                lastDate: DateTime.now(),
+              );
+              if (selecionada != null) {
+                setState(() => _dataParto = selecionada);
+              }
+            },
+          ),
+        ],
+      ],
+    );
+  }
+
+  String _formatarData(DateTime data) {
+    final dia = data.day.toString().padLeft(2, '0');
+    final mes = data.month.toString().padLeft(2, '0');
+    return '$dia/$mes/${data.year}';
   }
 
   Widget _passoMultiSelecao({

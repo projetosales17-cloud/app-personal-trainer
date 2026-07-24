@@ -4,7 +4,7 @@ import 'package:app_personal_trainer/models/anamnese.dart';
 
 void main() {
   test('toJson/fromJson preserva todos os campos', () {
-    const original = Anamnese(
+    final original = Anamnese(
       idade: 35,
       alturaCm: 165,
       pesoAtualKg: 80,
@@ -22,6 +22,7 @@ void main() {
       regioesPriorizadas: ['Fortalecer core'],
       localTreino: LocalTreino.casa,
       preferenciaTreino: PreferenciaTreino.combinado,
+      dataParto: DateTime(2026, 1, 1),
     );
 
     final reconstruido = Anamnese.fromJson(original.toJson());
@@ -43,6 +44,7 @@ void main() {
     expect(reconstruido.regioesPriorizadas, original.regioesPriorizadas);
     expect(reconstruido.localTreino, original.localTreino);
     expect(reconstruido.preferenciaTreino, original.preferenciaTreino);
+    expect(reconstruido.dataParto, original.dataParto);
   });
 
   test('fromJson usa valores padrão para campos opcionais ausentes', () {
@@ -64,6 +66,7 @@ void main() {
     expect(anamnese.regioesPriorizadas, isEmpty);
     expect(anamnese.localTreino, LocalTreino.academia);
     expect(anamnese.preferenciaTreino, PreferenciaTreino.soMusculacao);
+    expect(anamnese.dataParto, isNull);
   });
 
   test('recomendação de preferência de treino por objetivo', () {
