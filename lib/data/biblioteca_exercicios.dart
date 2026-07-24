@@ -234,6 +234,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com os halteres à frente das coxas, eleve os braços à frente até '
         'a altura dos ombros e desça controladamente.',
+    caminhoImagem: 'assets/personagem/elevacao-frontal.jpg',
   ),
   Exercicio(
     id: 'remada-alta',
@@ -246,6 +247,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Segurando os halteres à frente do corpo, puxe os cotovelos para '
         'cima e para fora até a altura dos ombros.',
+    caminhoImagem: 'assets/personagem/remada-alta.jpg',
   ),
   Exercicio(
     id: 'face-pull-cabo',
@@ -258,6 +260,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Puxe a corda em direção ao rosto, separando as mãos e '
         'contraindo a parte de trás do ombro.',
+    caminhoImagem: 'assets/personagem/face-pull-cabo.jpg',
   ),
   Exercicio(
     id: 'desenvolvimento-militar-barra',
@@ -270,6 +273,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Em pé, empurre a barra a partir da altura dos ombros até '
         'estender totalmente os braços acima da cabeça.',
+    caminhoImagem: 'assets/personagem/desenvolvimento-militar-barra.jpg',
   ),
   Exercicio(
     id: 'desenvolvimento-elastico',
@@ -282,6 +286,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com o elástico preso sob os pés, empurre as pontas para cima '
         'até estender os braços acima da cabeça e desça controladamente.',
+    caminhoImagem: 'assets/personagem/desenvolvimento-elastico.jpg',
   ),
   Exercicio(
     id: 'elevacao-lateral-elastico',
@@ -293,6 +298,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com o elástico preso sob os pés, eleve os braços lateralmente '
         'até a altura dos ombros, sem balançar o tronco.',
+    caminhoImagem: 'assets/personagem/elevacao-lateral-elastico.jpg',
   ),
 
   // Bíceps
