@@ -23,6 +23,8 @@ void main() {
       localTreino: LocalTreino.casa,
       preferenciaTreino: PreferenciaTreino.combinado,
       dataParto: DateTime(2026, 1, 1),
+      cicloMenstrualRegular: true,
+      dataUltimaMenstruacao: DateTime(2026, 1, 1),
     );
 
     final reconstruido = Anamnese.fromJson(original.toJson());
@@ -45,6 +47,8 @@ void main() {
     expect(reconstruido.localTreino, original.localTreino);
     expect(reconstruido.preferenciaTreino, original.preferenciaTreino);
     expect(reconstruido.dataParto, original.dataParto);
+    expect(reconstruido.cicloMenstrualRegular, original.cicloMenstrualRegular);
+    expect(reconstruido.dataUltimaMenstruacao, original.dataUltimaMenstruacao);
   });
 
   test('fromJson usa valores padrão para campos opcionais ausentes', () {
@@ -67,6 +71,45 @@ void main() {
     expect(anamnese.localTreino, LocalTreino.academia);
     expect(anamnese.preferenciaTreino, PreferenciaTreino.soMusculacao);
     expect(anamnese.dataParto, isNull);
+    expect(anamnese.cicloMenstrualRegular, isTrue);
+    expect(anamnese.dataUltimaMenstruacao, isNull);
+  });
+
+  test('faseCiclo é null sem data da última menstruação ou com ciclo irregular', () {
+    const semData = Anamnese(
+      idade: 25,
+      alturaCm: 160,
+      pesoAtualKg: 55,
+      objetivoPrincipal: Objetivo.tonificacao,
+      nivelAtividade: NivelAtividade.leve,
+      frequenciaSemanalDias: 3,
+    );
+    expect(semData.faseCiclo, isNull);
+
+    final cicloIrregular = Anamnese(
+      idade: 25,
+      alturaCm: 160,
+      pesoAtualKg: 55,
+      objetivoPrincipal: Objetivo.tonificacao,
+      nivelAtividade: NivelAtividade.leve,
+      frequenciaSemanalDias: 3,
+      cicloMenstrualRegular: false,
+      dataUltimaMenstruacao: DateTime.now(),
+    );
+    expect(cicloIrregular.faseCiclo, isNull);
+  });
+
+  test('faseCiclo calcula a partir da data da última menstruação quando regular', () {
+    final anamnese = Anamnese(
+      idade: 25,
+      alturaCm: 160,
+      pesoAtualKg: 55,
+      objetivoPrincipal: Objetivo.tonificacao,
+      nivelAtividade: NivelAtividade.leve,
+      frequenciaSemanalDias: 3,
+      dataUltimaMenstruacao: DateTime.now(),
+    );
+    expect(anamnese.faseCiclo, FaseCiclo.menstrual);
   });
 
   test('recomendação de preferência de treino por objetivo', () {

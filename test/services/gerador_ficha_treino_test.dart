@@ -251,4 +251,82 @@ void main() {
     final gruposCobertos = ficha.dias.expand((d) => d.gruposMusculares).toSet();
     expect(gruposCobertos, GrupoMuscular.values.toSet());
   });
+
+  test('fase menstrual reduz volume e evita nível avançado', () {
+    final anamneseMenstrual = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.hipertrofia,
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+      dataUltimaMenstruacao: DateTime.now(),
+    );
+
+    final fichaMenstrual = gerador.gerar(anamneseMenstrual);
+    final fichaBase = gerador.gerar(_anamneseBase);
+
+    for (final dia in fichaMenstrual.dias) {
+      expect(dia.exercicios.length, lessThan(fichaBase.dias[dia.dia - 1].exercicios.length));
+      for (final exercicio in dia.exercicios) {
+        expect(exercicio.nivel, isNot(NivelExercicio.avancado));
+      }
+    }
+  });
+
+  test('fase lútea evita nível avançado sem reduzir volume', () {
+    final anamneseLutea = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.hipertrofia,
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+      dataUltimaMenstruacao: DateTime.now().subtract(const Duration(days: 20)),
+    );
+
+    final fichaLutea = gerador.gerar(anamneseLutea);
+    for (final dia in fichaLutea.dias) {
+      for (final exercicio in dia.exercicios) {
+        expect(exercicio.nivel, isNot(NivelExercicio.avancado));
+      }
+    }
+  });
+
+  test('fase folicular e ovulação não restringem nada', () {
+    final anamneseFolicular = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.hipertrofia,
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+      dataUltimaMenstruacao: DateTime.now().subtract(const Duration(days: 8)),
+    );
+
+    final fichaFolicular = gerador.gerar(anamneseFolicular);
+    final fichaBase = gerador.gerar(_anamneseBase);
+    for (final dia in fichaFolicular.dias) {
+      expect(dia.exercicios.length, fichaBase.dias[dia.dia - 1].exercicios.length);
+    }
+  });
+
+  test('ciclo irregular não aplica nenhuma restrição', () {
+    final anamneseIrregular = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.hipertrofia,
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+      cicloMenstrualRegular: false,
+      dataUltimaMenstruacao: DateTime.now(),
+    );
+
+    final ficha = gerador.gerar(anamneseIrregular);
+    final fichaBase = gerador.gerar(_anamneseBase);
+    for (final dia in ficha.dias) {
+      expect(dia.exercicios.length, fichaBase.dias[dia.dia - 1].exercicios.length);
+    }
+  });
 }

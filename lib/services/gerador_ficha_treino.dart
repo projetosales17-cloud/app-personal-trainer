@@ -86,6 +86,17 @@ class GeradorFichaTreino {
         : null;
     final restringirTerceiraIdade = anamnese.objetivoPrincipal == Objetivo.terceiraIdade;
 
+    // Ajuste por fase do ciclo hormonal (ver briefing do produto): fase
+    // menstrual reduz volume (menos exercícios por grupo) e intensidade
+    // (sem nível avançado); fase lútea só reduz intensidade. Folicular e
+    // ovulação não têm restrição — são as fases de mais energia/força.
+    final faseCiclo = anamnese.faseCiclo;
+    final excluirNivelAvancadoPorCiclo =
+        faseCiclo == FaseCiclo.menstrual || faseCiclo == FaseCiclo.lutea;
+    final maxExerciciosPorGrupo = faseCiclo == FaseCiclo.menstrual
+        ? _maxExerciciosPorGrupo - 1
+        : _maxExerciciosPorGrupo;
+
     final incluirMusculacao = anamnese.preferenciaTreino != PreferenciaTreino.soCardio;
     final incluirCardio = anamnese.preferenciaTreino != PreferenciaTreino.soMusculacao;
     final candidatosCardio = incluirCardio
@@ -107,6 +118,8 @@ class GeradorFichaTreino {
             objetivoExercicio,
             equipamentosPermitidos: equipamentosPermitidos,
             restringirTerceiraIdade: restringirTerceiraIdade,
+            excluirNivelAvancado: excluirNivelAvancadoPorCiclo,
+            maxExercicios: maxExerciciosPorGrupo,
           ),
       ];
       final atividadesCardio = candidatosCardio.isNotEmpty
@@ -135,6 +148,8 @@ class GeradorFichaTreino {
     ObjetivoExercicio objetivo, {
     Set<Equipamento>? equipamentosPermitidos,
     bool restringirTerceiraIdade = false,
+    bool excluirNivelAvancado = false,
+    int? maxExercicios,
   }) {
     var candidatos = repositorio.filtrar(grupoMuscular: grupo);
     if (equipamentosPermitidos != null) {
@@ -150,10 +165,14 @@ class GeradorFichaTreino {
                 !_exerciciosInseguraTerceiraIdade.contains(exercicio.id),
           )
           .toList();
+    } else if (excluirNivelAvancado) {
+      candidatos = candidatos
+          .where((exercicio) => exercicio.nivel != NivelExercicio.avancado)
+          .toList();
     }
     final comObjetivo = candidatos.where((exercicio) => exercicio.objetivos.contains(objetivo));
     final base = comObjetivo.isNotEmpty ? comObjetivo.toList() : candidatos;
     final ordenados = [...base]..sort((a, b) => a.nivel.index.compareTo(b.nivel.index));
-    return ordenados.take(_maxExerciciosPorGrupo).toList();
+    return ordenados.take(maxExercicios ?? _maxExerciciosPorGrupo).toList();
   }
 }

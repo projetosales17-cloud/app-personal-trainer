@@ -54,7 +54,7 @@ class OnboardingFlow extends StatefulWidget {
 
 class _OnboardingFlowState extends State<OnboardingFlow> {
   int _passo = 0;
-  static const _totalPassos = 13;
+  static const _totalPassos = 14;
 
   final _idadeController = TextEditingController();
   final _alturaController = TextEditingController();
@@ -69,6 +69,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   Objetivo? _objetivo;
   bool _cirurgiaBariatrica = false;
   String _condicaoHormonal = _condicoesHormonais.first;
+  bool _cicloMenstrualRegular = true;
+  DateTime? _dataUltimaMenstruacao;
   final Set<String> _restricoes = {};
   final Set<String> _lesoes = {};
   bool _teveParto = false;
@@ -109,9 +111,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       !_cirurgiaBariatrica ||
           (_tipoCirurgiaController.text.trim().isNotEmpty &&
               int.tryParse(_mesesCirurgiaController.text) != null),
-    8 => _nivelAtividade != null,
-    9 => _localTreino != null,
-    10 => _preferenciaTreino != null,
+    9 => _nivelAtividade != null,
+    10 => _localTreino != null,
+    11 => _preferenciaTreino != null,
     _ => true,
   };
 
@@ -125,7 +127,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       // Pré-seleciona o caminho recomendado pelo app para o objetivo já
       // escolhido — a usuária pode trocar antes de confirmar (ver briefing
       // do produto: "o app sempre orienta qual seria o caminho recomendado").
-      if (_passo == 10 && _preferenciaTreino == null && _objetivo != null) {
+      if (_passo == 11 && _preferenciaTreino == null && _objetivo != null) {
         _preferenciaTreino = _objetivo!.preferenciaTreinoRecomendada;
       }
     });
@@ -165,6 +167,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       localTreino: _localTreino!,
       preferenciaTreino: _preferenciaTreino!,
       dataParto: _teveParto ? _dataParto : null,
+      cicloMenstrualRegular: _cicloMenstrualRegular,
+      dataUltimaMenstruacao: _cicloMenstrualRegular ? _dataUltimaMenstruacao : null,
     );
 
     await widget.repositorio.salvar(anamnese);
@@ -223,35 +227,37 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       case 4:
         return _passoCondicaoHormonal();
       case 5:
+        return _passoCicloMenstrual();
+      case 6:
         return _passoMultiSelecao(
           titulo: 'Restrições alimentares ou alergias',
           opcoes: _restricoesComuns,
           selecionadas: _restricoes,
           outroController: _restricaoOutraController,
         );
-      case 6:
+      case 7:
         return _passoMultiSelecao(
           titulo: 'Lesões ou limitações físicas',
           opcoes: _lesoesComuns,
           selecionadas: _lesoes,
           outroController: _lesaoOutraController,
         );
-      case 7:
-        return _passoPosParto();
       case 8:
-        return _passoAtividade();
+        return _passoPosParto();
       case 9:
-        return _passoLocalTreino();
+        return _passoAtividade();
       case 10:
-        return _passoPreferenciaTreino();
+        return _passoLocalTreino();
       case 11:
+        return _passoPreferenciaTreino();
+      case 12:
         return _passoMultiSelecao(
           titulo: 'Priorização de região corporal',
           opcoes: _regioesComuns,
           selecionadas: _regioes,
           outroController: null,
         );
-      case 12:
+      case 13:
         return _passoResumo();
       default:
         return const SizedBox.shrink();
@@ -366,6 +372,52 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             controller: _condicaoOutraController,
             decoration: const InputDecoration(labelText: 'Qual?'),
           ),
+      ],
+    );
+  }
+
+  Widget _passoCicloMenstrual() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Ciclo menstrual (opcional)', style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 8),
+        Text(
+          'Usamos isso só para ajustar o volume do treino e dar dicas de '
+          'alimentação conforme a fase do ciclo — pode pular se não fizer '
+          'sentido pra você (ex: menopausa ou ciclo irregular).',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 16),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Meu ciclo é regular'),
+          value: _cicloMenstrualRegular,
+          onChanged: (valor) => setState(() => _cicloMenstrualRegular = valor),
+        ),
+        if (_cicloMenstrualRegular) ...[
+          const SizedBox(height: 12),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(
+              _dataUltimaMenstruacao == null
+                  ? 'Data da última menstruação'
+                  : 'Última menstruação: ${_formatarData(_dataUltimaMenstruacao!)}',
+            ),
+            trailing: const Icon(Icons.calendar_today_outlined),
+            onTap: () async {
+              final selecionada = await showDatePicker(
+                context: context,
+                initialDate: _dataUltimaMenstruacao ?? DateTime.now(),
+                firstDate: DateTime.now().subtract(const Duration(days: 60)),
+                lastDate: DateTime.now(),
+              );
+              if (selecionada != null) {
+                setState(() => _dataUltimaMenstruacao = selecionada);
+              }
+            },
+          ),
+        ],
       ],
     );
   }
