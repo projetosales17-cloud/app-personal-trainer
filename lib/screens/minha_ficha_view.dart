@@ -7,7 +7,10 @@ import '../models/ficha_treino.dart';
 import '../services/anamnese_repository.dart';
 import '../services/biblioteca_exercicios_repository.dart';
 import '../services/checkin_treino_repository.dart';
+import '../services/gamificacao_service.dart';
 import '../services/gerador_ficha_treino.dart';
+import '../services/motor_aderencia.dart';
+import '../services/notificador_conquistas.dart';
 import '../services/preferencias_repository.dart';
 import 'exercicio_detalhe_screen.dart';
 
@@ -20,15 +23,24 @@ class MinhaFichaView extends StatefulWidget {
     BibliotecaExerciciosRepository? bibliotecaRepositorio,
     PreferenciasRepository? preferenciasRepositorio,
     CheckinTreinoRepository? checkinRepositorio,
+    MotorAderencia? motorAderencia,
+    GamificacaoService? gamificacaoService,
+    NotificadorConquistas? notificadorConquistas,
   }) : anamneseRepositorio = anamneseRepositorio ?? AnamneseRepository(),
        geradorFicha = GeradorFichaTreino(repositorio: bibliotecaRepositorio),
        preferenciasRepositorio = preferenciasRepositorio ?? PreferenciasRepository(),
-       checkinRepositorio = checkinRepositorio ?? CheckinTreinoRepository();
+       checkinRepositorio = checkinRepositorio ?? CheckinTreinoRepository(),
+       motorAderencia = motorAderencia ?? MotorAderencia(),
+       gamificacaoService = gamificacaoService ?? GamificacaoService(),
+       notificadorConquistas = notificadorConquistas ?? NotificadorConquistasLocal();
 
   final AnamneseRepository anamneseRepositorio;
   final GeradorFichaTreino geradorFicha;
   final PreferenciasRepository preferenciasRepositorio;
   final CheckinTreinoRepository checkinRepositorio;
+  final MotorAderencia motorAderencia;
+  final GamificacaoService gamificacaoService;
+  final NotificadorConquistas notificadorConquistas;
 
   @override
   State<MinhaFichaView> createState() => _MinhaFichaViewState();
@@ -54,14 +66,53 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
   }
 
   Future<void> _alternarConcluido(DateTime data, int diaFicha, bool concluido) async {
+    final diasDaSemana = await _diasDaSemanaFuture;
+    final checkinsAntes = await widget.checkinRepositorio.listar();
+
     if (concluido) {
       await widget.checkinRepositorio.marcarConcluido(data, diaFicha);
     } else {
       await widget.checkinRepositorio.desmarcarConcluido(data, diaFicha);
     }
+
+    final checkinsDepois = await widget.checkinRepositorio.listar();
+    await _notificarSeBateuMarco(diasDaSemana, checkinsAntes, checkinsDepois);
+
     setState(() {
-      _checkinsFuture = widget.checkinRepositorio.listar();
+      _checkinsFuture = Future.value(checkinsDepois);
     });
+  }
+
+  /// Compara a gamificação antes/depois do check-in e dispara uma
+  /// notificação local imediata (ver briefing do produto) quando um novo
+  /// marco de streak é atingido ou a meta semanal passa a ser batida —
+  /// sem geração de cupom, que depende de uma loja real ainda inexistente.
+  Future<void> _notificarSeBateuMarco(
+    List<int>? diasDaSemana,
+    List<CheckinTreino> checkinsAntes,
+    List<CheckinTreino> checkinsDepois,
+  ) async {
+    final antes = widget.gamificacaoService.calcular(
+      diasDaSemanaEsperados: diasDaSemana,
+      datasCheckin: [for (final c in checkinsAntes) c.data],
+    );
+    final depois = widget.gamificacaoService.calcular(
+      diasDaSemanaEsperados: diasDaSemana,
+      datasCheckin: [for (final c in checkinsDepois) c.data],
+    );
+
+    if (depois.streakDias > antes.streakDias &&
+        GamificacaoService.marcosStreak.contains(depois.streakDias)) {
+      await widget.notificadorConquistas.notificar(
+        titulo: 'Sequência de ${depois.streakDias} dias!',
+        corpo: 'Você bateu um novo marco de streak. Continue assim!',
+      );
+    } else if (!antes.metaSemanalBatida && depois.metaSemanalBatida) {
+      await widget.notificadorConquistas.notificar(
+        titulo: 'Meta semanal batida!',
+        corpo: 'Você completou todos os treinos previstos dessa semana.',
+      );
+    }
   }
 
   @override
@@ -86,8 +137,6 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
           );
         }
 
-        final ficha = widget.geradorFicha.gerar(anamnese);
-
         return FutureBuilder<List<int>?>(
           future: _diasDaSemanaFuture,
           builder: (context, diasSnapshot) {
@@ -105,6 +154,19 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                 }
 
                 final checkins = checkinsSnapshot.data ?? const [];
+                final datasCheckin = [for (final c in checkins) c.data];
+                final aderencia = widget.motorAderencia.avaliar(
+                  diasDaSemanaEsperados: diasDaSemana,
+                  datasCheckin: datasCheckin,
+                );
+                final gamificacao = widget.gamificacaoService.calcular(
+                  diasDaSemanaEsperados: diasDaSemana,
+                  datasCheckin: datasCheckin,
+                );
+                final ficha = widget.geradorFicha.gerar(
+                  anamnese,
+                  reduzirVolumeRetomada: aderencia.emAlerta,
+                );
 
                 return ListView(
                   padding: const EdgeInsets.all(16),
@@ -113,6 +175,21 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                       'Válida até ${_formatarData(ficha.validaAte)}',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
+                    const SizedBox(height: 8),
+                    _CartaoGamificacao(resultado: gamificacao),
+                    if (aderencia.emAlerta) ...[
+                      const SizedBox(height: 8),
+                      Card(
+                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Text(
+                            aderencia.mensagem!,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     _SeletorDiasDaSemana(
                       quantidadeDias: ficha.dias.length,
@@ -212,6 +289,35 @@ class _SeletorDiasDaSemanaState extends State<_SeletorDiasDaSemana> {
                     ? () => widget.aoSalvar(_selecionados.toList()..sort())
                     : null,
                 child: const Text('Salvar dias'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CartaoGamificacao extends StatelessWidget {
+  const _CartaoGamificacao({required this.resultado});
+
+  final ResultadoGamificacao resultado;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            const Icon(Icons.local_fire_department_outlined),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Streak: ${resultado.streakDias} dia(s) · ${resultado.pontosTotais} pontos'
+                '${resultado.metaSemanalBatida ? ' · Meta semanal batida!' : ''}',
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
           ],

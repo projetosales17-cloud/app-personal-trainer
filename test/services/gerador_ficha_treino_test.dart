@@ -329,4 +329,25 @@ void main() {
       expect(dia.exercicios.length, fichaBase.dias[dia.dia - 1].exercicios.length);
     }
   });
+
+  test('reduzirVolumeRetomada reduz volume e evita nível avançado', () {
+    final fichaRetomada = gerador.gerar(_anamneseBase, reduzirVolumeRetomada: true);
+    final fichaBase = gerador.gerar(_anamneseBase);
+
+    for (final dia in fichaRetomada.dias) {
+      expect(dia.exercicios.length, lessThan(fichaBase.dias[dia.dia - 1].exercicios.length));
+      for (final exercicio in dia.exercicios) {
+        expect(exercicio.nivel, isNot(NivelExercicio.avancado));
+      }
+    }
+  });
+
+  test('reduzirVolumeRetomada falso (padrão) não afeta o volume', () {
+    final ficha = gerador.gerar(_anamneseBase, reduzirVolumeRetomada: false);
+    final fichaBase = gerador.gerar(_anamneseBase);
+
+    for (final dia in ficha.dias) {
+      expect(dia.exercicios.length, fichaBase.dias[dia.dia - 1].exercicios.length);
+    }
+  });
 }
