@@ -23,6 +23,24 @@ class GeradorCardapio {
   /// calculado.
   static const _objetivosComCeia = {Objetivo.hipertrofia, Objetivo.performanceAtletica};
 
+  /// Dicas nutricionais gerais e não-prescritivas por fase do ciclo (ver
+  /// briefing do produto) — não muda a seleção de alimentos, só complementa
+  /// com uma sugestão de atenção prática.
+  static const _observacoesPorFase = {
+    FaseCiclo.menstrual:
+        'Fase menstrual: dê atenção especial à hidratação e a alimentos '
+        'ricos em ferro (ex: carnes magras, leguminosas, vegetais escuros).',
+    FaseCiclo.folicular:
+        'Fase folicular: fase de mais energia — bom momento para manter a '
+        'dieta bem distribuída ao longo do dia.',
+    FaseCiclo.ovulacao:
+        'Ovulação: mantenha a hidratação em dia, especialmente se o treino '
+        'estiver mais intenso nesses dias.',
+    FaseCiclo.lutea:
+        'Fase lútea: é comum sentir mais fome ou vontade de doce — priorizar '
+        'fontes de fibra e proteína pode ajudar a manter a saciedade.',
+  };
+
   Cardapio gerar(Anamnese anamnese) {
     final restricoes = anamnese.restricoesAlimentares;
     final incluirCeia = _objetivosComCeia.contains(anamnese.objetivoPrincipal);
@@ -66,6 +84,7 @@ class GeradorCardapio {
       dias: dias,
       geradaEm: geradaEm,
       validaAte: geradaEm.add(const Duration(days: duracaoValidadeDias)),
+      observacaoCiclo: _observacoesPorFase[anamnese.faseCiclo],
     );
   }
 

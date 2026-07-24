@@ -1,5 +1,7 @@
+import '../saude/ciclo_hormonal.dart';
 import '../saude/sexo.dart';
 
+export '../saude/ciclo_hormonal.dart' show FaseCiclo;
 export '../saude/sexo.dart' show Sexo;
 
 enum Objetivo {
@@ -100,6 +102,11 @@ class Anamnese {
     // Idem: antes de existir cardio na ficha, o comportamento era sempre
     // "só musculação".
     this.preferenciaTreino = PreferenciaTreino.soMusculacao,
+    // Campo opcional (ver briefing do produto): quem está na menopausa,
+    // pós-bariátrica ou tem ciclo irregular pode deixar cicloMenstrualRegular
+    // em false e pular esse ajuste sem penalidade.
+    this.cicloMenstrualRegular = true,
+    this.dataUltimaMenstruacao,
   });
 
   final int idade;
@@ -119,6 +126,15 @@ class Anamnese {
   final List<String> regioesPriorizadas;
   final LocalTreino localTreino;
   final PreferenciaTreino preferenciaTreino;
+  final bool cicloMenstrualRegular;
+  final DateTime? dataUltimaMenstruacao;
+
+  /// Fase aproximada do ciclo no momento em que for consultada (não fica
+  /// congelada na anamnese — muda conforme os dias passam). `null` quando
+  /// a usuária não tem ciclo regular ou não informou a data.
+  FaseCiclo? get faseCiclo => (cicloMenstrualRegular && dataUltimaMenstruacao != null)
+      ? calcularFaseCiclo(dataUltimaMenstruacao!)
+      : null;
 
   Map<String, dynamic> toJson() => {
     'idade': idade,
@@ -138,6 +154,8 @@ class Anamnese {
     'regioesPriorizadas': regioesPriorizadas,
     'localTreino': localTreino.name,
     'preferenciaTreino': preferenciaTreino.name,
+    'cicloMenstrualRegular': cicloMenstrualRegular,
+    'dataUltimaMenstruacao': dataUltimaMenstruacao?.toIso8601String(),
   };
 
   factory Anamnese.fromJson(Map<String, dynamic> json) => Anamnese(
@@ -163,5 +181,9 @@ class Anamnese {
     preferenciaTreino: PreferenciaTreino.values.byName(
       json['preferenciaTreino'] as String? ?? 'soMusculacao',
     ),
+    cicloMenstrualRegular: json['cicloMenstrualRegular'] as bool? ?? true,
+    dataUltimaMenstruacao: json['dataUltimaMenstruacao'] != null
+        ? DateTime.parse(json['dataUltimaMenstruacao'] as String)
+        : null,
   );
 }

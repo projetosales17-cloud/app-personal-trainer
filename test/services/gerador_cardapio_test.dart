@@ -89,4 +89,24 @@ void main() {
       }
     }
   });
+
+  test('sem informação de ciclo, não há observação de ciclo', () {
+    final cardapio = gerador.gerar(_anamneseBase);
+    expect(cardapio.observacaoCiclo, isNull);
+  });
+
+  test('com data da última menstruação, mostra observação da fase correspondente', () {
+    final anamneseMenstrual = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.emagrecimento,
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+      dataUltimaMenstruacao: DateTime.now(),
+    );
+
+    final cardapio = gerador.gerar(anamneseMenstrual);
+    expect(cardapio.observacaoCiclo, contains('Fase menstrual'));
+  });
 }
