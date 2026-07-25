@@ -10,7 +10,16 @@ import 'package:app_personal_trainer/screens/exercicio_detalhe_screen.dart';
 import 'package:app_personal_trainer/services/treino_repository.dart';
 
 final _flexao = bibliotecaExercicios.first;
-final _semImagem = bibliotecaExercicios.firstWhere((e) => e.caminhoImagem == null);
+final _semImagem = Exercicio(
+  id: _flexao.id,
+  nome: _flexao.nome,
+  grupoMuscularPrincipal: _flexao.grupoMuscularPrincipal,
+  gruposMuscularesSecundarios: _flexao.gruposMuscularesSecundarios,
+  nivel: _flexao.nivel,
+  objetivos: _flexao.objetivos,
+  equipamento: _flexao.equipamento,
+  instrucoes: _flexao.instrucoes,
+);
 
 const _lista = Key('lista-exercicio-detalhe');
 
