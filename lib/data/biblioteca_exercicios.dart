@@ -312,6 +312,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com os braços ao lado do corpo, flexione os cotovelos elevando '
         'os halteres até a altura dos ombros, sem balançar.',
+    caminhoImagem: 'assets/personagem/rosca-direta-halteres.jpg',
   ),
   Exercicio(
     id: 'rosca-alternada',
@@ -321,6 +322,7 @@ const bibliotecaExercicios = <Exercicio>[
     objetivos: [ObjetivoExercicio.hipertrofia],
     equipamento: Equipamento.halteres,
     instrucoes: 'Igual à rosca direta, alternando um braço de cada vez.',
+    caminhoImagem: 'assets/personagem/rosca-alternada.jpg',
   ),
   Exercicio(
     id: 'rosca-martelo',
@@ -332,6 +334,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com as palmas voltadas uma para a outra, flexione os cotovelos '
         'mantendo essa pegada neutra durante todo o movimento.',
+    caminhoImagem: 'assets/personagem/rosca-martelo.jpg',
   ),
   Exercicio(
     id: 'rosca-direta-barra',
@@ -343,6 +346,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com pegada supinada na barra, flexione os cotovelos elevando a '
         'barra até a altura dos ombros.',
+    caminhoImagem: 'assets/personagem/rosca-direta-barra.jpg',
   ),
   Exercicio(
     id: 'rosca-scott',
@@ -354,6 +358,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com o braço apoiado no banco Scott, flexione o cotovelo elevando '
         'o peso sem tirar o braço do apoio.',
+    caminhoImagem: 'assets/personagem/rosca-scott.jpg',
   ),
   Exercicio(
     id: 'rosca-concentrada',
@@ -365,6 +370,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Sentada, com o cotovelo apoiado na parte interna da coxa, '
         'flexione o braço elevando o halter lentamente.',
+    caminhoImagem: 'assets/personagem/rosca-concentrada.jpg',
   ),
   Exercicio(
     id: 'rosca-direta-elastico',
@@ -376,6 +382,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com o elástico preso sob os pés, flexione os cotovelos elevando '
         'as pontas até a altura dos ombros, sem balançar.',
+    caminhoImagem: 'assets/personagem/rosca-direta-elastico.jpg',
   ),
   Exercicio(
     id: 'rosca-martelo-elastico',
@@ -387,6 +394,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Igual à rosca direta com elástico, mantendo as palmas voltadas '
         'uma para a outra durante todo o movimento.',
+    caminhoImagem: 'assets/personagem/rosca-martelo-elastico.jpg',
   ),
 
   // Tríceps
