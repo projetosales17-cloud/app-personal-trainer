@@ -408,6 +408,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com os cotovelos fixos ao lado do corpo, estenda os braços '
         'empurrando a corda para baixo.',
+    caminhoImagem: 'assets/personagem/triceps-corda-cabo.jpg',
   ),
   Exercicio(
     id: 'mergulho-banco',
@@ -420,6 +421,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com as mãos apoiadas na borda do banco atrás do corpo, flexione '
         'os cotovelos descendo o quadril e empurre de volta para cima.',
+    caminhoImagem: 'assets/personagem/mergulho-banco.jpg',
   ),
   Exercicio(
     id: 'triceps-testa-halteres',
@@ -431,6 +433,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Deitada, com os braços estendidos para cima, flexione apenas os '
         'cotovelos descendo os halteres em direção à testa.',
+    caminhoImagem: 'assets/personagem/triceps-testa-halteres.jpg',
   ),
   Exercicio(
     id: 'triceps-frances',
@@ -442,6 +445,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Em pé ou sentada, com o halter atrás da cabeça, estenda o '
         'cotovelo elevando o peso e volte controladamente.',
+    caminhoImagem: 'assets/personagem/triceps-frances.jpg',
   ),
   Exercicio(
     id: 'flexao-braco-fechada',
@@ -454,6 +458,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Como a flexão tradicional, mas com as mãos próximas, na largura '
         'dos ombros, para focar mais o tríceps.',
+    caminhoImagem: 'assets/personagem/flexao-braco-fechada.jpg',
   ),
   Exercicio(
     id: 'triceps-coice-halter',
@@ -465,6 +470,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com o tronco inclinado à frente e o braço junto ao corpo, '
         'estenda o cotovelo levando o halter para trás.',
+    caminhoImagem: 'assets/personagem/triceps-coice-halter.jpg',
   ),
   Exercicio(
     id: 'triceps-elastico',
@@ -476,6 +482,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com o elástico preso em um ponto fixo acima da cabeça e os '
         'cotovelos junto ao corpo, estenda os braços empurrando para baixo.',
+    caminhoImagem: 'assets/personagem/triceps-elastico.jpg',
   ),
 
   // Perna
