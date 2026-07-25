@@ -497,6 +497,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com os pés na largura dos ombros, desça flexionando quadril e '
         'joelhos como se fosse sentar, mantendo as costas retas.',
+    caminhoImagem: 'assets/personagem/agachamento-livre.jpg',
   ),
   Exercicio(
     id: 'agachamento-halteres',
@@ -509,6 +510,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Igual ao agachamento livre, segurando um halter em cada mão ao '
         'lado do corpo para aumentar a carga.',
+    caminhoImagem: 'assets/personagem/agachamento-halteres.jpg',
   ),
   Exercicio(
     id: 'afundo',
@@ -521,6 +523,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Dê um passo à frente e desça o joelho de trás em direção ao '
         'chão, mantendo o tronco ereto, depois volte à posição inicial.',
+    caminhoImagem: 'assets/personagem/afundo.jpg',
   ),
   Exercicio(
     id: 'leg-press',
@@ -533,6 +536,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Sentada na máquina, empurre a plataforma estendendo as pernas, '
         'sem travar totalmente os joelhos, e volte controladamente.',
+    caminhoImagem: 'assets/personagem/leg-press.jpg',
   ),
   Exercicio(
     id: 'cadeira-extensora',
@@ -544,6 +548,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Sentada na máquina, estenda os joelhos elevando o peso e desça '
         'controladamente.',
+    caminhoImagem: 'assets/personagem/cadeira-extensora.jpg',
   ),
   Exercicio(
     id: 'cadeira-flexora',
@@ -555,6 +560,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Deitada ou sentada na máquina, flexione os joelhos puxando o '
         'peso em direção aos glúteos.',
+    caminhoImagem: 'assets/personagem/cadeira-flexora.jpg',
   ),
 
   // Glúteo
