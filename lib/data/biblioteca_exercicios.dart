@@ -651,6 +651,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Apoiada nos antebraços e pontas dos pés, mantenha o corpo reto '
         'e o core contraído pelo tempo determinado.',
+    caminhoImagem: 'assets/personagem/prancha.jpg',
   ),
   Exercicio(
     id: 'prancha-lateral',
@@ -662,6 +663,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Apoiada em um antebraço e na lateral do pé, mantenha o corpo '
         'alinhado, evitando que o quadril caia.',
+    caminhoImagem: 'assets/personagem/prancha-lateral.jpg',
   ),
   Exercicio(
     id: 'abdominal-supra',
@@ -673,6 +675,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Deitada com os joelhos flexionados, eleve o tronco em direção '
         'aos joelhos contraindo o abdômen, sem puxar o pescoço.',
+    caminhoImagem: 'assets/personagem/abdominal-supra.jpg',
   ),
   Exercicio(
     id: 'abdominal-infra',
@@ -684,6 +687,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Deitada com as pernas estendidas, eleve-as em direção ao teto '
         'contraindo a parte inferior do abdômen, e desça sem tocar o chão.',
+    caminhoImagem: 'assets/personagem/abdominal-infra.jpg',
   ),
   Exercicio(
     id: 'bicicleta-no-chao',
@@ -695,6 +699,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Deitada, alterne levar o cotovelo em direção ao joelho oposto '
         'enquanto estende a outra perna, em um movimento de pedalada.',
+    caminhoImagem: 'assets/personagem/bicicleta-no-chao.jpg',
   ),
   Exercicio(
     id: 'roda-abdominal',
@@ -706,5 +711,6 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Ajoelhada, role a roda para a frente estendendo o corpo o '
         'máximo possível sem deixar o quadril cair, depois retorne.',
+    caminhoImagem: 'assets/personagem/roda-abdominal.jpg',
   ),
 ];
