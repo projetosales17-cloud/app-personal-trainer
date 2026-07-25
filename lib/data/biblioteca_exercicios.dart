@@ -575,6 +575,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Deitada com os joelhos flexionados e pés apoiados no chão, eleve '
         'o quadril contraindo os glúteos no topo do movimento.',
+    caminhoImagem: 'assets/personagem/elevacao-pelvica.jpg',
   ),
   Exercicio(
     id: 'elevacao-pelvica-barra',
@@ -586,6 +587,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com a barra apoiada sobre o quadril e as costas apoiadas em um '
         'banco, eleve o quadril contraindo os glúteos no topo.',
+    caminhoImagem: 'assets/personagem/elevacao-pelvica-barra.jpg',
   ),
   Exercicio(
     id: 'agachamento-sumo-halter',
@@ -598,6 +600,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com os pés afastados e apontados para fora, segure um halter à '
         'frente do corpo e desça flexionando o quadril e os joelhos.',
+    caminhoImagem: 'assets/personagem/agachamento-sumo-halter.jpg',
   ),
   Exercicio(
     id: 'coice-cabo',
@@ -609,6 +612,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com o cabo preso no tornozelo, estenda a perna para trás '
         'contraindo o glúteo, mantendo o tronco estável.',
+    caminhoImagem: 'assets/personagem/coice-cabo.jpg',
   ),
   Exercicio(
     id: 'abducao-quadril-elastico',
@@ -620,6 +624,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com o elástico ao redor das pernas, abra e feche as pernas '
         'lateralmente contra a resistência.',
+    caminhoImagem: 'assets/personagem/abducao-quadril-elastico.jpg',
   ),
   Exercicio(
     id: 'stiff-halteres',
@@ -632,6 +637,7 @@ const bibliotecaExercicios = <Exercicio>[
     instrucoes:
         'Com os joelhos levemente flexionados, incline o tronco à frente '
         'descendo os halteres próximos às pernas, sentindo alongar o posterior.',
+    caminhoImagem: 'assets/personagem/stiff-halteres.jpg',
   ),
 
   // Abdômen
