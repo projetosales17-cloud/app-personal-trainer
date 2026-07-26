@@ -10,7 +10,7 @@ void main() {
 
     expect(find.byKey(const Key('lista-suplementos')), findsOneWidget);
     expect(find.text('Whey protein'), findsOneWidget);
-    expect(find.textContaining('sem dosagem'), findsOneWidget);
+    expect(find.textContaining('não recomendação individualizada'), findsOneWidget);
   });
 
   testWidgets('Filtrar por tipo mostra só suplementos daquele tipo', (tester) async {
@@ -32,6 +32,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('soro do leite'), findsOneWidget);
+    expect(find.text('Faixa geral de uso'), findsOneWidget);
+    expect(find.textContaining('20 a 30 g por porção'), findsOneWidget);
     expect(find.textContaining('Consulte um(a) nutricionista'), findsOneWidget);
   });
 }

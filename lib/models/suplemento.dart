@@ -10,20 +10,25 @@ extension TipoSuplementoLabel on TipoSuplemento {
 }
 
 /// Conteúdo educativo genérico sobre um suplemento — o que é e para que
-/// serve em linhas gerais, sem dosagem, horário de uso ou recomendação
-/// individualizada (ver briefing do produto: precisa de validação
-/// profissional antes de virar conteúdo prescritivo, mesmo padrão já
-/// aplicado à trilha pós-bariátrica em Orientações).
+/// serve em linhas gerais. `dosagemGenerica` traz uma faixa amplamente
+/// publicada (o mesmo tipo de informação que já vem no rótulo do produto)
+/// — não é calculada por peso, objetivo ou condição de saúde da usuária,
+/// e não substitui recomendação individualizada (ver briefing do produto:
+/// dosagem individualizada precisa de validação profissional antes de
+/// virar conteúdo prescritivo, mesmo padrão já aplicado à trilha
+/// pós-bariátrica em Orientações).
 class Suplemento {
   const Suplemento({
     required this.id,
     required this.nome,
     required this.tipo,
     required this.descricao,
+    this.dosagemGenerica,
   });
 
   final String id;
   final String nome;
   final TipoSuplemento tipo;
   final String descricao;
+  final String? dosagemGenerica;
 }

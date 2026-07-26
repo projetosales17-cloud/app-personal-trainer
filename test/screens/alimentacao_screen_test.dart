@@ -108,6 +108,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Whey protein'), findsOneWidget);
-    expect(find.textContaining('sem dosagem'), findsOneWidget);
+    expect(find.textContaining('não recomendação individualizada'), findsOneWidget);
   });
 }

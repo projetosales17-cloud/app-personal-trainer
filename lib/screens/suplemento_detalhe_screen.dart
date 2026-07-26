@@ -17,6 +17,12 @@ class SuplementoDetalheScreen extends StatelessWidget {
           Chip(label: Text(suplemento.tipo.label)),
           const SizedBox(height: 24),
           Text(suplemento.descricao, style: Theme.of(context).textTheme.bodyLarge),
+          if (suplemento.dosagemGenerica != null) ...[
+            const SizedBox(height: 24),
+            Text('Faixa geral de uso', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
+            Text(suplemento.dosagemGenerica!, style: Theme.of(context).textTheme.bodyMedium),
+          ],
           const SizedBox(height: 24),
           Container(
             padding: const EdgeInsets.all(12),
@@ -25,9 +31,9 @@ class SuplementoDetalheScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              'Conteúdo educativo geral — não recomenda dosagem, horário de uso '
-              'ou combinação específica. Consulte um(a) nutricionista ou médico '
-              'para orientação individualizada, especialmente se você fez '
+              'Conteúdo educativo geral — a faixa de uso acima é uma referência '
+              'ampla, não uma recomendação individualizada. Consulte um(a) '
+              'nutricionista ou médico antes de usar, especialmente se você fez '
               'cirurgia bariátrica ou tem alguma condição de saúde.',
               style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
             ),
