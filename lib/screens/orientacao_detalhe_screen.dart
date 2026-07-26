@@ -26,7 +26,7 @@ class OrientacaoDetalheScreen extends StatelessWidget {
           const SizedBox(height: 24),
           Text(orientacao.corpo, style: Theme.of(context).textTheme.bodyLarge),
           const SizedBox(height: 24),
-          if (orientacao.urlVideo == null)
+          if (orientacao.caminhoVideo == null)
             Text(
               'Vídeo em breve.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -39,7 +39,8 @@ class OrientacaoDetalheScreen extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => OrientacaoVideoScreen(
                     titulo: orientacao.titulo,
-                    urlVideo: orientacao.urlVideo!,
+                    corpo: orientacao.corpo,
+                    caminhoVideo: orientacao.caminhoVideo!,
                   ),
                 ),
               ),

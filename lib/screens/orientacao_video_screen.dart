@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-/// Reprodução do vídeo curto de uma orientação (conteúdo pré-gravado,
-/// hospedado externamente — ver Orientacao.urlVideo). Sem teste de widget
+/// Reprodução do vídeo curto de fundo de uma orientação (asset local, em
+/// loop, sem áudio — ver Orientacao.caminhoVideo) com o título e o corpo do
+/// texto sobrepostos nativamente pelo Flutter. Sem teste de widget
 /// automatizado: assim como VideoDetalheScreen, depende de inicialização
-/// real de platform channel/rede, indisponível no ambiente de teste.
+/// real de platform channel, indisponível no ambiente de teste.
 class OrientacaoVideoScreen extends StatefulWidget {
-  const OrientacaoVideoScreen({super.key, required this.titulo, required this.urlVideo});
+  const OrientacaoVideoScreen({
+    super.key,
+    required this.titulo,
+    required this.corpo,
+    required this.caminhoVideo,
+  });
 
   final String titulo;
-  final String urlVideo;
+  final String corpo;
+  final String caminhoVideo;
 
   @override
   State<OrientacaoVideoScreen> createState() => _OrientacaoVideoScreenState();
@@ -22,8 +29,13 @@ class _OrientacaoVideoScreenState extends State<OrientacaoVideoScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.urlVideo));
-    _inicializacao = _controller.initialize();
+    _controller = VideoPlayerController.asset(widget.caminhoVideo);
+    _inicializacao = _controller.initialize().then((_) {
+      _controller
+        ..setLooping(true)
+        ..setVolume(0)
+        ..play();
+    });
   }
 
   @override
@@ -50,6 +62,39 @@ class _OrientacaoVideoScreenState extends State<OrientacaoVideoScreen> {
                 alignment: Alignment.center,
                 children: [
                   VideoPlayer(_controller),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.black.withValues(alpha: 0), Colors.black.withValues(alpha: 0.85)],
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.titulo,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            widget.corpo,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   IconButton(
                     key: const Key('botao-play-pause-orientacao'),
                     iconSize: 64,
