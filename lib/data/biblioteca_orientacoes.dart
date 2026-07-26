@@ -6,6 +6,10 @@ import '../models/orientacao.dart';
 /// reforça a importância de acompanhamento profissional, sem prescrever
 /// nada específico (ver briefing: precisa de validação profissional antes
 /// de virar conteúdo prescritivo).
+///
+/// Cada `caminhoVideo` aponta para um vídeo curto em loop da Yara
+/// (`assets/videos/` + nome do tema + `.mp4`) reaproveitado por todo o
+/// conteúdo do mesmo tema — não é um vídeo por item individual.
 const bibliotecaOrientacoes = <Orientacao>[
   // Treino
   Orientacao(
@@ -17,6 +21,7 @@ const bibliotecaOrientacoes = <Orientacao>[
         'a temperatura corporal e reduz o risco de lesões. Poucos minutos de '
         'movimento leve (caminhada, polichinelos, mobilidade articular) antes '
         'da parte principal do treino já fazem diferença.',
+    caminhoVideo: 'assets/videos/treino.mp4',
   ),
   Orientacao(
     id: 'descanso-entre-treinos',
@@ -26,6 +31,7 @@ const bibliotecaOrientacoes = <Orientacao>[
         'O músculo se fortalece no descanso, não só durante o treino. Respeitar '
         'pelo menos um dia de intervalo para o mesmo grupo muscular ajuda na '
         'recuperação e reduz o risco de lesões por excesso de uso.',
+    caminhoVideo: 'assets/videos/treino.mp4',
   ),
 
   // Alimentação
@@ -37,6 +43,7 @@ const bibliotecaOrientacoes = <Orientacao>[
         'Distribuir a ingestão de água ao longo do dia, em vez de concentrar '
         'tudo de uma vez, ajuda o corpo a absorver melhor os líquidos. '
         'Consulte a aba Hidratação para ver sua meta diária estimada.',
+    caminhoVideo: 'assets/videos/alimentacao.mp4',
   ),
   Orientacao(
     id: 'como-ler-rotulos',
@@ -46,6 +53,7 @@ const bibliotecaOrientacoes = <Orientacao>[
         'Observar a lista de ingredientes (geralmente em ordem decrescente de '
         'quantidade) e a informação nutricional por porção ajuda a comparar '
         'produtos e identificar açúcares e gorduras adicionados.',
+    caminhoVideo: 'assets/videos/alimentacao.mp4',
   ),
 
   // Motivação
@@ -57,6 +65,7 @@ const bibliotecaOrientacoes = <Orientacao>[
         'Um treino imperfeito feito é mais valioso do que o treino perfeito '
         'que nunca acontece. Resultados vêm da soma de pequenas ações '
         'repetidas ao longo do tempo, não de esforços pontuais intensos.',
+    caminhoVideo: 'assets/videos/motivacao.mp4',
   ),
   Orientacao(
     id: 'metas-realistas',
@@ -66,6 +75,7 @@ const bibliotecaOrientacoes = <Orientacao>[
         'Metas menores e mensuráveis (ex: treinar 3x nesta semana) sustentam a '
         'motivação melhor do que objetivos grandes e distantes. Comemore o '
         'progresso pelo caminho, não só o resultado final.',
+    caminhoVideo: 'assets/videos/motivacao.mp4',
   ),
 
   // Menopausa
@@ -144,6 +154,7 @@ const bibliotecaOrientacoes = <Orientacao>[
         'Depende da sua frequência semanal escolhida na anamnese e do seu '
         'nível de atividade. O app já gera sua ficha considerando isso — '
         'você pode ajustar a frequência quando gerar uma nova ficha.',
+    caminhoVideo: 'assets/videos/treino.mp4',
   ),
   Orientacao(
     id: 'faq-diario-conta-caloria',
@@ -154,6 +165,7 @@ const bibliotecaOrientacoes = <Orientacao>[
         'Não nesta versão. O diário registra o que você comeu de forma '
         'livre, sem contagem calórica — o foco é criar o hábito de '
         'acompanhar a alimentação, não controlar números.',
+    caminhoVideo: 'assets/videos/alimentacao.mp4',
   ),
   Orientacao(
     id: 'faq-nao-motivada',
@@ -164,6 +176,7 @@ const bibliotecaOrientacoes = <Orientacao>[
         'Reduza a meta do dia em vez de pular o treino inteiro — um treino '
         'curto mantém o hábito vivo. Motivação vem e vai; constância é o '
         'que sustenta o resultado nos dias em que a motivação falta.',
+    caminhoVideo: 'assets/videos/motivacao.mp4',
   ),
   Orientacao(
     id: 'faq-posso-treinar-fogachos',

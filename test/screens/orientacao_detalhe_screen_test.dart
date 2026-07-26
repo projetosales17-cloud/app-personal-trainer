@@ -16,7 +16,7 @@ const _comVideo = Orientacao(
   titulo: 'Exemplo com vídeo',
   tema: TemaOrientacao.habitos,
   corpo: 'Corpo do texto.',
-  urlVideo: 'https://exemplo.com/video.mp4',
+  caminhoVideo: 'assets/videos/habitos.mp4',
 );
 
 const _faq = Orientacao(

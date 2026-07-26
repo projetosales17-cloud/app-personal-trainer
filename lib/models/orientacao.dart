@@ -21,10 +21,12 @@ extension TipoConteudoOrientacaoLabel on TipoConteudoOrientacao {
 }
 
 /// Um conteúdo pré-gravado da biblioteca de Orientações — artigo ou FAQ
-/// (pergunta em `titulo`, resposta em `corpo`), conforme `tipo`. `urlVideo`
-/// fica nulo para toda a biblioteca por enquanto — produção de vídeos
-/// curtos é um passo de conteúdo externo ainda pendente (ver briefing do
-/// produto: "artigos por tema, FAQ e vídeos curtos").
+/// (pergunta em `titulo`, resposta em `corpo`), conforme `tipo`.
+/// `caminhoVideo` aponta para um vídeo curto em loop (asset local, sem
+/// áudio/narração) usado como fundo animado da Yara na tela de vídeo — o
+/// texto de `titulo`/`corpo` é sobreposto nativamente pelo Flutter por
+/// cima, não faz parte do arquivo de vídeo. Um mesmo vídeo é reaproveitado
+/// por todo conteúdo do mesmo `tema`.
 class Orientacao {
   const Orientacao({
     required this.id,
@@ -32,7 +34,7 @@ class Orientacao {
     required this.tema,
     required this.corpo,
     this.tipo = TipoConteudoOrientacao.artigo,
-    this.urlVideo,
+    this.caminhoVideo,
   });
 
   final String id;
@@ -40,5 +42,5 @@ class Orientacao {
   final TemaOrientacao tema;
   final String corpo;
   final TipoConteudoOrientacao tipo;
-  final String? urlVideo;
+  final String? caminhoVideo;
 }
