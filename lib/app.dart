@@ -16,7 +16,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Personal Trainer Online',
+      title: 'MeuPersonal',
       theme: temaClaro,
       darkTheme: temaEscuro,
       themeMode: ThemeMode.system,

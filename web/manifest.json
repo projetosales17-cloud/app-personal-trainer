@@ -1,6 +1,6 @@
 {
-    "name": "app_personal_trainer",
-    "short_name": "app_personal_trainer",
+    "name": "MeuPersonal",
+    "short_name": "MeuPersonal",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

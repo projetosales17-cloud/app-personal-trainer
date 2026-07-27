@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.projetosales" "\0"
-            VALUE "FileDescription", "app_personal_trainer" "\0"
+            VALUE "CompanyName", "Vetor" "\0"
+            VALUE "FileDescription", "MeuPersonal" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "app_personal_trainer" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.projetosales. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Vetor. All rights reserved." "\0"
             VALUE "OriginalFilename", "app_personal_trainer.exe" "\0"
-            VALUE "ProductName", "app_personal_trainer" "\0"
+            VALUE "ProductName", "MeuPersonal" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
