@@ -215,8 +215,11 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         return const _TextoPasso(
           titulo: 'Bem-vinda!',
           texto:
-              'Vamos configurar seu plano personalizado de treino e alimentação. '
-              'Isso leva só alguns minutos.',
+              'Vamos montar seu plano de treino e alimentação a partir do seu '
+              'perfil real — seu objetivo, sua rotina, suas restrições. Emagrecimento, '
+              'hipertrofia, menopausa, pós-bariátrica ou terceira idade: o '
+              'acompanhamento se adapta a você, não o contrário. Isso leva só '
+              'alguns minutos.',
         );
       case 1:
         return _passoDadosBasicos();
