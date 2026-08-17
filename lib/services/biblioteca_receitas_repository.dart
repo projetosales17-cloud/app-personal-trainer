@@ -16,10 +16,10 @@ class BibliotecaReceitasRepository {
       if (tipoRefeicao != null && receita.tipoRefeicao != tipoRefeicao) {
         return false;
       }
-      if (restricoesUsuaria.contains('Lactose') && receita.contemLactose) {
+      if (restricoesUsuaria.contains('Lactosa') && receita.contemLactose) {
         return false;
       }
-      if (restricoesUsuaria.contains('Glúten') && receita.contemGluten) {
+      if (restricoesUsuaria.contains('Gluten') && receita.contemGluten) {
         return false;
       }
       if (restricoesUsuaria.contains('Vegetariana') && !receita.vegetariano) {

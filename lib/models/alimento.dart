@@ -3,11 +3,11 @@ enum CategoriaAlimento { proteina, carboidrato, gordura, vegetal, fruta, laticin
 extension CategoriaAlimentoLabel on CategoriaAlimento {
   String get label => switch (this) {
     CategoriaAlimento.proteina => 'Proteína',
-    CategoriaAlimento.carboidrato => 'Carboidrato',
-    CategoriaAlimento.gordura => 'Gordura boa',
+    CategoriaAlimento.carboidrato => 'Carbohidrato',
+    CategoriaAlimento.gordura => 'Grasa buena',
     CategoriaAlimento.vegetal => 'Vegetal',
     CategoriaAlimento.fruta => 'Fruta',
-    CategoriaAlimento.laticinio => 'Laticínio/substituto',
+    CategoriaAlimento.laticinio => 'Lácteo/sustituto',
   };
 }
 

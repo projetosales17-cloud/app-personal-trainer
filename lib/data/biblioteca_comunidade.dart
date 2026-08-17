@@ -10,84 +10,89 @@ const bibliotecaComunidade = <PublicacaoComunidade>[
     autora: 'Fernanda S.',
     tipo: TipoPublicacaoComunidade.depoimento,
     texto:
-        'Troquei a meta de "perder X quilos" por "treinar 3x por semana". Errei '
-        'menos vezes com uma meta que dependia só de mim, não da balança.',
+        'Cambié la meta de "perder X kilos" por "entrenar 3 veces por '
+        'semana". Fallé menos veces con una meta que dependía solo de mí, '
+        'no de la báscula.',
   ),
   PublicacaoComunidade(
     id: 'dica-agua-por-perto',
-    autora: 'Equipe',
+    autora: 'Equipo',
     tipo: TipoPublicacaoComunidade.dica,
     texto:
-        'Deixar uma garrafa de água por perto (mesa de trabalho, bolsa) ajuda a '
-        'bater a meta de hidratação sem precisar lembrar de beber água o tempo todo.',
+        'Dejar una botella de agua cerca (escritorio, bolso) ayuda a '
+        'cumplir la meta de hidratación sin tener que acordarte de tomar '
+        'agua todo el tiempo.',
   ),
   PublicacaoComunidade(
     id: 'marina-primeira-flexao',
     autora: 'Marina T.',
     tipo: TipoPublicacaoComunidade.conquista,
     texto:
-        'Depois de meses treinando em casa, consegui fazer minha primeira '
-        'flexão completa sem apoiar os joelhos. Pequena pra muita gente, '
-        'enorme pra mim.',
+        'Después de meses entrenando en casa, logré hacer mi primera '
+        'flexión de brazos completa sin apoyar las rodillas. Algo pequeño '
+        'para mucha gente, enorme para mí.',
   ),
   PublicacaoComunidade(
     id: 'claudia-menopausa',
-    autora: 'Cláudia R.',
+    autora: 'Claudia R.',
     tipo: TipoPublicacaoComunidade.depoimento,
     texto:
-        'Na menopausa, o treino de força virou prioridade pra mim depois que '
-        'entendi a relação com densidade óssea. Não é sobre estética, é sobre '
-        'os próximos 30 anos.',
+        'En la menopausia, el entrenamiento de fuerza se volvió una '
+        'prioridad para mí después de entender su relación con la densidad '
+        'ósea. No se trata de estética, se trata de los próximos 30 años.',
   ),
   PublicacaoComunidade(
     id: 'dica-ficha-vencida',
-    autora: 'Equipe',
+    autora: 'Equipo',
     tipo: TipoPublicacaoComunidade.dica,
     texto:
-        'Quando o app avisar que sua ficha vai vencer, aproveite pra repensar '
-        'se seus dias disponíveis na semana mudaram — a ficha nova pode se '
-        'ajustar melhor à sua rotina atual.',
+        'Cuando la app te avise que tu plan está por vencer, aprovecha '
+        'para pensar si tus días disponibles en la semana cambiaron: el '
+        'nuevo plan puede ajustarse mejor a tu rutina actual.',
   ),
   PublicacaoComunidade(
     id: 'juliana-bariatrica',
     autora: 'Juliana M.',
     tipo: TipoPublicacaoComunidade.depoimento,
     texto:
-        'Um ano depois da bariátrica, o que mais me ajudou foi não comparar '
-        'meu ritmo com o de ninguém. Cada acompanhamento profissional traça um '
-        'caminho diferente.',
+        'Un año después de la bariátrica, lo que más me ayudó fue no '
+        'comparar mi ritmo con el de nadie más. Cada acompañamiento '
+        'profesional traza un camino diferente.',
   ),
   PublicacaoComunidade(
     id: 'rosa-terceira-idade',
     autora: 'Rosa A.',
     tipo: TipoPublicacaoComunidade.conquista,
     texto:
-        'Aos 68 anos, comecei os treinos de mobilidade com receio de me '
-        'machucar. Hoje subo escadas sem me segurar no corrimão — algo que eu '
-        'tinha parado de fazer havia anos.',
+        'A los 68 años, empecé los entrenamientos de movilidad con miedo '
+        'de lastimarme. Hoy subo escaleras sin sujetarme del pasamanos, '
+        'algo que había dejado de hacer hace años.',
   ),
   PublicacaoComunidade(
     id: 'dica-descanso',
-    autora: 'Equipe',
+    autora: 'Equipo',
     tipo: TipoPublicacaoComunidade.dica,
     texto:
-        'Um dia de descanso não é um dia perdido. É parte do treino — o '
-        'músculo se recupera e fica mais forte justamente nesse intervalo.',
+        'Un día de descanso no es un día perdido. Es parte del '
+        'entrenamiento: el músculo se recupera y se vuelve más fuerte '
+        'justo en ese intervalo.',
   ),
   PublicacaoComunidade(
     id: 'patricia-hipertrofia',
-    autora: 'Patrícia L.',
+    autora: 'Patricia L.',
     tipo: TipoPublicacaoComunidade.conquista,
     texto:
-        'Registrar a carga de cada treino me mostrou um progresso que eu não '
-        'via no espelho. Em 4 meses, dobrei a carga do agachamento.',
+        'Registrar la carga de cada entrenamiento me mostró un progreso '
+        'que no veía en el espejo. En 4 meses, dupliqué la carga de la '
+        'sentadilla.',
   ),
   PublicacaoComunidade(
     id: 'dica-priorize-uma-mudanca',
-    autora: 'Equipe',
+    autora: 'Equipo',
     tipo: TipoPublicacaoComunidade.dica,
     texto:
-        'Tentar mudar treino, alimentação e sono todos de uma vez costuma '
-        'cansar rápido. Priorizar uma mudança por vez tende a durar mais.',
+        'Tratar de cambiar el entrenamiento, la alimentación y el sueño '
+        'todo al mismo tiempo suele agotar rápido. Priorizar un cambio a '
+        'la vez tiende a durar más.',
   ),
 ];

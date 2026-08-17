@@ -5,7 +5,7 @@ extension TipoSuplementoLabel on TipoSuplemento {
     TipoSuplemento.proteina => 'Proteína',
     TipoSuplemento.creatina => 'Creatina',
     TipoSuplemento.vitaminaMineral => 'Vitamina/mineral',
-    TipoSuplemento.acidoGraxo => 'Ácido graxo',
+    TipoSuplemento.acidoGraxo => 'Ácido graso',
   };
 }
 

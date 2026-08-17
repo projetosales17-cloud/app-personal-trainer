@@ -14,7 +14,7 @@ const _extraMlPorAtividade = {
 /// Retorna a hidratação diária recomendada, em mililitros.
 double calcularHidratacaoDiaria(double pesoKg, NivelAtividade nivelAtividade) {
   if (pesoKg <= 0) {
-    throw ArgumentError('Peso deve ser um valor positivo');
+    throw ArgumentError('El peso debe ser un valor positivo');
   }
 
   final baseMl = pesoKg * _mlPorKg;

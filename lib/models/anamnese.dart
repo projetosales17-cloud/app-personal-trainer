@@ -15,13 +15,13 @@ enum Objetivo {
 
 extension ObjetivoLabel on Objetivo {
   String get label => switch (this) {
-    Objetivo.emagrecimento => 'Emagrecimento',
-    Objetivo.tonificacao => 'Tonificação',
+    Objetivo.emagrecimento => 'Pérdida de peso',
+    Objetivo.tonificacao => 'Tonificación',
     Objetivo.hipertrofia => 'Hipertrofia',
-    Objetivo.performanceAtletica => 'Performance atlética',
-    Objetivo.saudeGeral => 'Saúde geral (ex: menopausa)',
+    Objetivo.performanceAtletica => 'Rendimiento atlético',
+    Objetivo.saudeGeral => 'Salud general (ej: menopausia)',
     Objetivo.terceiraIdade =>
-      'Terceira idade (mobilidade, equilíbrio e prevenção de quedas)',
+      'Adultos mayores (movilidad, equilibrio y prevención de caídas)',
   };
 }
 
@@ -29,8 +29,8 @@ enum LocalTreino { academia, casa }
 
 extension LocalTreinoLabel on LocalTreino {
   String get label => switch (this) {
-    LocalTreino.academia => 'Academia',
-    LocalTreino.casa => 'Em casa (sem aparelhos)',
+    LocalTreino.academia => 'Gimnasio',
+    LocalTreino.casa => 'En casa (sin aparatos)',
   };
 }
 
@@ -38,9 +38,9 @@ enum PreferenciaTreino { soMusculacao, soCardio, combinado }
 
 extension PreferenciaTreinoLabel on PreferenciaTreino {
   String get label => switch (this) {
-    PreferenciaTreino.soMusculacao => 'Só musculação',
-    PreferenciaTreino.soCardio => 'Só cardio',
-    PreferenciaTreino.combinado => 'Musculação + cardio',
+    PreferenciaTreino.soMusculacao => 'Solo musculación',
+    PreferenciaTreino.soCardio => 'Solo cardio',
+    PreferenciaTreino.combinado => 'Musculación + cardio',
   };
 }
 
@@ -66,11 +66,11 @@ enum NivelAtividade { sedentario, leve, moderado, intenso, muitoIntenso }
 
 extension NivelAtividadeLabel on NivelAtividade {
   String get label => switch (this) {
-    NivelAtividade.sedentario => 'Sedentário',
+    NivelAtividade.sedentario => 'Sedentaria',
     NivelAtividade.leve => 'Leve',
-    NivelAtividade.moderado => 'Moderado',
-    NivelAtividade.intenso => 'Intenso',
-    NivelAtividade.muitoIntenso => 'Muito intenso',
+    NivelAtividade.moderado => 'Moderada',
+    NivelAtividade.intenso => 'Intensa',
+    NivelAtividade.muitoIntenso => 'Muy intensa',
   };
 }
 
@@ -90,7 +90,7 @@ class Anamnese {
     this.cirurgiaBariatrica = false,
     this.tipoCirurgiaBariatrica,
     this.mesesDesdeCirurgia,
-    this.condicaoHormonal = 'Nenhuma',
+    this.condicaoHormonal = 'Ninguna',
     this.restricoesAlimentares = const [],
     this.lesoesLimitacoes = const [],
     required this.nivelAtividade,
@@ -174,7 +174,7 @@ class Anamnese {
     cirurgiaBariatrica: json['cirurgiaBariatrica'] as bool? ?? false,
     tipoCirurgiaBariatrica: json['tipoCirurgiaBariatrica'] as String?,
     mesesDesdeCirurgia: json['mesesDesdeCirurgia'] as int?,
-    condicaoHormonal: json['condicaoHormonal'] as String? ?? 'Nenhuma',
+    condicaoHormonal: json['condicaoHormonal'] as String? ?? 'Ninguna',
     restricoesAlimentares:
         (json['restricoesAlimentares'] as List?)?.cast<String>() ?? const [],
     lesoesLimitacoes:

@@ -63,9 +63,9 @@ class _RegistroMedidasViewState extends State<RegistroMedidasView> {
   String _resumo(RegistroMedidas registro) {
     final partes = [
       if (registro.cinturaCm != null) 'Cintura ${registro.cinturaCm!.toStringAsFixed(0)}cm',
-      if (registro.quadrilCm != null) 'Quadril ${registro.quadrilCm!.toStringAsFixed(0)}cm',
-      if (registro.bracoCm != null) 'Braço ${registro.bracoCm!.toStringAsFixed(0)}cm',
-      if (registro.coxaCm != null) 'Coxa ${registro.coxaCm!.toStringAsFixed(0)}cm',
+      if (registro.quadrilCm != null) 'Cadera ${registro.quadrilCm!.toStringAsFixed(0)}cm',
+      if (registro.bracoCm != null) 'Brazo ${registro.bracoCm!.toStringAsFixed(0)}cm',
+      if (registro.coxaCm != null) 'Muslo ${registro.coxaCm!.toStringAsFixed(0)}cm',
     ];
     return partes.join(' · ');
   }
@@ -93,14 +93,14 @@ class _RegistroMedidasViewState extends State<RegistroMedidasView> {
           Row(
             children: [
               _campo(const Key('campo-cintura'), 'Cintura (cm)', _controladorCintura),
-              _campo(const Key('campo-quadril'), 'Quadril (cm)', _controladorQuadril),
+              _campo(const Key('campo-quadril'), 'Cadera (cm)', _controladorQuadril),
             ],
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              _campo(const Key('campo-braco'), 'Braço (cm)', _controladorBraco),
-              _campo(const Key('campo-coxa'), 'Coxa (cm)', _controladorCoxa),
+              _campo(const Key('campo-braco'), 'Brazo (cm)', _controladorBraco),
+              _campo(const Key('campo-coxa'), 'Muslo (cm)', _controladorCoxa),
             ],
           ),
           const SizedBox(height: 8),
@@ -124,7 +124,7 @@ class _RegistroMedidasViewState extends State<RegistroMedidasView> {
                 final registros = (snapshot.data ?? const <RegistroMedidas>[]).reversed.toList();
                 if (registros.isEmpty) {
                   return const Center(
-                    child: Text('Nenhum registro de medidas ainda. Adicione o primeiro acima.'),
+                    child: Text('Aún no hay registros de medidas. Agrega el primero arriba.'),
                   );
                 }
 

@@ -6,11 +6,11 @@ enum TagPerfil { emagrecimento, hipertrofia, menopausa, terceiraIdade, bariatric
 
 extension TagPerfilLabel on TagPerfil {
   String get label => switch (this) {
-    TagPerfil.emagrecimento => 'Emagrecimento',
+    TagPerfil.emagrecimento => 'Pérdida de peso',
     TagPerfil.hipertrofia => 'Hipertrofia',
-    TagPerfil.menopausa => 'Menopausa',
-    TagPerfil.terceiraIdade => 'Terceira idade',
-    TagPerfil.bariatrica => 'Pós-bariátrica',
+    TagPerfil.menopausa => 'Menopausia',
+    TagPerfil.terceiraIdade => 'Adultos mayores',
+    TagPerfil.bariatrica => 'Posbariátrica',
   };
 }
 

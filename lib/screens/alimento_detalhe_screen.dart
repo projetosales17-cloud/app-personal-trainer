@@ -24,9 +24,9 @@ class AlimentoDetalheScreen extends StatelessWidget {
             runSpacing: 8,
             children: [
               Chip(label: Text(alimento.categoria.label)),
-              Chip(label: Text('Porção: ${alimento.porcaoSugerida}')),
-              if (alimento.contemLactose) const Chip(label: Text('Contém lactose')),
-              if (alimento.contemGluten) const Chip(label: Text('Contém glúten')),
+              Chip(label: Text('Porción: ${alimento.porcaoSugerida}')),
+              if (alimento.contemLactose) const Chip(label: Text('Contiene lactosa')),
+              if (alimento.contemGluten) const Chip(label: Text('Contiene gluten')),
               if (alimento.vegano)
                 const Chip(label: Text('Vegano'))
               else if (alimento.vegetariano)
@@ -38,10 +38,10 @@ class AlimentoDetalheScreen extends StatelessWidget {
             Text(alimento.observacao!, style: Theme.of(context).textTheme.bodyMedium),
           ],
           const SizedBox(height: 24),
-          Text('Substituições nesta categoria', style: Theme.of(context).textTheme.titleMedium),
+          Text('Sustituciones en esta categoría', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           if (substitutos.isEmpty)
-            const Text('Nenhuma substituição compatível encontrada nesta categoria.')
+            const Text('No se encontró ninguna sustitución compatible en esta categoría.')
           else
             for (final substituto in substitutos)
               ListTile(

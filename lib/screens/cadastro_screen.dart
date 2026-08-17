@@ -61,7 +61,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Criar conta')),
+      appBar: AppBar(title: const Text('Crear cuenta')),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -71,7 +71,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                 key: const Key('campo-email-cadastro'),
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(labelText: 'E-mail'),
+                decoration: const InputDecoration(labelText: 'Correo electrónico'),
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 12),
@@ -79,7 +79,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                 key: const Key('campo-senha-cadastro'),
                 controller: _senhaController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Senha (mín. 6 caracteres)'),
+                decoration: const InputDecoration(labelText: 'Contraseña (mín. 6 caracteres)'),
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 12),
@@ -87,7 +87,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                 key: const Key('campo-confirmar-senha-cadastro'),
                 controller: _confirmarSenhaController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Confirmar senha'),
+                decoration: const InputDecoration(labelText: 'Confirmar contraseña'),
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 12),
@@ -96,7 +96,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                 contentPadding: EdgeInsets.zero,
                 value: _aceiteTermos,
                 onChanged: (valor) => setState(() => _aceiteTermos = valor ?? false),
-                title: const Text('Li e aceito os termos de uso e a política de privacidade'),
+                title: const Text('Leí y acepto los términos de uso y la política de privacidad'),
                 controlAffinity: ListTileControlAffinity.leading,
               ),
               if (_erro != null) ...[
@@ -113,7 +113,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Criar conta'),
+                    : const Text('Crear cuenta'),
               ),
             ],
           ),

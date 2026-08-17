@@ -23,8 +23,9 @@ class MotorAderencia {
   static const _janelaDatasEsperadas = 6;
 
   static const _mensagemAlerta =
-      'Notamos que você pulou os últimos treinos — sem problema. Preparamos '
-      'uma ficha com volume reduzido pra facilitar a retomada hoje.';
+      'Notamos que te saltaste los últimos entrenamientos — no pasa nada. '
+      'Preparamos una rutina con volumen reducido para facilitar tu '
+      'regreso hoy.';
 
   /// Sem dias da semana escolhidos, não há como saber com confiança quais
   /// datas eram esperadas — retorna neutro (sem alerta) nesse caso.

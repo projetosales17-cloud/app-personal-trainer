@@ -16,10 +16,10 @@ class BibliotecaAlimentosRepository {
       if (categoria != null && alimento.categoria != categoria) {
         return false;
       }
-      if (restricoesUsuaria.contains('Lactose') && alimento.contemLactose) {
+      if (restricoesUsuaria.contains('Lactosa') && alimento.contemLactose) {
         return false;
       }
-      if (restricoesUsuaria.contains('Glúten') && alimento.contemGluten) {
+      if (restricoesUsuaria.contains('Gluten') && alimento.contemGluten) {
         return false;
       }
       if (restricoesUsuaria.contains('Vegetariana') && !alimento.vegetariano) {

@@ -31,9 +31,9 @@ class _SuplementosViewState extends State<SuplementosView> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
-            'Conteúdo educativo geral. As faixas de uso mostradas são '
-            'referências amplas, não recomendação individualizada. Consulte '
-            'um(a) nutricionista ou médico antes de usar qualquer suplemento.',
+            'Contenido educativo general. Los rangos de uso mostrados son '
+            'referencias amplias, no una recomendación individualizada. Consulta '
+            'a un(a) nutricionista o médico antes de usar cualquier suplemento.',
             style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
           ),
         ),

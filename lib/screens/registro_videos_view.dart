@@ -57,7 +57,7 @@ class _RegistroVideosViewState extends State<RegistroVideosView> {
   Widget build(BuildContext context) {
     if (kIsWeb) {
       return const IndisponivelNaWeb(
-        mensagem: 'Vídeos de progresso ainda não estão disponíveis na versão web.',
+        mensagem: 'Los videos de progreso aún no están disponibles en la versión web.',
       );
     }
     return Padding(
@@ -71,7 +71,7 @@ class _RegistroVideosViewState extends State<RegistroVideosView> {
                   key: const Key('botao-camera-video'),
                   onPressed: () => _adicionar(ImageSource.camera),
                   icon: const Icon(Icons.videocam_outlined),
-                  label: const Text('Câmera'),
+                  label: const Text('Cámara'),
                 ),
               ),
               const SizedBox(width: 8),
@@ -80,7 +80,7 @@ class _RegistroVideosViewState extends State<RegistroVideosView> {
                   key: const Key('botao-galeria-video'),
                   onPressed: () => _adicionar(ImageSource.gallery),
                   icon: const Icon(Icons.video_library_outlined),
-                  label: const Text('Galeria'),
+                  label: const Text('Galería'),
                 ),
               ),
             ],
@@ -97,7 +97,7 @@ class _RegistroVideosViewState extends State<RegistroVideosView> {
                 final videos = (snapshot.data ?? const <RegistroVideo>[]).reversed.toList();
                 if (videos.isEmpty) {
                   return const Center(
-                    child: Text('Nenhum vídeo ainda. Adicione o primeiro acima.'),
+                    child: Text('Aún no hay videos. Agrega el primero arriba.'),
                   );
                 }
 

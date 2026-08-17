@@ -43,7 +43,7 @@ class NotificadorConquistasLocal implements NotificadorConquistas {
       title: titulo,
       body: corpo,
       notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(_idCanal, 'Conquistas'),
+        android: AndroidNotificationDetails(_idCanal, 'Logros'),
         iOS: DarwinNotificationDetails(),
       ),
     );

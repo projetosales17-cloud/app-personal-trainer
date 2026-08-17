@@ -32,9 +32,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 const _mensagensMotivacionais = [
-  'Um treino de cada vez.',
-  'Constância vale mais que intensidade.',
-  'Você já chegou até aqui — continue.',
+  'Un entrenamiento a la vez.',
+  'La constancia vale más que la intensidad.',
+  'Ya llegaste hasta aquí — sigue así.',
 ];
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Início')),
+      appBar: AppBar(title: const Text('Inicio')),
       body: FutureBuilder<Anamnese?>(
         future: _anamneseFuture,
         builder: (context, snapshot) {
@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Padding(
                 padding: EdgeInsets.all(24),
                 child: Text(
-                  'Complete a anamnese no onboarding para ver seu painel.',
+                  'Completa la anamnesis en el onboarding para ver tu panel.',
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Text('Olá!', style: Theme.of(context).textTheme.headlineMedium),
+              Text('¡Hola!', style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: 4),
               Text(
                 _mensagensMotivacionais[DateTime.now().day % _mensagensMotivacionais.length],
@@ -119,7 +119,7 @@ class _CardTreinoDoDia extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Treino do dia', style: Theme.of(context).textTheme.titleMedium),
+            Text('Entrenamiento del día', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -129,10 +129,10 @@ class _CardTreinoDoDia extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text('${dia.exercicios.length} exercícios · veja na aba Treino'),
+            Text('${dia.exercicios.length} ejercicios · míralos en la pestaña Entrenamiento'),
             const SizedBox(height: 8),
             Text(
-              'Ficha válida até ${_formatarData(validaAte)}',
+              'Rutina válida hasta ${_formatarData(validaAte)}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -156,7 +156,7 @@ class _CardAlimentacaoDoDia extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Alimentação do dia', style: Theme.of(context).textTheme.titleMedium),
+            Text('Alimentación del día', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -166,10 +166,10 @@ class _CardAlimentacaoDoDia extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text('${dia.refeicoes.length} refeições · veja na aba Alimentação'),
+            Text('${dia.refeicoes.length} comidas · míralas en la pestaña Alimentación'),
             const SizedBox(height: 8),
             Text(
-              'Cardápio válido até ${_formatarData(validaAte)}',
+              'Menú válido hasta ${_formatarData(validaAte)}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -197,17 +197,17 @@ class _CardProgresso extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Progresso', style: Theme.of(context).textTheme.titleMedium),
+            Text('Progreso', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Text('${pesoAtual.toStringAsFixed(1)} kg', style: Theme.of(context).textTheme.bodyLarge),
             const SizedBox(height: 8),
             if (ultimoRegistro == null)
-              const Text('Registre seu peso na aba Progresso para acompanhar a evolução.')
+              const Text('Registra tu peso en la pestaña Progreso para seguir tu evolución.')
             else
               Text(
                 delta == 0
-                    ? 'Sem variação desde o início'
-                    : '${delta > 0 ? '+' : ''}${delta.toStringAsFixed(1)} kg desde o início',
+                    ? 'Sin variación desde el inicio'
+                    : '${delta > 0 ? '+' : ''}${delta.toStringAsFixed(1)} kg desde el inicio',
               ),
           ],
         ),

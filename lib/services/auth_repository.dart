@@ -13,15 +13,15 @@ class AuthException implements Exception {
 /// Traduz um código de erro do FirebaseAuth para uma mensagem em português.
 /// Função pura (sem depender do Firebase em si) para ficar fácil de testar.
 String mensagemDeErroAuth(String codigo) => switch (codigo) {
-  'email-already-in-use' => 'Este e-mail já está cadastrado.',
-  'weak-password' => 'A senha precisa ter pelo menos 6 caracteres.',
-  'invalid-email' => 'E-mail inválido.',
+  'email-already-in-use' => 'Este correo ya está registrado.',
+  'weak-password' => 'La contraseña debe tener al menos 6 caracteres.',
+  'invalid-email' => 'Correo inválido.',
   'user-not-found' || 'wrong-password' || 'invalid-credential' =>
-    'E-mail ou senha incorretos.',
-  'user-disabled' => 'Esta conta foi desativada.',
-  'too-many-requests' => 'Muitas tentativas. Tente novamente mais tarde.',
-  'network-request-failed' => 'Sem conexão com a internet.',
-  _ => 'Não foi possível completar a operação. Tente novamente.',
+    'Correo o contraseña incorrectos.',
+  'user-disabled' => 'Esta cuenta fue desactivada.',
+  'too-many-requests' => 'Demasiados intentos. Vuelve a intentarlo más tarde.',
+  'network-request-failed' => 'Sin conexión a internet.',
+  _ => 'No se pudo completar la operación. Vuelve a intentarlo.',
 };
 
 /// Conta da usuária via Firebase Authentication (e-mail e senha).

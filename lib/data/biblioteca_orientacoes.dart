@@ -14,198 +14,212 @@ const bibliotecaOrientacoes = <Orientacao>[
   // Treino
   Orientacao(
     id: 'aquecimento-antes-do-treino',
-    titulo: 'Por que aquecer antes de treinar',
+    titulo: 'Por qué calentar antes de entrenar',
     tema: TemaOrientacao.treino,
     corpo:
-        'O aquecimento prepara músculos e articulações para o esforço, aumenta '
-        'a temperatura corporal e reduz o risco de lesões. Poucos minutos de '
-        'movimento leve (caminhada, polichinelos, mobilidade articular) antes '
-        'da parte principal do treino já fazem diferença.',
+        'El calentamiento prepara los músculos y las articulaciones para el '
+        'esfuerzo, aumenta la temperatura corporal y reduce el riesgo de '
+        'lesiones. Unos pocos minutos de movimiento suave (caminata, saltos '
+        'de tijera, movilidad articular) antes de la parte principal del '
+        'entrenamiento ya marcan la diferencia.',
     caminhoVideo: 'assets/videos/treino.mp4',
   ),
   Orientacao(
     id: 'descanso-entre-treinos',
-    titulo: 'Descanso entre treinos',
+    titulo: 'Descanso entre entrenamientos',
     tema: TemaOrientacao.treino,
     corpo:
-        'O músculo se fortalece no descanso, não só durante o treino. Respeitar '
-        'pelo menos um dia de intervalo para o mesmo grupo muscular ajuda na '
-        'recuperação e reduz o risco de lesões por excesso de uso.',
+        'El músculo se fortalece durante el descanso, no solo durante el '
+        'entrenamiento. Respetar al menos un día de intervalo para el mismo '
+        'grupo muscular ayuda en la recuperación y reduce el riesgo de '
+        'lesiones por sobreuso.',
     caminhoVideo: 'assets/videos/treino.mp4',
   ),
 
   // Alimentação
   Orientacao(
     id: 'hidratacao-ao-longo-do-dia',
-    titulo: 'Hidratação ao longo do dia',
+    titulo: 'Hidratación a lo largo del día',
     tema: TemaOrientacao.alimentacao,
     corpo:
-        'Distribuir a ingestão de água ao longo do dia, em vez de concentrar '
-        'tudo de uma vez, ajuda o corpo a absorver melhor os líquidos. '
-        'Consulte a aba Hidratação para ver sua meta diária estimada.',
+        'Distribuir la ingesta de agua a lo largo del día, en vez de '
+        'concentrarla toda de una vez, ayuda a que el cuerpo absorba mejor '
+        'los líquidos. Consulta la pestaña Hidratación para ver tu meta '
+        'diaria estimada.',
     caminhoVideo: 'assets/videos/alimentacao.mp4',
   ),
   Orientacao(
     id: 'como-ler-rotulos',
-    titulo: 'Como ler rótulos de alimentos',
+    titulo: 'Cómo leer las etiquetas de los alimentos',
     tema: TemaOrientacao.alimentacao,
     corpo:
-        'Observar a lista de ingredientes (geralmente em ordem decrescente de '
-        'quantidade) e a informação nutricional por porção ajuda a comparar '
-        'produtos e identificar açúcares e gorduras adicionados.',
+        'Observar la lista de ingredientes (generalmente en orden '
+        'decreciente de cantidad) y la información nutricional por porción '
+        'ayuda a comparar productos e identificar azúcares y grasas '
+        'añadidas.',
     caminhoVideo: 'assets/videos/alimentacao.mp4',
   ),
 
   // Motivação
   Orientacao(
     id: 'constancia-antes-de-perfeicao',
-    titulo: 'Constância importa mais que perfeição',
+    titulo: 'La constancia importa más que la perfección',
     tema: TemaOrientacao.motivacao,
     corpo:
-        'Um treino imperfeito feito é mais valioso do que o treino perfeito '
-        'que nunca acontece. Resultados vêm da soma de pequenas ações '
-        'repetidas ao longo do tempo, não de esforços pontuais intensos.',
+        'Un entrenamiento imperfecto que sí se hace vale más que el '
+        'entrenamiento perfecto que nunca sucede. Los resultados vienen de '
+        'la suma de pequeñas acciones repetidas a lo largo del tiempo, no '
+        'de esfuerzos puntuales intensos.',
     caminhoVideo: 'assets/videos/motivacao.mp4',
   ),
   Orientacao(
     id: 'metas-realistas',
-    titulo: 'Definindo metas realistas',
+    titulo: 'Cómo definir metas realistas',
     tema: TemaOrientacao.motivacao,
     corpo:
-        'Metas menores e mensuráveis (ex: treinar 3x nesta semana) sustentam a '
-        'motivação melhor do que objetivos grandes e distantes. Comemore o '
-        'progresso pelo caminho, não só o resultado final.',
+        'Las metas pequeñas y medibles (por ejemplo: entrenar 3 veces esta '
+        'semana) sostienen la motivación mejor que los objetivos grandes y '
+        'lejanos. Celebra el progreso en el camino, no solo el resultado '
+        'final.',
     caminhoVideo: 'assets/videos/motivacao.mp4',
   ),
 
   // Menopausa
   Orientacao(
     id: 'atividade-fisica-na-menopausa',
-    titulo: 'Atividade física na menopausa',
+    titulo: 'Actividad física en la menopausia',
     tema: TemaOrientacao.menopausa,
     corpo:
-        'A prática regular de exercícios, incluindo treino de força, é '
-        'associada a benefícios para densidade óssea, composição corporal e '
-        'bem-estar durante a menopausa. Converse com seu médico sobre '
-        'particularidades do seu caso antes de mudanças importantes na rotina.',
+        'La práctica regular de ejercicio, incluido el entrenamiento de '
+        'fuerza, se asocia con beneficios para la densidad ósea, la '
+        'composición corporal y el bienestar durante la menopausia. Habla '
+        'con tu médico sobre las particularidades de tu caso antes de hacer '
+        'cambios importantes en tu rutina.',
   ),
   Orientacao(
     id: 'alimentacao-e-menopausa',
-    titulo: 'Alimentação e menopausa',
+    titulo: 'Alimentación y menopausia',
     tema: TemaOrientacao.menopausa,
     corpo:
-        'Mudanças hormonais podem afetar apetite, composição corporal e sono. '
-        'Priorizar proteínas, cálcio e fibras no dia a dia é uma orientação '
-        'geral comum nessa fase — um(a) nutricionista pode individualizar '
-        'essas recomendações para você.',
+        'Los cambios hormonales pueden afectar el apetito, la composición '
+        'corporal y el sueño. Priorizar las proteínas, el calcio y la fibra '
+        'en el día a día es una recomendación general común en esta etapa; '
+        'un(a) nutricionista puede personalizar estas recomendaciones para '
+        'ti.',
   ),
 
   // Pós-bariátrica
   Orientacao(
     id: 'acompanhamento-profissional-bariatrica',
-    titulo: 'Acompanhamento profissional é essencial',
+    titulo: 'El acompañamiento profesional es esencial',
     tema: TemaOrientacao.posBariatrica,
     corpo:
-        'Após cirurgia bariátrica, necessidades nutricionais e de treino são '
-        'específicas e mudam ao longo do tempo pós-operatório. Este app ainda '
-        'não substitui o acompanhamento de nutricionista e educador físico '
-        'com experiência em bariátrica — procure sempre orientação '
-        'profissional individualizada.',
+        'Después de la cirugía bariátrica, las necesidades nutricionales y '
+        'de entrenamiento son específicas y cambian a lo largo del tiempo '
+        'posoperatorio. Esta app todavía no reemplaza el acompañamiento de '
+        'un(a) nutricionista y un(a) educador(a) físico(a) con experiencia '
+        'en bariátrica — busca siempre orientación profesional '
+        'individualizada.',
   ),
   Orientacao(
     id: 'sinais-de-alerta-bariatrica',
-    titulo: 'Sinais de alerta para procurar ajuda',
+    titulo: 'Señales de alerta para buscar ayuda',
     tema: TemaOrientacao.posBariatrica,
     corpo:
-        'Sintomas como tontura frequente, queda de cabelo intensa, fadiga '
-        'incomum ou dificuldade persistente para se alimentar merecem '
-        'conversa com sua equipe médica — não espere a próxima consulta de '
-        'rotina se algo parecer fora do comum.',
+        'Síntomas como mareos frecuentes, caída intensa de cabello, fatiga '
+        'inusual o dificultad persistente para alimentarte merecen una '
+        'conversación con tu equipo médico — no esperes a tu próxima '
+        'consulta de rutina si algo se siente fuera de lo común.',
   ),
 
   // Hábitos saudáveis
   Orientacao(
     id: 'sono-e-recuperacao',
-    titulo: 'Sono e recuperação',
+    titulo: 'Sueño y recuperación',
     tema: TemaOrientacao.habitos,
     corpo:
-        'O sono é quando boa parte da recuperação muscular e hormonal '
-        'acontece. Priorizar uma rotina de sono regular pode ter tanto '
-        'impacto nos resultados quanto o treino ou a alimentação.',
+        'El sueño es cuando ocurre gran parte de la recuperación muscular y '
+        'hormonal. Priorizar una rutina de sueño regular puede tener tanto '
+        'impacto en los resultados como el entrenamiento o la '
+        'alimentación.',
   ),
   Orientacao(
     id: 'pequenas-mudancas-grandes-resultados',
-    titulo: 'Pequenas mudanças, grandes resultados',
+    titulo: 'Pequeños cambios, grandes resultados',
     tema: TemaOrientacao.habitos,
     corpo:
-        'Trocar o elevador pela escada, caminhar mais, ajustar o horário de '
-        'dormir — mudanças pequenas e sustentáveis tendem a durar mais do que '
-        'reformulações drásticas e difíceis de manter.',
+        'Cambiar el elevador por las escaleras, caminar más, ajustar tu '
+        'horario para dormir — los cambios pequeños y sostenibles suelen '
+        'durar más que las reformas drásticas y difíciles de mantener.',
   ),
 
   // FAQ — perguntas frequentes, uma por tema (formato pergunta/resposta,
   // ver briefing do produto: "artigos por tema, FAQ e vídeos curtos").
   Orientacao(
     id: 'faq-quantas-vezes-por-semana',
-    titulo: 'Quantas vezes por semana devo treinar?',
+    titulo: '¿Cuántas veces por semana debo entrenar?',
     tema: TemaOrientacao.treino,
     tipo: TipoConteudoOrientacao.faq,
     corpo:
-        'Depende da sua frequência semanal escolhida na anamnese e do seu '
-        'nível de atividade. O app já gera sua ficha considerando isso — '
-        'você pode ajustar a frequência quando gerar uma nova ficha.',
+        'Depende de la frecuencia semanal que elegiste en la anamnesis y de '
+        'tu nivel de actividad. La app ya genera tu rutina considerando '
+        'esto — puedes ajustar la frecuencia cuando generes una nueva '
+        'rutina.',
     caminhoVideo: 'assets/videos/treino.mp4',
   ),
   Orientacao(
     id: 'faq-diario-conta-caloria',
-    titulo: 'O diário alimentar conta calorias?',
+    titulo: '¿El diario de alimentación cuenta calorías?',
     tema: TemaOrientacao.alimentacao,
     tipo: TipoConteudoOrientacao.faq,
     corpo:
-        'Não nesta versão. O diário registra o que você comeu de forma '
-        'livre, sem contagem calórica — o foco é criar o hábito de '
-        'acompanhar a alimentação, não controlar números.',
+        'No en esta versión. El diario registra lo que comiste de forma '
+        'libre, sin conteo de calorías — el objetivo es crear el hábito de '
+        'llevar un seguimiento de tu alimentación, no controlar números.',
     caminhoVideo: 'assets/videos/alimentacao.mp4',
   ),
   Orientacao(
     id: 'faq-nao-motivada',
-    titulo: 'O que fazer quando bater a falta de motivação?',
+    titulo: '¿Qué hacer cuando te falta la motivación?',
     tema: TemaOrientacao.motivacao,
     tipo: TipoConteudoOrientacao.faq,
     corpo:
-        'Reduza a meta do dia em vez de pular o treino inteiro — um treino '
-        'curto mantém o hábito vivo. Motivação vem e vai; constância é o '
-        'que sustenta o resultado nos dias em que a motivação falta.',
+        'Reduce la meta del día en vez de saltarte el entrenamiento '
+        'completo — un entrenamiento corto mantiene vivo el hábito. La '
+        'motivación va y viene; la constancia es lo que sostiene el '
+        'resultado en los días en que la motivación falta.',
     caminhoVideo: 'assets/videos/motivacao.mp4',
   ),
   Orientacao(
     id: 'faq-posso-treinar-fogachos',
-    titulo: 'Posso treinar tendo fogachos/calores da menopausa?',
+    titulo: '¿Puedo entrenar si tengo bochornos o sofocos de la menopausia?',
     tema: TemaOrientacao.menopausa,
     tipo: TipoConteudoOrientacao.faq,
     corpo:
-        'Em geral sim, ajustando intensidade e hidratação. Se os sintomas '
-        'forem intensos ou vierem acompanhados de outros sinais incomuns, '
-        'converse com seu médico antes de manter a rotina de treino.',
+        'En general sí, ajustando la intensidad y la hidratación. Si los '
+        'síntomas son intensos o vienen acompañados de otras señales '
+        'inusuales, habla con tu médico antes de mantener tu rutina de '
+        'entrenamiento.',
   ),
   Orientacao(
     id: 'faq-quando-posso-treinar-bariatrica',
-    titulo: 'Quando posso voltar a treinar após a cirurgia bariátrica?',
+    titulo: '¿Cuándo puedo volver a entrenar después de la cirugía bariátrica?',
     tema: TemaOrientacao.posBariatrica,
     tipo: TipoConteudoOrientacao.faq,
     corpo:
-        'Isso é definido pela sua equipe médica, não pelo app — o tempo de '
-        'liberação varia por pessoa e tipo de cirurgia. Converse com seu '
-        'cirurgião e educador físico antes de retomar qualquer treino.',
+        'Esto lo define tu equipo médico, no la app — el tiempo de '
+        'autorización varía según la persona y el tipo de cirugía. Habla '
+        'con tu cirujano(a) y tu educador(a) físico(a) antes de retomar '
+        'cualquier entrenamiento.',
   ),
   Orientacao(
     id: 'faq-preciso-dormir-quanto',
-    titulo: 'Quantas horas de sono eu preciso para render no treino?',
+    titulo: '¿Cuántas horas de sueño necesito para rendir en el entrenamiento?',
     tema: TemaOrientacao.habitos,
     tipo: TipoConteudoOrientacao.faq,
     corpo:
-        '7 a 9 horas é a faixa geralmente recomendada para adultas, embora '
-        'varie de pessoa para pessoa. Priorizar regularidade no horário de '
-        'dormir costuma ajudar tanto quanto a quantidade de horas.',
+        'De 7 a 9 horas es el rango generalmente recomendado para adultas, '
+        'aunque varía de persona a persona. Priorizar la regularidad en el '
+        'horario para dormir suele ayudar tanto como la cantidad de horas.',
   ),
 ];

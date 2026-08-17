@@ -14,11 +14,11 @@ class TreinoScreen extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Treino'),
+          title: const Text('Entrenamiento'),
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Biblioteca'),
-              Tab(text: 'Minha ficha'),
+              Tab(text: 'Mi rutina'),
             ],
           ),
         ),

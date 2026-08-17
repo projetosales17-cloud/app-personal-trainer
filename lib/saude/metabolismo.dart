@@ -12,7 +12,7 @@ const fatoresAtividade = {
 /// Taxa Metabólica Basal pela fórmula de Mifflin-St Jeor.
 double calcularTmb(double pesoKg, double alturaCm, int idade, Sexo sexo) {
   if (pesoKg <= 0 || alturaCm <= 0 || idade <= 0) {
-    throw ArgumentError('Peso, altura e idade devem ser valores positivos');
+    throw ArgumentError('El peso, la altura y la edad deben ser valores positivos');
   }
 
   var tmb = 10 * pesoKg + 6.25 * alturaCm - 5 * idade;

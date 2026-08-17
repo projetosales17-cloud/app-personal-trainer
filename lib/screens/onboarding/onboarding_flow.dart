@@ -6,35 +6,35 @@ import '../../saude/metabolismo.dart';
 import '../../services/anamnese_repository.dart';
 
 const _condicoesHormonais = [
-  'Nenhuma',
-  'Menopausa',
-  'TPM / ciclo irregular',
-  'SOP (Síndrome do Ovário Policístico)',
-  'Outra',
+  'Ninguna',
+  'Menopausia',
+  'SPM / ciclo irregular',
+  'SOP (Síndrome de Ovario Poliquístico)',
+  'Otra',
 ];
 
 const _restricoesComuns = [
-  'Lactose',
-  'Glúten',
+  'Lactosa',
+  'Gluten',
   'Vegetariana',
   'Vegana',
   'Diabetes',
 ];
 
 const _lesoesComuns = [
-  'Joelho',
-  'Ombro',
-  'Coluna/lombar',
-  'Punho',
-  'Tornozelo',
+  'Rodilla',
+  'Hombro',
+  'Columna/lumbar',
+  'Muñeca',
+  'Tobillo',
 ];
 
 const _regioesComuns = [
   'Aumentar glúteo',
-  'Aumentar pernas',
-  'Diminuir braço',
-  'Diminuir abdômen',
-  'Fortalecer core',
+  'Aumentar piernas',
+  'Reducir brazo',
+  'Reducir abdomen',
+  'Fortalecer el core',
 ];
 
 /// Fluxo de onboarding da anamnese, em etapas. A conta (e-mail/senha) já
@@ -152,7 +152,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       mesesDesdeCirurgia:
           _cirurgiaBariatrica ? int.tryParse(_mesesCirurgiaController.text) : null,
       condicaoHormonal:
-          _condicaoHormonal == 'Outra' ? _condicaoOutraController.text.trim() : _condicaoHormonal,
+          _condicaoHormonal == 'Otra' ? _condicaoOutraController.text.trim() : _condicaoHormonal,
       restricoesAlimentares: [
         ..._restricoes,
         if (_restricaoOutraController.text.trim().isNotEmpty) _restricaoOutraController.text.trim(),
@@ -194,11 +194,11 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               child: Row(
                 children: [
                   if (_passo > 0)
-                    TextButton(onPressed: _voltar, child: const Text('Voltar')),
+                    TextButton(onPressed: _voltar, child: const Text('Atrás')),
                   const Spacer(),
                   FilledButton(
                     onPressed: _salvando || !_podeAvancar ? null : _avancar,
-                    child: Text(_passo == _totalPassos - 1 ? 'Concluir' : 'Avançar'),
+                    child: Text(_passo == _totalPassos - 1 ? 'Finalizar' : 'Siguiente'),
                   ),
                 ],
               ),
@@ -213,10 +213,10 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     switch (_passo) {
       case 0:
         return const _TextoPasso(
-          titulo: 'Bem-vinda!',
+          titulo: '¡Bienvenida!',
           texto:
-              'Vamos configurar seu plano personalizado de treino e alimentação. '
-              'Isso leva só alguns minutos.',
+              'Vamos a configurar tu plan personalizado de entrenamiento y alimentación. '
+              'Esto toma solo unos minutos.',
         );
       case 1:
         return _passoDadosBasicos();
@@ -230,14 +230,14 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         return _passoCicloMenstrual();
       case 6:
         return _passoMultiSelecao(
-          titulo: 'Restrições alimentares ou alergias',
+          titulo: 'Restricciones alimentarias o alergias',
           opcoes: _restricoesComuns,
           selecionadas: _restricoes,
           outroController: _restricaoOutraController,
         );
       case 7:
         return _passoMultiSelecao(
-          titulo: 'Lesões ou limitações físicas',
+          titulo: 'Lesiones o limitaciones físicas',
           opcoes: _lesoesComuns,
           selecionadas: _lesoes,
           outroController: _lesaoOutraController,
@@ -252,7 +252,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         return _passoPreferenciaTreino();
       case 12:
         return _passoMultiSelecao(
-          titulo: 'Priorização de região corporal',
+          titulo: 'Priorización de zona corporal',
           opcoes: _regioesComuns,
           selecionadas: _regioes,
           outroController: null,
@@ -268,11 +268,11 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Dados básicos', style: Theme.of(context).textTheme.headlineSmall),
+        Text('Datos básicos', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 16),
         TextField(
           controller: _idadeController,
-          decoration: const InputDecoration(labelText: 'Idade (anos)'),
+          decoration: const InputDecoration(labelText: 'Edad (años)'),
           keyboardType: TextInputType.number,
           onChanged: (_) => setState(() {}),
         ),
@@ -286,14 +286,14 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         const SizedBox(height: 12),
         TextField(
           controller: _pesoAtualController,
-          decoration: const InputDecoration(labelText: 'Peso atual (kg)'),
+          decoration: const InputDecoration(labelText: 'Peso actual (kg)'),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _pesoDesejadoController,
-          decoration: const InputDecoration(labelText: 'Peso desejado (kg) — opcional'),
+          decoration: const InputDecoration(labelText: 'Peso deseado (kg) — opcional'),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
         ),
       ],
@@ -304,7 +304,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Qual seu objetivo principal?', style: Theme.of(context).textTheme.headlineSmall),
+        Text('¿Cuál es tu objetivo principal?', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 16),
         for (final opcao in Objetivo.values)
           RadioListTile<Objetivo>(
@@ -324,11 +324,11 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Já fez cirurgia bariátrica?', style: Theme.of(context).textTheme.headlineSmall),
+        Text('¿Ya te hiciste una cirugía bariátrica?', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 16),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Sim'),
+          title: const Text('Sí'),
           value: _cirurgiaBariatrica,
           onChanged: (valor) => setState(() => _cirurgiaBariatrica = valor),
         ),
@@ -336,13 +336,13 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           const SizedBox(height: 12),
           TextField(
             controller: _tipoCirurgiaController,
-            decoration: const InputDecoration(labelText: 'Tipo de cirurgia'),
+            decoration: const InputDecoration(labelText: 'Tipo de cirugía'),
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _mesesCirurgiaController,
-            decoration: const InputDecoration(labelText: 'Meses desde a cirurgia'),
+            decoration: const InputDecoration(labelText: 'Meses desde la cirugía'),
             keyboardType: TextInputType.number,
             onChanged: (_) => setState(() {}),
           ),
@@ -355,7 +355,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Condição hormonal', style: Theme.of(context).textTheme.headlineSmall),
+        Text('Condición hormonal', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 16),
         for (final opcao in _condicoesHormonais)
           RadioListTile<String>(
@@ -367,10 +367,10 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             // ignore: deprecated_member_use
             onChanged: (valor) => setState(() => _condicaoHormonal = valor!),
           ),
-        if (_condicaoHormonal == 'Outra')
+        if (_condicaoHormonal == 'Otra')
           TextField(
             controller: _condicaoOutraController,
-            decoration: const InputDecoration(labelText: 'Qual?'),
+            decoration: const InputDecoration(labelText: '¿Cuál?'),
           ),
       ],
     );
@@ -383,15 +383,15 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         Text('Ciclo menstrual (opcional)', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
         Text(
-          'Usamos isso só para ajustar o volume do treino e dar dicas de '
-          'alimentação conforme a fase do ciclo — pode pular se não fizer '
-          'sentido pra você (ex: menopausa ou ciclo irregular).',
+          'Usamos esto solo para ajustar el volumen del entrenamiento y dar '
+          'consejos de alimentación según la fase del ciclo — puedes saltar '
+          'este paso si no tiene sentido para ti (ej: menopausia o ciclo irregular).',
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 16),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Meu ciclo é regular'),
+          title: const Text('Mi ciclo es regular'),
           value: _cicloMenstrualRegular,
           onChanged: (valor) => setState(() => _cicloMenstrualRegular = valor),
         ),
@@ -401,8 +401,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             contentPadding: EdgeInsets.zero,
             title: Text(
               _dataUltimaMenstruacao == null
-                  ? 'Data da última menstruação'
-                  : 'Última menstruação: ${_formatarData(_dataUltimaMenstruacao!)}',
+                  ? 'Fecha de la última menstruación'
+                  : 'Última menstruación: ${_formatarData(_dataUltimaMenstruacao!)}',
             ),
             trailing: const Icon(Icons.calendar_today_outlined),
             onTap: () async {
@@ -426,17 +426,17 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Pós-parto (opcional)', style: Theme.of(context).textTheme.headlineSmall),
+        Text('Posparto (opcional)', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
         Text(
-          'Se você teve um parto recente, o app evita exercícios de abdômen '
-          'por um tempo, até liberação médica.',
+          'Si tuviste un parto reciente, la app evita ejercicios de abdomen '
+          'por un tiempo, hasta que tengas el alta médica.',
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 16),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Tive um parto recente'),
+          title: const Text('Tuve un parto reciente'),
           value: _teveParto,
           onChanged: (valor) => setState(() => _teveParto = valor),
         ),
@@ -445,7 +445,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           ListTile(
             contentPadding: EdgeInsets.zero,
             title: Text(
-              _dataParto == null ? 'Data do parto' : 'Data do parto: ${_formatarData(_dataParto!)}',
+              _dataParto == null ? 'Fecha del parto' : 'Fecha del parto: ${_formatarData(_dataParto!)}',
             ),
             trailing: const Icon(Icons.calendar_today_outlined),
             onTap: () async {
@@ -504,7 +504,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           const SizedBox(height: 12),
           TextField(
             controller: outroController,
-            decoration: const InputDecoration(labelText: 'Outra (opcional)'),
+            decoration: const InputDecoration(labelText: 'Otra (opcional)'),
           ),
         ],
       ],
@@ -515,7 +515,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Nível de atividade', style: Theme.of(context).textTheme.headlineSmall),
+        Text('Nivel de actividad', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 16),
         for (final opcao in NivelAtividade.values)
           RadioListTile<NivelAtividade>(
@@ -528,7 +528,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             onChanged: (valor) => setState(() => _nivelAtividade = valor),
           ),
         const SizedBox(height: 16),
-        Text('Dias disponíveis por semana: $_frequenciaSemanalDias'),
+        Text('Días disponibles por semana: $_frequenciaSemanalDias'),
         Slider(
           value: _frequenciaSemanalDias.toDouble(),
           min: 1,
@@ -545,7 +545,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Onde você vai treinar?', style: Theme.of(context).textTheme.headlineSmall),
+        Text('¿Dónde vas a entrenar?', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 16),
         for (final opcao in LocalTreino.values)
           RadioListTile<LocalTreino>(
@@ -559,7 +559,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           ),
         const SizedBox(height: 8),
         Text(
-          'Sua ficha será montada com exercícios equivalentes para o modo escolhido.',
+          'Tu rutina se armará con ejercicios equivalentes para la modalidad elegida.',
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -571,7 +571,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Musculação, cardio ou os dois?', style: Theme.of(context).textTheme.headlineSmall),
+        Text('¿Pesas, cardio o ambos?', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 16),
         for (final opcao in PreferenciaTreino.values)
           RadioListTile<PreferenciaTreino>(
@@ -608,20 +608,20 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Resumo', style: Theme.of(context).textTheme.headlineSmall),
+        Text('Resumen', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 16),
         Text('Objetivo: ${_objetivo?.label ?? '-'}'),
-        Text('Idade: $idade anos'),
+        Text('Edad: $idade años'),
         Text('Altura: $alturaCm cm'),
-        Text('Peso atual: $pesoAtualKg kg'),
-        Text('Nível de atividade: ${_nivelAtividade?.label ?? '-'}'),
-        Text('Dias por semana: $_frequenciaSemanalDias'),
-        Text('Local de treino: ${_localTreino?.label ?? '-'}'),
-        Text('Preferência: ${_preferenciaTreino?.label ?? '-'}'),
+        Text('Peso actual: $pesoAtualKg kg'),
+        Text('Nivel de actividad: ${_nivelAtividade?.label ?? '-'}'),
+        Text('Días por semana: $_frequenciaSemanalDias'),
+        Text('Lugar de entrenamiento: ${_localTreino?.label ?? '-'}'),
+        Text('Preferencia: ${_preferenciaTreino?.label ?? '-'}'),
         const Divider(height: 32),
         Text('IMC: $imc ($classificacaoImc)'),
-        Text('Taxa Metabólica Basal: $tmb kcal/dia'),
-        Text('Gasto calórico diário estimado: $gastoCalorico kcal'),
+        Text('Tasa Metabólica Basal: $tmb kcal/día'),
+        Text('Gasto calórico diario estimado: $gastoCalorico kcal'),
         if (alertaSaude != null) ...[
           const SizedBox(height: 12),
           Container(
@@ -631,13 +631,13 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              'ATENÇÃO: $alertaSaude',
+              'ATENCIÓN: $alertaSaude',
               style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
             ),
           ),
         ],
         const SizedBox(height: 16),
-        const Text('Confirme para gerar seu plano inicial.'),
+        const Text('Confirma para generar tu plan inicial.'),
       ],
     );
   }

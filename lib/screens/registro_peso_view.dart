@@ -54,7 +54,7 @@ class _RegistroPesoViewState extends State<RegistroPesoView> {
                   key: const Key('campo-peso'),
                   controller: _controladorPeso,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Peso atual (kg)'),
+                  decoration: const InputDecoration(labelText: 'Peso actual (kg)'),
                 ),
               ),
               const SizedBox(width: 8),
@@ -77,7 +77,7 @@ class _RegistroPesoViewState extends State<RegistroPesoView> {
                 final ascendentes = snapshot.data ?? const <RegistroPeso>[];
                 if (ascendentes.isEmpty) {
                   return const Center(
-                    child: Text('Nenhum registro de peso ainda. Adicione o primeiro acima.'),
+                    child: Text('Aún no hay registros de peso. Agrega el primero arriba.'),
                   );
                 }
 

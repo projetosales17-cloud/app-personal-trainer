@@ -44,7 +44,7 @@ class _MeuCardapioViewState extends State<MeuCardapioView> {
             child: Padding(
               padding: EdgeInsets.all(24),
               child: Text(
-                'Complete a anamnese no onboarding para gerar seu cardápio.',
+                'Completa la anamnesis en el onboarding para generar tu menú.',
                 textAlign: TextAlign.center,
               ),
             ),
@@ -57,7 +57,7 @@ class _MeuCardapioViewState extends State<MeuCardapioView> {
           padding: const EdgeInsets.all(16),
           children: [
             Text(
-              'Válido até ${_formatarData(cardapio.validaAte)}',
+              'Válido hasta ${_formatarData(cardapio.validaAte)}',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             if (anamnese.cirurgiaBariatrica) ...[
@@ -67,9 +67,9 @@ class _MeuCardapioViewState extends State<MeuCardapioView> {
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(
-                    'Após cirurgia bariátrica suas necessidades nutricionais são '
-                    'específicas. Este cardápio é uma sugestão geral e não '
-                    'substitui a orientação de um(a) nutricionista.',
+                    'Después de una cirugía bariátrica tus necesidades nutricionales '
+                    'son específicas. Este menú es una sugerencia general y no '
+                    'sustituye la orientación de un(a) nutricionista.',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
@@ -111,7 +111,7 @@ class _DiaDeCardapioCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Dia ${dia.dia}', style: Theme.of(context).textTheme.titleMedium),
+            Text('Día ${dia.dia}', style: Theme.of(context).textTheme.titleMedium),
             const Divider(height: 24),
             for (final refeicao in dia.refeicoes) _RefeicaoTile(refeicao: refeicao),
           ],

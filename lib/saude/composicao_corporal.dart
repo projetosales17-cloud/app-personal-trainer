@@ -16,23 +16,23 @@ double calcularPercentualGordura({
   double? quadrilCm,
 }) {
   if (alturaCm <= 0 || pescocoCm <= 0 || cinturaCm <= 0) {
-    throw ArgumentError('Altura, pescoço e cintura devem ser valores positivos');
+    throw ArgumentError('Altura, cuello y cintura deben ser valores positivos');
   }
 
   double denominador;
   if (sexo == Sexo.masculino) {
     if (cinturaCm <= pescocoCm) {
-      throw ArgumentError('Cintura deve ser maior que o pescoço');
+      throw ArgumentError('La cintura debe ser mayor que el cuello');
     }
     denominador = 1.0324 -
         0.19077 * _log10(cinturaCm - pescocoCm) +
         0.15456 * _log10(alturaCm);
   } else {
     if (quadrilCm == null || quadrilCm <= 0) {
-      throw ArgumentError("Quadril é obrigatório e deve ser positivo para sexo feminino");
+      throw ArgumentError("La cadera es obligatoria y debe ser positiva para sexo femenino");
     }
     if (cinturaCm + quadrilCm <= pescocoCm) {
-      throw ArgumentError('Cintura + quadril deve ser maior que o pescoço');
+      throw ArgumentError('Cintura + cadera debe ser mayor que el cuello');
     }
     denominador = 1.29579 -
         0.35004 * _log10(cinturaCm + quadrilCm - pescocoCm) +

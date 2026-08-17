@@ -7,72 +7,77 @@ import '../models/suplemento.dart';
 const bibliotecaSuplementos = <Suplemento>[
   Suplemento(
     id: 'whey-protein',
-    nome: 'Whey protein',
+    nome: 'Proteína de suero (whey protein)',
     tipo: TipoSuplemento.proteina,
     descricao:
-        'Proteína derivada do soro do leite, usada como forma prática de '
-        'complementar a ingestão diária de proteína quando a alimentação '
-        'sozinha não é suficiente. Existem versões com e sem lactose. Não '
-        'substitui proteína de fontes alimentares — é um complemento.',
+        'Proteína derivada del suero de la leche, usada como una forma '
+        'práctica de complementar la ingesta diaria de proteína cuando la '
+        'alimentación por sí sola no es suficiente. Existen versiones con y '
+        'sin lactosa. No reemplaza la proteína de fuentes alimentarias: es '
+        'un complemento.',
     dosagemGenerica:
-        'Faixa geral publicada: 20 a 30 g por porção, geralmente 1 a 2 '
-        'vezes ao dia. Confira sempre a quantidade indicada na embalagem '
-        'do produto específico.',
+        'Rango general publicado: 20 a 30 g por porción, generalmente 1 a '
+        '2 veces al día. Revisa siempre la cantidad indicada en el empaque '
+        'del producto específico.',
   ),
   Suplemento(
     id: 'proteina-vegetal',
-    nome: 'Proteína vegetal (ervilha, arroz, soja)',
+    nome: 'Proteína vegetal (chícharo o arveja, arroz, soya)',
     tipo: TipoSuplemento.proteina,
     descricao:
-        'Alternativa ao whey para quem tem restrição a laticínios ou segue '
-        'dieta vegetariana/vegana, combinando proteínas de diferentes '
-        'fontes vegetais para um perfil de aminoácidos mais completo.',
+        'Alternativa al whey para quienes tienen restricciones con los '
+        'lácteos o siguen una dieta vegetariana o vegana, combinando '
+        'proteínas de diferentes fuentes vegetales para un perfil de '
+        'aminoácidos más completo.',
     dosagemGenerica:
-        'Faixa geral publicada: 20 a 30 g por porção, mesma lógica do '
-        'whey. Confira sempre a quantidade indicada na embalagem do '
-        'produto específico.',
+        'Rango general publicado: 20 a 30 g por porción, la misma lógica '
+        'que el whey. Revisa siempre la cantidad indicada en el empaque '
+        'del producto específico.',
   ),
   Suplemento(
     id: 'creatina',
     nome: 'Creatina',
     tipo: TipoSuplemento.creatina,
     descricao:
-        'Um dos suplementos mais estudados para desempenho em treinos de '
-        'força — associado a ganhos de força e massa muscular ao longo do '
-        'tempo, quando combinado com treino regular. Segura para a maioria '
-        'das pessoas saudáveis, mas pessoas com condições renais devem '
-        'conversar com um médico antes de usar.',
+        'Uno de los suplementos más estudiados para el rendimiento en '
+        'entrenamientos de fuerza — asociado con ganancias de fuerza y '
+        'masa muscular a lo largo del tiempo, cuando se combina con '
+        'entrenamiento regular. Es segura para la mayoría de las personas '
+        'sanas, pero quienes tienen condiciones renales deben hablar con '
+        'un médico antes de usarla.',
     dosagemGenerica:
-        'Faixa geral publicada: 3 a 5 g por dia, em qualquer horário — '
-        'não é necessária uma fase de saturação para a maioria das '
-        'pessoas.',
+        'Rango general publicado: 3 a 5 g por día, en cualquier horario — '
+        'no es necesaria una fase de carga para la mayoría de las '
+        'personas.',
   ),
   Suplemento(
     id: 'multivitaminico',
     nome: 'Multivitamínico',
     tipo: TipoSuplemento.vitaminaMineral,
     descricao:
-        'Combinação de vitaminas e minerais usada para cobrir possíveis '
-        'lacunas nutricionais da alimentação do dia a dia. Especialmente '
-        'relevante após cirurgia bariátrica, onde a absorção de nutrientes '
-        'muda — nesse caso, a reposição costuma ser acompanhada de perto '
-        'por exames periódicos pedidos pela equipe médica.',
+        'Combinación de vitaminas y minerales usada para cubrir posibles '
+        'vacíos nutricionales de la alimentación del día a día. '
+        'Especialmente relevante después de la cirugía bariátrica, donde '
+        'la absorción de nutrientes cambia — en ese caso, la reposición '
+        'suele estar acompañada de cerca con exámenes periódicos '
+        'solicitados por el equipo médico.',
     dosagemGenerica:
-        'Varia muito por marca e formulação — não existe uma faixa '
-        'genérica única. Siga sempre a dose indicada na embalagem do '
-        'produto específico.',
+        'Varía mucho según la marca y la formulación — no existe un rango '
+        'genérico único. Sigue siempre la dosis indicada en el empaque '
+        'del producto específico.',
   ),
   Suplemento(
     id: 'omega-3',
-    nome: 'Ômega-3',
+    nome: 'Omega-3',
     tipo: TipoSuplemento.acidoGraxo,
     descricao:
-        'Ácido graxo essencial, associado a benefícios cardiovasculares e '
-        'anti-inflamatórios gerais. Presente naturalmente em peixes '
-        'gordurosos e sementes como linhaça e chia — o suplemento é uma '
-        'opção para quem não consome essas fontes com frequência.',
+        'Ácido graso esencial, asociado con beneficios cardiovasculares y '
+        'antiinflamatorios generales. Presente naturalmente en pescados '
+        'grasos y semillas como la linaza y la chía — el suplemento es una '
+        'opción para quienes no consumen estas fuentes con frecuencia.',
     dosagemGenerica:
-        'Faixa geral publicada: 1 a 2 g de EPA+DHA combinados por dia. '
-        'Confira a concentração exata na embalagem do produto específico.',
+        'Rango general publicado: 1 a 2 g de EPA+DHA combinados por día. '
+        'Revisa la concentración exacta en el empaque del producto '
+        'específico.',
   ),
 ];

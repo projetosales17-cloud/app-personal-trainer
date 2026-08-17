@@ -54,7 +54,7 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
   Widget build(BuildContext context) {
     if (kIsWeb) {
       return const IndisponivelNaWeb(
-        mensagem: 'Fotos de progresso ainda não estão disponíveis na versão web.',
+        mensagem: 'Las fotos de progreso aún no están disponibles en la versión web.',
       );
     }
     return Padding(
@@ -68,7 +68,7 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
                   key: const Key('botao-camera'),
                   onPressed: () => _adicionar(ImageSource.camera),
                   icon: const Icon(Icons.camera_alt_outlined),
-                  label: const Text('Câmera'),
+                  label: const Text('Cámara'),
                 ),
               ),
               const SizedBox(width: 8),
@@ -77,7 +77,7 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
                   key: const Key('botao-galeria'),
                   onPressed: () => _adicionar(ImageSource.gallery),
                   icon: const Icon(Icons.photo_library_outlined),
-                  label: const Text('Galeria'),
+                  label: const Text('Galería'),
                 ),
               ),
             ],
@@ -94,7 +94,7 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
                 final fotos = (snapshot.data ?? const <RegistroFoto>[]).reversed.toList();
                 if (fotos.isEmpty) {
                   return const Center(
-                    child: Text('Nenhuma foto ainda. Adicione a primeira acima.'),
+                    child: Text('Aún no hay fotos. Agrega la primera arriba.'),
                   );
                 }
 

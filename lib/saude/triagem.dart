@@ -8,60 +8,60 @@
 library;
 
 const _recomendacaoMedica =
-    'Recomendamos procurar um médico e realizar exames antes de iniciar ou '
-    'continuar um programa de atividade física.';
+    'Te recomendamos consultar a un médico y hacerte exámenes antes de '
+    'iniciar o continuar un programa de actividad física.';
 
 const _recomendacaoUrgente =
-    'Valores compatíveis com crise hipertensiva. Procure atendimento médico '
-    'imediatamente antes de praticar qualquer atividade física.';
+    'Valores compatibles con crisis hipertensiva. Busca atención médica '
+    'de inmediato antes de practicar cualquier actividad física.';
 
 const _categoriasPressaoComRisco = {
-  'Hipotensão',
-  'Hipertensão estágio 1',
-  'Hipertensão estágio 2',
-  'Crise hipertensiva',
+  'Hipotensión',
+  'Hipertensión etapa 1',
+  'Hipertensión etapa 2',
+  'Crisis hipertensiva',
 };
 
 /// Classifica a pressão arterial segundo critérios da American Heart
 /// Association (valores em mmHg).
 String classificarPressaoArterial(double sistolica, double diastolica) {
   if (sistolica <= 0 || diastolica <= 0) {
-    throw ArgumentError('Sistólica e diastólica devem ser valores positivos');
+    throw ArgumentError('La sistólica y la diastólica deben ser valores positivos');
   }
 
-  if (sistolica >= 180 || diastolica >= 120) return 'Crise hipertensiva';
-  if (sistolica >= 140 || diastolica >= 90) return 'Hipertensão estágio 2';
-  if (sistolica >= 130 || diastolica >= 80) return 'Hipertensão estágio 1';
-  if (sistolica < 90 || diastolica < 60) return 'Hipotensão';
-  if (sistolica >= 120) return 'Pressão elevada';
+  if (sistolica >= 180 || diastolica >= 120) return 'Crisis hipertensiva';
+  if (sistolica >= 140 || diastolica >= 90) return 'Hipertensión etapa 2';
+  if (sistolica >= 130 || diastolica >= 80) return 'Hipertensión etapa 1';
+  if (sistolica < 90 || diastolica < 60) return 'Hipotensión';
+  if (sistolica >= 120) return 'Presión elevada';
   return 'Normal';
 }
 
 String? verificarAlertaPressaoArterial(String categoria) {
-  if (categoria == 'Crise hipertensiva') return _recomendacaoUrgente;
+  if (categoria == 'Crisis hipertensiva') return _recomendacaoUrgente;
   if (_categoriasPressaoComRisco.contains(categoria)) return _recomendacaoMedica;
   return null;
 }
 
 const perguntasParQ = {
   'problemaCardiaco':
-      'Um médico já disse que você possui um problema cardíaco e '
-      'recomendou realizar atividade física apenas sob supervisão?',
-  'dorPeitoAtividade': 'Você sente dor no peito ao praticar atividade física?',
+      '¿Un médico te ha dicho alguna vez que tienes un problema cardíaco y '
+      'que solo debes hacer actividad física bajo supervisión?',
+  'dorPeitoAtividade': '¿Sientes dolor en el pecho al practicar actividad física?',
   'dorPeitoRepouso':
-      'No último mês, você sentiu dor no peito quando não estava '
-      'praticando atividade física?',
+      'En el último mes, ¿has sentido dolor en el pecho cuando no estabas '
+      'haciendo actividad física?',
   'tonturaDesequilibrio':
-      'Você perde o equilíbrio por tontura ou já perdeu a consciência?',
+      '¿Pierdes el equilibrio por mareo o has perdido el conocimiento alguna vez?',
   'problemaOsseoArticular':
-      'Você tem algum problema ósseo ou articular que poderia piorar com '
-      'uma mudança na sua atividade física?',
+      '¿Tienes algún problema óseo o articular que pudiera empeorar con '
+      'un cambio en tu actividad física?',
   'medicamentoPressaoCoracao':
-      'Um médico prescreveu atualmente medicamentos para pressão arterial '
-      'ou para o coração?',
+      '¿Actualmente un médico te recetó medicamentos para la presión '
+      'arterial o para el corazón?',
   'outroMotivo':
-      'Você conhece qualquer outro motivo pelo qual não deveria praticar '
-      'atividade física?',
+      '¿Conoces algún otro motivo por el que no deberías practicar '
+      'actividad física?',
 };
 
 /// Aplica o questionário PAR-Q. `respostas` mapeia um subconjunto das
@@ -89,9 +89,9 @@ class ResultadoTriagem {
 }
 
 const _recomendacaoSemFatoresDeRisco =
-    'Nenhum fator de risco identificado no PAR-Q. Ainda assim, '
-    'recomenda-se avaliação médica periódica antes de iniciar um programa '
-    'de exercícios.';
+    'No se identificó ningún factor de riesgo en el PAR-Q. Aun así, se '
+    'recomienda una evaluación médica periódica antes de iniciar un '
+    'programa de ejercicios.';
 
 ResultadoTriagem avaliarLiberacaoAtividadeFisica(Map<String, bool> respostas) {
   final alertas = triagemParQ(respostas);

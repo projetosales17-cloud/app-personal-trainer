@@ -35,7 +35,7 @@ class _OrientacoesScreenState extends State<OrientacoesScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Orientações')),
+      appBar: AppBar(title: const Text('Guías')),
       body: Column(
         children: [
           Padding(
@@ -44,7 +44,7 @@ class _OrientacoesScreenState extends State<OrientacoesScreen> {
               key: const Key('campo-busca-orientacoes'),
               controller: _controladorBusca,
               decoration: const InputDecoration(
-                labelText: 'Buscar por tema ou palavra-chave',
+                labelText: 'Buscar por tema o palabra clave',
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: (valor) => setState(() => _busca = valor),
@@ -87,7 +87,7 @@ class _OrientacoesScreenState extends State<OrientacoesScreen> {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: ChoiceChip(
-                    label: const Text('Tudo'),
+                    label: const Text('Todo'),
                     selected: _filtroTipo == null,
                     onSelected: (_) => setState(() => _filtroTipo = null),
                   ),
@@ -106,7 +106,7 @@ class _OrientacoesScreenState extends State<OrientacoesScreen> {
           ),
           Expanded(
             child: orientacoes.isEmpty
-                ? const Center(child: Text('Nenhum conteúdo encontrado.'))
+                ? const Center(child: Text('No se encontró contenido.'))
                 : ListView.builder(
                     key: const Key('lista-orientacoes'),
                     itemCount: orientacoes.length,

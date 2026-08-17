@@ -9,7 +9,7 @@ extension FaseCicloLabel on FaseCiclo {
   String get label => switch (this) {
     FaseCiclo.menstrual => 'Menstrual',
     FaseCiclo.folicular => 'Folicular',
-    FaseCiclo.ovulacao => 'Ovulação',
+    FaseCiclo.ovulacao => 'Ovulación',
     FaseCiclo.lutea => 'Lútea',
   };
 }

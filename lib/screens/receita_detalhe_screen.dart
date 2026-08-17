@@ -20,9 +20,9 @@ class ReceitaDetalheScreen extends StatelessWidget {
             children: [
               Chip(label: Text(receita.tipoRefeicao.label)),
               Chip(label: Text('${receita.tempoPreparoMinutos} min')),
-              Chip(label: Text('${receita.porcoes} porção(ões)')),
-              if (receita.contemLactose) const Chip(label: Text('Contém lactose')),
-              if (receita.contemGluten) const Chip(label: Text('Contém glúten')),
+              Chip(label: Text('${receita.porcoes} porción(es)')),
+              if (receita.contemLactose) const Chip(label: Text('Contiene lactosa')),
+              if (receita.contemGluten) const Chip(label: Text('Contiene gluten')),
               if (receita.vegano)
                 const Chip(label: Text('Vegano'))
               else if (receita.vegetariano)
@@ -38,7 +38,7 @@ class ReceitaDetalheScreen extends StatelessWidget {
               child: Text('• $ingrediente'),
             ),
           const SizedBox(height: 24),
-          Text('Modo de preparo', style: Theme.of(context).textTheme.titleMedium),
+          Text('Modo de preparación', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           Text(receita.modoPreparo, style: Theme.of(context).textTheme.bodyLarge),
         ],

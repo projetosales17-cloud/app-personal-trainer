@@ -68,11 +68,11 @@ class AgendadorNotificacoesLocal implements AgendadorNotificacoes {
 
       await _plugin.zonedSchedule(
         id: proximoId,
-        title: 'Treino de hoje',
-        body: 'Confira sua ficha de treino no app.',
+        title: 'Entrenamiento de hoy',
+        body: 'Revisa tu rutina de entrenamiento en la app.',
         scheduledDate: agendadoPara,
         notificationDetails: const NotificationDetails(
-          android: AndroidNotificationDetails(_idCanal, 'Lembretes de treino'),
+          android: AndroidNotificationDetails(_idCanal, 'Recordatorios de entrenamiento'),
           iOS: DarwinNotificationDetails(),
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

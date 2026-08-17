@@ -15,7 +15,7 @@ import '../services/notificador_conquistas.dart';
 import '../services/preferencias_repository.dart';
 import 'exercicio_detalhe_screen.dart';
 
-const _rotulosDiasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+const _rotulosDiasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
 class MinhaFichaView extends StatefulWidget {
   MinhaFichaView({
@@ -107,13 +107,13 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
     if (depois.streakDias > antes.streakDias &&
         GamificacaoService.marcosStreak.contains(depois.streakDias)) {
       await widget.notificadorConquistas.notificar(
-        titulo: 'Sequência de ${depois.streakDias} dias!',
-        corpo: 'Você bateu um novo marco de streak. Continue assim!',
+        titulo: '¡Racha de ${depois.streakDias} días!',
+        corpo: 'Alcanzaste un nuevo hito de racha. ¡Sigue así!',
       );
     } else if (!antes.metaSemanalBatida && depois.metaSemanalBatida) {
       await widget.notificadorConquistas.notificar(
-        titulo: 'Meta semanal batida!',
-        corpo: 'Você completou todos os treinos previstos dessa semana.',
+        titulo: '¡Meta semanal cumplida!',
+        corpo: 'Completaste todos los entrenamientos previstos para esta semana.',
       );
     }
   }
@@ -133,7 +133,7 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
             child: Padding(
               padding: EdgeInsets.all(24),
               child: Text(
-                'Complete a anamnese no onboarding para gerar sua ficha de treino.',
+                'Completa la anamnesis en el registro inicial para generar tu rutina de entrenamiento.',
                 textAlign: TextAlign.center,
               ),
             ),
@@ -175,7 +175,7 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     Text(
-                      'Válida até ${_formatarData(ficha.validaAte)}',
+                      'Válida hasta ${_formatarData(ficha.validaAte)}',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 8),
@@ -255,11 +255,11 @@ class _SeletorDiasDaSemanaState extends State<_SeletorDiasDaSemana> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Meus dias de treino', style: Theme.of(context).textTheme.titleMedium),
+            Text('Mis días de entrenamiento', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 4),
             Text(
-              'Escolha exatamente ${widget.quantidadeDias} dia(s) da semana '
-              '(${_selecionados.length} de ${widget.quantidadeDias} selecionado(s)).',
+              'Elige exactamente ${widget.quantidadeDias} día(s) de la semana '
+              '(${_selecionados.length} de ${widget.quantidadeDias} seleccionado(s)).',
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 8),
@@ -291,7 +291,7 @@ class _SeletorDiasDaSemanaState extends State<_SeletorDiasDaSemana> {
                 onPressed: _selecionados.length == widget.quantidadeDias
                     ? () => widget.aoSalvar(_selecionados.toList()..sort())
                     : null,
-                child: const Text('Salvar dias'),
+                child: const Text('Guardar días'),
               ),
             ),
           ],
@@ -318,8 +318,8 @@ class _CartaoGamificacao extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Streak: ${resultado.streakDias} dia(s) · ${resultado.pontosTotais} pontos'
-                '${resultado.metaSemanalBatida ? ' · Meta semanal batida!' : ''}',
+                'Racha: ${resultado.streakDias} día(s) · ${resultado.pontosTotais} puntos'
+                '${resultado.metaSemanalBatida ? ' · ¡Meta semanal cumplida!' : ''}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
@@ -359,10 +359,10 @@ class _DiaDeTreinoCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Dia ${dia.dia}', style: Theme.of(context).textTheme.titleMedium),
+            Text('Día ${dia.dia}', style: Theme.of(context).textTheme.titleMedium),
             if (datas.isNotEmpty) ...[
               const SizedBox(height: 4),
-              Text('Datas sugeridas:', style: Theme.of(context).textTheme.bodySmall),
+              Text('Fechas sugeridas:', style: Theme.of(context).textTheme.bodySmall),
               for (final data in datas)
                 CheckboxListTile(
                   key: Key('checkin-dia-${dia.dia}-${data.toIso8601String().substring(0, 10)}'),

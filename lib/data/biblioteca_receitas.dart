@@ -7,128 +7,129 @@ const bibliotecaReceitas = <Receita>[
   // Café da manhã
   Receita(
     id: 'omelete-de-espinafre',
-    titulo: 'Omelete de espinafre',
+    titulo: 'Omelette de espinaca',
     tipoRefeicao: TipoRefeicao.cafeDaManha,
     tempoPreparoMinutos: 10,
     porcoes: 1,
-    ingredientes: ['2 ovos', '1 punhado de espinafre picado', 'sal a gosto', '1 fio de azeite'],
+    ingredientes: ['2 huevos', 'un puñado de espinaca picada', 'sal al gusto', 'un chorrito de aceite de oliva'],
     modoPreparo:
-        'Bata os ovos com o sal. Aqueça o azeite em uma frigideira e refogue o '
-        'espinafre por 1 minuto. Adicione os ovos batidos e cozinhe em fogo '
-        'baixo até firmar, dobrando ao meio antes de servir.',
+        'Bate los huevos con la sal. Calienta el aceite en un sartén y saltea la '
+        'espinaca durante 1 minuto. Agrega los huevos batidos y cocina a fuego '
+        'bajo hasta que cuajen, doblando por la mitad antes de servir.',
     vegano: false,
   ),
   Receita(
     id: 'vitamina-de-banana-com-aveia',
-    titulo: 'Vitamina de banana com aveia',
+    titulo: 'Batido de plátano con avena',
     tipoRefeicao: TipoRefeicao.cafeDaManha,
     tempoPreparoMinutos: 5,
     porcoes: 1,
     ingredientes: [
-      '1 banana',
-      '2 colheres de sopa de aveia em flocos',
-      '1 copo de bebida vegetal (ou leite comum, se preferir)',
+      '1 plátano',
+      '2 cucharadas de avena en hojuelas',
+      '1 vaso de bebida vegetal (o leche normal, si prefieres)',
     ],
-    modoPreparo: 'Bata todos os ingredientes no liquidificador até ficar homogêneo. Sirva gelado.',
+    modoPreparo: 'Licúa todos los ingredientes en la licuadora hasta obtener una mezcla homogénea. Sirve bien frío.',
   ),
 
   // Almoço
   Receita(
     id: 'frango-arroz-integral-brocolis',
-    titulo: 'Frango grelhado com arroz integral e brócolis',
+    titulo: 'Pechuga de pollo a la plancha con arroz integral y brócoli',
     tipoRefeicao: TipoRefeicao.almoco,
     tempoPreparoMinutos: 30,
     porcoes: 2,
     ingredientes: [
-      '2 filés de peito de frango',
-      '1 xícara de arroz integral cru',
-      '1 xícara de brócolis em floretes',
-      'sal, alho e azeite a gosto',
+      '2 filetes de pechuga de pollo',
+      '1 taza de arroz integral crudo',
+      '1 taza de brócoli en floretes',
+      'sal, ajo y aceite de oliva al gusto',
     ],
     modoPreparo:
-        'Tempere o frango com sal e alho e grelhe até dourar dos dois lados. '
-        'Cozinhe o arroz integral conforme instruções da embalagem. Cozinhe o '
-        'brócolis no vapor por 5 minutos. Sirva tudo junto.',
+        'Sazona el pollo con sal y ajo y cocínalo a la plancha hasta que dore '
+        'por ambos lados. Cocina el arroz integral siguiendo las instrucciones '
+        'del empaque. Cocina el brócoli al vapor durante 5 minutos. Sirve todo junto.',
     vegetariano: false,
     vegano: false,
   ),
   Receita(
     id: 'bowl-grao-de-bico-legumes',
-    titulo: 'Bowl de grão-de-bico com legumes',
+    titulo: 'Bowl de garbanzos con vegetales',
     tipoRefeicao: TipoRefeicao.almoco,
     tempoPreparoMinutos: 20,
     porcoes: 2,
     ingredientes: [
-      '1 xícara de grão-de-bico cozido',
-      '1 cenoura ralada',
-      '1/2 abobrinha em cubos grelhados',
-      'azeite, limão e sal a gosto',
+      '1 taza de garbanzos cocidos',
+      '1 zanahoria rallada',
+      '1/2 calabacín en cubos, a la plancha',
+      'aceite de oliva, limón y sal al gusto',
     ],
     modoPreparo:
-        'Grelhe a abobrinha em cubos até dourar. Misture com o grão-de-bico e '
-        'a cenoura ralada em uma tigela. Tempere com azeite, limão e sal.',
+        'Cocina el calabacín en cubos a la plancha hasta que dore. Mezcla con '
+        'los garbanzos y la zanahoria rallada en un tazón. Sazona con aceite '
+        'de oliva, limón y sal.',
   ),
 
   // Lanche da tarde
   Receita(
     id: 'iogurte-com-frutas-e-chia',
-    titulo: 'Iogurte com frutas e chia',
+    titulo: 'Yogur con frutas y chía',
     tipoRefeicao: TipoRefeicao.lancheDaTarde,
     tempoPreparoMinutos: 5,
     porcoes: 1,
     ingredientes: [
-      '1 pote de iogurte natural (ou iogurte vegetal, se preferir)',
-      '1/2 xícara de morangos picados',
-      '1 colher de sopa de chia',
+      '1 envase de yogur natural (o yogur vegetal, si prefieres)',
+      '1/2 taza de fresas picadas',
+      '1 cucharada de chía',
     ],
-    modoPreparo: 'Misture o iogurte com os morangos picados e finalize com a chia por cima.',
+    modoPreparo: 'Mezcla el yogur con las fresas picadas y termina espolvoreando la chía por encima.',
     contemLactose: true,
     vegano: false,
   ),
   Receita(
     id: 'torrada-integral-pasta-de-amendoim',
-    titulo: 'Torrada integral com pasta de amendoim',
+    titulo: 'Tostada integral con mantequilla de maní',
     tipoRefeicao: TipoRefeicao.lancheDaTarde,
     tempoPreparoMinutos: 5,
     porcoes: 1,
-    ingredientes: ['2 fatias de pão integral', '1 colher de sopa de pasta de amendoim integral'],
-    modoPreparo: 'Toste o pão e espalhe a pasta de amendoim por cima.',
+    ingredientes: ['2 rebanadas de pan integral', '1 cucharada de mantequilla de maní integral'],
+    modoPreparo: 'Tuesta el pan y unta la mantequilla de maní encima.',
     contemGluten: true,
   ),
 
   // Jantar
   Receita(
     id: 'sopa-de-legumes-com-lentilha',
-    titulo: 'Sopa de legumes com lentilha',
+    titulo: 'Sopa de vegetales con lentejas',
     tipoRefeicao: TipoRefeicao.jantar,
     tempoPreparoMinutos: 35,
     porcoes: 2,
     ingredientes: [
-      '1 xícara de lentilha crua',
-      '1 cenoura em cubos',
-      '1 abobrinha em cubos',
-      'sal e temperos a gosto',
-      'água suficiente para cobrir',
+      '1 taza de lentejas crudas',
+      '1 zanahoria en cubos',
+      '1 calabacín en cubos',
+      'sal y condimentos al gusto',
+      'agua suficiente para cubrir',
     ],
     modoPreparo:
-        'Refogue os legumes rapidamente, adicione a lentilha e água suficiente '
-        'para cobrir tudo. Cozinhe em fogo médio até a lentilha ficar macia, '
-        'cerca de 25 minutos. Ajuste o sal e os temperos ao final.',
+        'Saltea rápidamente los vegetales, agrega las lentejas y suficiente '
+        'agua para cubrir todo. Cocina a fuego medio hasta que las lentejas '
+        'estén tiernas, unos 25 minutos. Ajusta la sal y los condimentos al final.',
   ),
   Receita(
     id: 'salada-de-atum-com-folhas-verdes',
-    titulo: 'Salada de atum com folhas verdes',
+    titulo: 'Ensalada de atún con hojas verdes',
     tipoRefeicao: TipoRefeicao.jantar,
     tempoPreparoMinutos: 10,
     porcoes: 1,
     ingredientes: [
-      '1 lata de atum em água',
-      'folhas verdes a gosto (alface, rúcula ou espinafre)',
-      '1 tomate em rodelas',
-      'azeite e limão a gosto',
+      '1 lata de atún en agua',
+      'hojas verdes al gusto (lechuga, rúcula o espinaca)',
+      '1 tomate en rodajas',
+      'aceite de oliva y limón al gusto',
     ],
-    modoPreparo: 'Monte as folhas e o tomate em um prato, adicione o atum escorrido por cima e '
-        'tempere com azeite e limão.',
+    modoPreparo: 'Coloca las hojas y el tomate en un plato, agrega el atún escurrido por encima y '
+        'sazona con aceite de oliva y limón.',
     vegetariano: false,
     vegano: false,
   ),

@@ -2,9 +2,9 @@ enum TipoPublicacaoComunidade { depoimento, dica, conquista }
 
 extension TipoPublicacaoComunidadeLabel on TipoPublicacaoComunidade {
   String get label => switch (this) {
-    TipoPublicacaoComunidade.depoimento => 'Depoimento',
-    TipoPublicacaoComunidade.dica => 'Dica',
-    TipoPublicacaoComunidade.conquista => 'Conquista',
+    TipoPublicacaoComunidade.depoimento => 'Testimonio',
+    TipoPublicacaoComunidade.dica => 'Consejo',
+    TipoPublicacaoComunidade.conquista => 'Logro',
   };
 }
 

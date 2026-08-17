@@ -25,11 +25,11 @@ class GeradorFichaTreino {
   /// muscular correspondente, para excluir da ficha. Lesões digitadas em
   /// "Outra" (texto livre) não são reconhecidas aqui e não filtram nada.
   static const _mapaLesaoParaGrupo = {
-    'Joelho': GrupoMuscular.perna,
-    'Ombro': GrupoMuscular.ombro,
-    'Coluna/lombar': GrupoMuscular.costas,
-    'Punho': GrupoMuscular.biceps,
-    'Tornozelo': GrupoMuscular.perna,
+    'Rodilla': GrupoMuscular.perna,
+    'Hombro': GrupoMuscular.ombro,
+    'Columna/lumbar': GrupoMuscular.costas,
+    'Muñeca': GrupoMuscular.biceps,
+    'Tobillo': GrupoMuscular.perna,
   };
 
   /// Mapeia o objetivo principal da anamnese para a tag de objetivo usada

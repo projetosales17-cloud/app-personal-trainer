@@ -71,7 +71,7 @@ class _CronometroDescansoState extends State<CronometroDescanso> {
           OutlinedButton(
             key: const Key('botao-parar-cronometro'),
             onPressed: _parar,
-            child: const Text('Parar'),
+            child: const Text('Detener'),
           )
         else
           ElevatedButton(

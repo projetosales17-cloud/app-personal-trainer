@@ -28,7 +28,7 @@ class OrientacaoDetalheScreen extends StatelessWidget {
           const SizedBox(height: 24),
           if (orientacao.caminhoVideo == null)
             Text(
-              'Vídeo em breve.',
+              'Video próximamente.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontStyle: FontStyle.italic,
               ),
@@ -45,7 +45,7 @@ class OrientacaoDetalheScreen extends StatelessWidget {
                 ),
               ),
               icon: const Icon(Icons.play_circle_outline),
-              label: const Text('Assistir vídeo'),
+              label: const Text('Ver video'),
             ),
         ],
       ),

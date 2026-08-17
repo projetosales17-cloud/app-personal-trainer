@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/registro_diario.dart';
 import '../services/diario_alimentar_repository.dart';
 
-const _refeicoes = ['Café da manhã', 'Almoço', 'Lanche da tarde', 'Jantar', 'Ceia'];
+const _refeicoes = ['Desayuno', 'Almuerzo', 'Merienda', 'Cena', 'Colación nocturna'];
 
 class DiarioAlimentarView extends StatefulWidget {
   DiarioAlimentarView({super.key, DiarioAlimentarRepository? repositorio})
@@ -69,7 +69,7 @@ class _DiarioAlimentarViewState extends State<DiarioAlimentarView> {
                 child: TextField(
                   key: const Key('campo-descricao'),
                   controller: _controladorDescricao,
-                  decoration: const InputDecoration(labelText: 'O que você comeu?'),
+                  decoration: const InputDecoration(labelText: '¿Qué comiste?'),
                 ),
               ),
               const SizedBox(width: 8),
@@ -92,7 +92,7 @@ class _DiarioAlimentarViewState extends State<DiarioAlimentarView> {
                 final registros = (snapshot.data ?? const <RegistroDiario>[]).reversed.toList();
                 if (registros.isEmpty) {
                   return const Center(
-                    child: Text('Nenhum registro no diário ainda. Adicione o primeiro acima.'),
+                    child: Text('Todavía no hay registros en el diario. Agrega el primero arriba.'),
                   );
                 }
 

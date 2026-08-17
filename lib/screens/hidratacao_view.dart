@@ -32,7 +32,7 @@ class _HidratacaoViewState extends State<HidratacaoView> {
             child: Padding(
               padding: EdgeInsets.all(24),
               child: Text(
-                'Complete a anamnese no onboarding para ver sua meta de hidratação.',
+                'Completa la anamnesis en el onboarding para ver tu meta de hidratación.',
                 textAlign: TextAlign.center,
               ),
             ),
@@ -54,10 +54,10 @@ class _HidratacaoViewState extends State<HidratacaoView> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(height: 16),
-                Text('$metaLitros L por dia', style: Theme.of(context).textTheme.headlineMedium),
+                Text('$metaLitros L por día', style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(height: 8),
                 Text(
-                  'Meta calculada a partir do seu peso e nível de atividade.',
+                  'Meta calculada a partir de tu peso y nivel de actividad.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),

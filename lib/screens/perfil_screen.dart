@@ -53,7 +53,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         );
         if (!concedido && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Permissão de notificações negada.')),
+            const SnackBar(content: Text('Permiso de notificaciones denegado.')),
           );
         }
       }
@@ -82,14 +82,14 @@ class _PerfilScreenState extends State<PerfilScreen> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Text('Seus dados', style: Theme.of(context).textTheme.titleMedium),
+              Text('Tus datos', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               if (anamnese == null)
-                const Text('Complete a anamnese no onboarding para ver seus dados aqui.')
+                const Text('Completa la anamnesis en el onboarding para ver tus datos aquí.')
               else
                 _CardDadosAnamnese(anamnese: anamnese),
               const SizedBox(height: 24),
-              Text('Notificações', style: Theme.of(context).textTheme.titleMedium),
+              Text('Notificaciones', style: Theme.of(context).textTheme.titleMedium),
               FutureBuilder<bool>(
                 future: _notificacoesFuture,
                 builder: (context, notifSnapshot) {
@@ -99,14 +99,14 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   return SwitchListTile(
                     key: const Key('switch-notificacoes'),
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Lembretes de treino e alimentação'),
+                    title: const Text('Recordatorios de entrenamiento y alimentación'),
                     value: notifSnapshot.data ?? true,
                     onChanged: _alterarNotificacoes,
                   );
                 },
               ),
               const SizedBox(height: 24),
-              Text('Conta', style: Theme.of(context).textTheme.titleMedium),
+              Text('Cuenta', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               Card(
                 child: Padding(
@@ -119,31 +119,31 @@ class _PerfilScreenState extends State<PerfilScreen> {
                       OutlinedButton(
                         key: const Key('botao-sair'),
                         onPressed: () => widget.authRepositorio.sair(),
-                        child: const Text('Sair da conta'),
+                        child: const Text('Cerrar sesión'),
                       ),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 24),
-              Text('Assinatura', style: Theme.of(context).textTheme.titleMedium),
+              Text('Suscripción', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               const Card(
                 child: Padding(
                   padding: EdgeInsets.all(16),
                   child: Text(
-                    'A conta e o login já são reais. A cobrança de assinatura ainda não '
-                    'está disponível nesta versão.',
+                    'La cuenta y el inicio de sesión ya son reales. El cobro de la suscripción '
+                    'todavía no está disponible en esta versión.',
                   ),
                 ),
               ),
               const SizedBox(height: 24),
-              Text('Suporte', style: Theme.of(context).textTheme.titleMedium),
+              Text('Soporte', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               const Card(
                 child: Padding(
                   padding: EdgeInsets.all(16),
-                  child: Text('Canal de suporte em breve.'),
+                  child: Text('Canal de soporte próximamente.'),
                 ),
               ),
             ],
@@ -167,20 +167,20 @@ class _CardDadosAnamnese extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _linha('Idade', '${anamnese.idade} anos'),
+            _linha('Edad', '${anamnese.idade} años'),
             _linha('Altura', '${anamnese.alturaCm.toStringAsFixed(0)} cm'),
-            _linha('Peso atual', '${anamnese.pesoAtualKg.toStringAsFixed(1)} kg'),
+            _linha('Peso actual', '${anamnese.pesoAtualKg.toStringAsFixed(1)} kg'),
             if (anamnese.pesoDesejadoKg != null)
-              _linha('Peso desejado', '${anamnese.pesoDesejadoKg!.toStringAsFixed(1)} kg'),
+              _linha('Peso deseado', '${anamnese.pesoDesejadoKg!.toStringAsFixed(1)} kg'),
             _linha('Objetivo principal', anamnese.objetivoPrincipal.label),
-            _linha('Nível de atividade', anamnese.nivelAtividade.label),
-            _linha('Frequência semanal', '${anamnese.frequenciaSemanalDias}x por semana'),
-            if (anamnese.condicaoHormonal != 'Nenhuma')
-              _linha('Condição hormonal', anamnese.condicaoHormonal),
+            _linha('Nivel de actividad', anamnese.nivelAtividade.label),
+            _linha('Frecuencia semanal', '${anamnese.frequenciaSemanalDias}x por semana'),
+            if (anamnese.condicaoHormonal != 'Ninguna')
+              _linha('Condición hormonal', anamnese.condicaoHormonal),
             if (anamnese.restricoesAlimentares.isNotEmpty)
-              _linha('Restrições alimentares', anamnese.restricoesAlimentares.join(', ')),
+              _linha('Restricciones alimentarias', anamnese.restricoesAlimentares.join(', ')),
             if (anamnese.lesoesLimitacoes.isNotEmpty)
-              _linha('Lesões/limitações', anamnese.lesoesLimitacoes.join(', ')),
+              _linha('Lesiones/limitaciones', anamnese.lesoesLimitacoes.join(', ')),
           ],
         ),
       ),
@@ -193,7 +193,7 @@ class _CardDadosAnamnese extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 160, child: Text(rotulo, style: const TextStyle(color: Colors.grey))),
+          SizedBox(width: 170, child: Text(rotulo, style: const TextStyle(color: Colors.grey))),
           Expanded(child: Text(valor)),
         ],
       ),

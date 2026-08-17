@@ -34,7 +34,7 @@ class _AntesDepoisViewState extends State<AntesDepoisView> {
   Widget build(BuildContext context) {
     if (kIsWeb) {
       return const IndisponivelNaWeb(
-        mensagem: 'A comparação antes/depois ainda não está disponível na versão web.',
+        mensagem: 'La comparación antes/después aún no está disponible en la versión web.',
       );
     }
     return FutureBuilder<List<RegistroFoto>>(
@@ -50,8 +50,8 @@ class _AntesDepoisViewState extends State<AntesDepoisView> {
             child: Padding(
               padding: EdgeInsets.all(24),
               child: Text(
-                'Registre pelo menos duas fotos na aba Fotos para ver a comparação '
-                'antes/depois.',
+                'Registra al menos dos fotos en la pestaña Fotos para ver la comparación '
+                'antes/después.',
                 textAlign: TextAlign.center,
               ),
             ),
@@ -79,7 +79,7 @@ class _AntesDepoisViewState extends State<AntesDepoisView> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _CartaoFoto(
-                      titulo: 'Depois',
+                      titulo: 'Después',
                       foto: depois,
                       formatarData: _formatarData,
                     ),
@@ -88,7 +88,7 @@ class _AntesDepoisViewState extends State<AntesDepoisView> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Linha do tempo completa',
+                'Línea de tiempo completa',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),

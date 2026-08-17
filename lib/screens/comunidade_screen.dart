@@ -24,7 +24,7 @@ class _ComunidadeScreenState extends State<ComunidadeScreen> {
     final publicacoes = widget.repositorio.filtrar(tipo: _filtro);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Comunidade')),
+      appBar: AppBar(title: const Text('Comunidad')),
       body: Column(
         children: [
           SizedBox(
@@ -56,7 +56,7 @@ class _ComunidadeScreenState extends State<ComunidadeScreen> {
           ),
           Expanded(
             child: publicacoes.isEmpty
-                ? const Center(child: Text('Nenhuma publicação encontrada.'))
+                ? const Center(child: Text('No se encontraron publicaciones.'))
                 : ListView.builder(
                     key: const Key('lista-comunidade'),
                     padding: const EdgeInsets.all(16),

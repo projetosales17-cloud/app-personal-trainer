@@ -28,17 +28,19 @@ class GeradorCardapio {
   /// com uma sugestão de atenção prática.
   static const _observacoesPorFase = {
     FaseCiclo.menstrual:
-        'Fase menstrual: dê atenção especial à hidratação e a alimentos '
-        'ricos em ferro (ex: carnes magras, leguminosas, vegetais escuros).',
+        'Fase menstrual: presta especial atención a la hidratación y a '
+        'alimentos ricos en hierro (ej: carnes magras, legumbres, vegetales '
+        'de hoja verde oscura).',
     FaseCiclo.folicular:
-        'Fase folicular: fase de mais energia — bom momento para manter a '
-        'dieta bem distribuída ao longo do dia.',
+        'Fase folicular: fase de más energía — buen momento para mantener '
+        'la dieta bien distribuida a lo largo del día.',
     FaseCiclo.ovulacao:
-        'Ovulação: mantenha a hidratação em dia, especialmente se o treino '
-        'estiver mais intenso nesses dias.',
+        'Ovulación: mantén la hidratación al día, sobre todo si el '
+        'entrenamiento es más intenso en estos días.',
     FaseCiclo.lutea:
-        'Fase lútea: é comum sentir mais fome ou vontade de doce — priorizar '
-        'fontes de fibra e proteína pode ajudar a manter a saciedade.',
+        'Fase lútea: es común sentir más hambre o antojo de dulce — '
+        'priorizar fuentes de fibra y proteína puede ayudar a mantener la '
+        'saciedad.',
   };
 
   Cardapio gerar(Anamnese anamnese) {
@@ -50,28 +52,28 @@ class GeradorCardapio {
         DiaDeCardapio(
           dia: indiceDia + 1,
           refeicoes: [
-            _montarRefeicao('Café da manhã', indiceDia, restricoes, const [
+            _montarRefeicao('Desayuno', indiceDia, restricoes, const [
               CategoriaAlimento.laticinio,
               CategoriaAlimento.carboidrato,
               CategoriaAlimento.fruta,
             ]),
-            _montarRefeicao('Almoço', indiceDia, restricoes, const [
+            _montarRefeicao('Almuerzo', indiceDia, restricoes, const [
               CategoriaAlimento.proteina,
               CategoriaAlimento.carboidrato,
               CategoriaAlimento.vegetal,
               CategoriaAlimento.gordura,
             ]),
-            _montarRefeicao('Lanche da tarde', indiceDia, restricoes, const [
+            _montarRefeicao('Merienda', indiceDia, restricoes, const [
               CategoriaAlimento.fruta,
               CategoriaAlimento.gordura,
             ]),
-            _montarRefeicao('Jantar', indiceDia, restricoes, const [
+            _montarRefeicao('Cena', indiceDia, restricoes, const [
               CategoriaAlimento.proteina,
               CategoriaAlimento.vegetal,
               CategoriaAlimento.carboidrato,
             ]),
             if (incluirCeia)
-              _montarRefeicao('Ceia', indiceDia, restricoes, const [
+              _montarRefeicao('Colación nocturna', indiceDia, restricoes, const [
                 CategoriaAlimento.proteina,
                 CategoriaAlimento.laticinio,
               ]),

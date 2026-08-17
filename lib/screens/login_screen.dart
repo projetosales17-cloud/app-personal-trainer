@@ -53,14 +53,14 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _esqueciSenha() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      setState(() => _erro = 'Digite seu e-mail para redefinir a senha.');
+      setState(() => _erro = 'Ingresa tu correo electrónico para restablecer la contraseña.');
       return;
     }
     try {
       await widget.authRepositorio.redefinirSenha(email);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('E-mail de redefinição de senha enviado.')),
+        const SnackBar(content: Text('Te enviamos un correo para restablecer tu contraseña.')),
       );
     } on AuthException catch (e) {
       setState(() => _erro = e.mensagem);
@@ -77,20 +77,20 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Entrar', style: Theme.of(context).textTheme.headlineMedium),
+              Text('Iniciar sesión', style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: 24),
               TextField(
                 key: const Key('campo-email-login'),
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(labelText: 'E-mail'),
+                decoration: const InputDecoration(labelText: 'Correo electrónico'),
               ),
               const SizedBox(height: 12),
               TextField(
                 key: const Key('campo-senha-login'),
                 controller: _senhaController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Senha'),
+                decoration: const InputDecoration(labelText: 'Contraseña'),
               ),
               if (_erro != null) ...[
                 const SizedBox(height: 12),
@@ -106,12 +106,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Entrar'),
+                    : const Text('Iniciar sesión'),
               ),
               TextButton(
                 key: const Key('botao-esqueci-senha'),
                 onPressed: _carregando ? null : _esqueciSenha,
-                child: const Text('Esqueci minha senha'),
+                child: const Text('Olvidé mi contraseña'),
               ),
               const Divider(height: 32),
               TextButton(
@@ -126,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                child: const Text('Ainda não tem conta? Cadastre-se'),
+                child: const Text('¿Aún no tienes cuenta? Regístrate'),
               ),
             ],
           ),

@@ -61,7 +61,7 @@ class _ReceitasViewState extends State<ReceitasView> {
                 key: const Key('campo-busca-receitas'),
                 controller: _controladorBusca,
                 decoration: const InputDecoration(
-                  labelText: 'Buscar receita',
+                  labelText: 'Buscar receta',
                   prefixIcon: Icon(Icons.search),
                 ),
                 onChanged: (valor) => setState(() => _busca = valor),
@@ -77,7 +77,7 @@ class _ReceitasViewState extends State<ReceitasView> {
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: FilterChip(
-                      label: const Text('Todos'),
+                      label: const Text('Todas'),
                       selected: _filtro == null,
                       onSelected: (_) => setState(() => _filtro = null),
                     ),
@@ -100,14 +100,14 @@ class _ReceitasViewState extends State<ReceitasView> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Filtrado para suas restrições: ${restricoes.join(", ")}',
+                    'Filtrado según tus restricciones: ${restricoes.join(", ")}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
               ),
             Expanded(
               child: receitas.isEmpty
-                  ? const Center(child: Text('Nenhuma receita encontrada.'))
+                  ? const Center(child: Text('No se encontraron recetas.'))
                   : ListView.builder(
                       key: const Key('lista-receitas'),
                       itemCount: receitas.length,

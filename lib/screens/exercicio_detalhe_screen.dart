@@ -88,7 +88,7 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
             ],
           ),
           const SizedBox(height: 24),
-          Text('Como executar', style: Theme.of(context).textTheme.titleMedium),
+          Text('Cómo hacerlo', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
@@ -103,7 +103,7 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
           if (exercicio.caminhoImagem == null) ...[
             const SizedBox(height: 4),
             Text(
-              'Ilustração genérica do grupo muscular — imagem real do exercício em produção.',
+              'Ilustración genérica del grupo muscular — imagen real del ejercicio en producción.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontStyle: FontStyle.italic,
               ),
@@ -112,7 +112,7 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
           const SizedBox(height: 12),
           Text(exercicio.instrucoes, style: Theme.of(context).textTheme.bodyLarge),
           const SizedBox(height: 24),
-          Text('Cronômetro de descanso', style: Theme.of(context).textTheme.titleMedium),
+          Text('Cronómetro de descanso', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           const CronometroDescanso(),
           const SizedBox(height: 24),
@@ -134,7 +134,7 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
                   key: const Key('campo-series'),
                   controller: _controladorSeries,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Séries'),
+                  decoration: const InputDecoration(labelText: 'Series'),
                 ),
               ),
               const SizedBox(width: 8),
@@ -143,7 +143,7 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
                   key: const Key('campo-repeticoes'),
                   controller: _controladorRepeticoes,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Repetições'),
+                  decoration: const InputDecoration(labelText: 'Repeticiones'),
                 ),
               ),
             ],
@@ -158,7 +158,7 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          Text('Histórico', style: Theme.of(context).textTheme.titleMedium),
+          Text('Historial', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           FutureBuilder<List<RegistroCarga>>(
             future: _historicoFuture,
@@ -169,7 +169,7 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
 
               final historico = (snapshot.data ?? const <RegistroCarga>[]).reversed.toList();
               if (historico.isEmpty) {
-                return const Text('Nenhum registro de carga ainda para este exercício.');
+                return const Text('Aún no hay registros de carga para este ejercicio.');
               }
 
               return Column(

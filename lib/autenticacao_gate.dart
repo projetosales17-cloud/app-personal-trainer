@@ -47,7 +47,7 @@ class _AutenticacaoGateState extends State<AutenticacaoGate> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Sua conta foi acessada em outro aparelho. Você foi desconectada.'),
+          content: Text('Tu cuenta fue accedida desde otro dispositivo. Fuiste desconectada.'),
         ),
       );
     });

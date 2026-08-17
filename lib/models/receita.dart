@@ -2,10 +2,10 @@ enum TipoRefeicao { cafeDaManha, almoco, lancheDaTarde, jantar }
 
 extension TipoRefeicaoLabel on TipoRefeicao {
   String get label => switch (this) {
-    TipoRefeicao.cafeDaManha => 'Café da manhã',
-    TipoRefeicao.almoco => 'Almoço',
-    TipoRefeicao.lancheDaTarde => 'Lanche da tarde',
-    TipoRefeicao.jantar => 'Jantar',
+    TipoRefeicao.cafeDaManha => 'Desayuno',
+    TipoRefeicao.almoco => 'Almuerzo',
+    TipoRefeicao.lancheDaTarde => 'Merienda',
+    TipoRefeicao.jantar => 'Cena',
   };
 }
 

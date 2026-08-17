@@ -2,12 +2,12 @@ enum TemaOrientacao { treino, alimentacao, motivacao, menopausa, posBariatrica, 
 
 extension TemaOrientacaoLabel on TemaOrientacao {
   String get label => switch (this) {
-    TemaOrientacao.treino => 'Treino',
-    TemaOrientacao.alimentacao => 'Alimentação',
-    TemaOrientacao.motivacao => 'Motivação',
-    TemaOrientacao.menopausa => 'Menopausa',
-    TemaOrientacao.posBariatrica => 'Pós-bariátrica',
-    TemaOrientacao.habitos => 'Hábitos saudáveis',
+    TemaOrientacao.treino => 'Entrenamiento',
+    TemaOrientacao.alimentacao => 'Alimentación',
+    TemaOrientacao.motivacao => 'Motivación',
+    TemaOrientacao.menopausa => 'Menopausia',
+    TemaOrientacao.posBariatrica => 'Posbariátrica',
+    TemaOrientacao.habitos => 'Hábitos saludables',
   };
 }
 
@@ -15,7 +15,7 @@ enum TipoConteudoOrientacao { artigo, faq }
 
 extension TipoConteudoOrientacaoLabel on TipoConteudoOrientacao {
   String get label => switch (this) {
-    TipoConteudoOrientacao.artigo => 'Artigo',
+    TipoConteudoOrientacao.artigo => 'Artículo',
     TipoConteudoOrientacao.faq => 'FAQ',
   };
 }

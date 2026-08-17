@@ -15,15 +15,15 @@ class ProgressoScreen extends StatelessWidget {
       length: 5,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Progresso'),
+          title: const Text('Progreso'),
           bottom: const TabBar(
             isScrollable: true,
             tabs: [
               Tab(text: 'Peso'),
               Tab(text: 'Medidas'),
               Tab(text: 'Fotos'),
-              Tab(text: 'Vídeos'),
-              Tab(text: 'Antes/Depois'),
+              Tab(text: 'Videos'),
+              Tab(text: 'Antes/Después'),
             ],
           ),
         ),

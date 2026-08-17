@@ -11,14 +11,14 @@ enum GrupoMuscular {
 
 extension GrupoMuscularLabel on GrupoMuscular {
   String get label => switch (this) {
-    GrupoMuscular.peito => 'Peito',
-    GrupoMuscular.costas => 'Costas',
-    GrupoMuscular.ombro => 'Ombro',
+    GrupoMuscular.peito => 'Pecho',
+    GrupoMuscular.costas => 'Espalda',
+    GrupoMuscular.ombro => 'Hombro',
     GrupoMuscular.biceps => 'Bíceps',
     GrupoMuscular.triceps => 'Tríceps',
-    GrupoMuscular.perna => 'Perna',
+    GrupoMuscular.perna => 'Pierna',
     GrupoMuscular.gluteo => 'Glúteo',
-    GrupoMuscular.abdomen => 'Abdômen',
+    GrupoMuscular.abdomen => 'Abdomen',
   };
 
   /// Ilustração genérica usada como proxy visual enquanto não existe uma
@@ -41,9 +41,9 @@ enum NivelExercicio { iniciante, intermediario, avancado }
 
 extension NivelExercicioLabel on NivelExercicio {
   String get label => switch (this) {
-    NivelExercicio.iniciante => 'Iniciante',
-    NivelExercicio.intermediario => 'Intermediário',
-    NivelExercicio.avancado => 'Avançado',
+    NivelExercicio.iniciante => 'Principiante',
+    NivelExercicio.intermediario => 'Intermedio',
+    NivelExercicio.avancado => 'Avanzado',
   };
 }
 
@@ -52,9 +52,9 @@ enum ObjetivoExercicio { hipertrofia, emagrecimento, forca, mobilidade }
 extension ObjetivoExercicioLabel on ObjetivoExercicio {
   String get label => switch (this) {
     ObjetivoExercicio.hipertrofia => 'Hipertrofia',
-    ObjetivoExercicio.emagrecimento => 'Emagrecimento/circuito',
-    ObjetivoExercicio.forca => 'Força',
-    ObjetivoExercicio.mobilidade => 'Mobilidade',
+    ObjetivoExercicio.emagrecimento => 'Pérdida de peso/circuito',
+    ObjetivoExercicio.forca => 'Fuerza',
+    ObjetivoExercicio.mobilidade => 'Movilidad',
   };
 }
 
@@ -62,13 +62,13 @@ enum Equipamento { nenhum, halteres, barra, elastico, maquina, banco, outro }
 
 extension EquipamentoLabel on Equipamento {
   String get label => switch (this) {
-    Equipamento.nenhum => 'Peso do corpo',
-    Equipamento.halteres => 'Halteres',
+    Equipamento.nenhum => 'Peso corporal',
+    Equipamento.halteres => 'Mancuernas',
     Equipamento.barra => 'Barra',
-    Equipamento.elastico => 'Elástico',
-    Equipamento.maquina => 'Máquina/cabo',
+    Equipamento.elastico => 'Banda elástica',
+    Equipamento.maquina => 'Máquina/polea',
     Equipamento.banco => 'Banco',
-    Equipamento.outro => 'Outro',
+    Equipamento.outro => 'Otro',
   };
 }
 

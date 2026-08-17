@@ -20,7 +20,7 @@ class VitrineProdutosScreen extends StatelessWidget {
     final abriu = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!abriu && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Não foi possível abrir o link.')),
+        const SnackBar(content: Text('No fue posible abrir el enlace.')),
       );
     }
   }
@@ -30,7 +30,7 @@ class VitrineProdutosScreen extends StatelessWidget {
     final produtos = repositorio.todos();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Loja')),
+      appBar: AppBar(title: const Text('Tienda')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -40,8 +40,8 @@ class VitrineProdutosScreen extends StatelessWidget {
               child: const Padding(
                 padding: EdgeInsets.all(12),
                 child: Text(
-                  'Catálogo informativo — preços de referência, sujeitos a '
-                  'alteração. A compra é feita fora do app, em uma loja parceira.',
+                  'Catálogo informativo — precios de referencia, sujetos a '
+                  'cambios. La compra se realiza fuera de la app, en una tienda asociada.',
                   style: TextStyle(fontSize: 12),
                 ),
               ),
@@ -106,7 +106,7 @@ class _ProdutoCard extends StatelessWidget {
                 onPressed: produto.linkExterno == null
                     ? null
                     : () => aoComprar(context, produto.linkExterno!),
-                child: Text(produto.linkExterno == null ? 'Em breve' : 'Comprar'),
+                child: Text(produto.linkExterno == null ? 'Próximamente' : 'Comprar'),
               ),
             ),
           ],

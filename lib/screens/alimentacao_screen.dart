@@ -16,15 +16,15 @@ class AlimentacaoScreen extends StatelessWidget {
       length: 6,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Alimentação'),
+          title: const Text('Alimentación'),
           bottom: const TabBar(
             isScrollable: true,
             tabs: [
               Tab(text: 'Biblioteca'),
-              Tab(text: 'Cardápio'),
-              Tab(text: 'Receitas'),
-              Tab(text: 'Diário'),
-              Tab(text: 'Hidratação'),
+              Tab(text: 'Menú'),
+              Tab(text: 'Recetas'),
+              Tab(text: 'Diario'),
+              Tab(text: 'Hidratación'),
               Tab(text: 'Suplementos'),
             ],
           ),
