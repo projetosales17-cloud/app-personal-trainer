@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -70,6 +67,16 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyBqOqkudOXgcjSOsFPD5D9-rcguPkqp-w8',
+    appId: '1:912875241727:web:d73532d4f8a80f36000cca',
+    messagingSenderId: '912875241727',
+    projectId: 'app-personal-trainer-48012',
+    authDomain: 'app-personal-trainer-48012.firebaseapp.com',
+    storageBucket: 'app-personal-trainer-48012.firebasestorage.app',
+    measurementId: 'G-RP3ERGM63H',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyBqOqkudOXgcjSOsFPD5D9-rcguPkqp-w8',
     appId: '1:912875241727:web:d73532d4f8a80f36000cca',
     messagingSenderId: '912875241727',
