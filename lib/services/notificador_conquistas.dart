@@ -49,3 +49,12 @@ class NotificadorConquistasLocal implements NotificadorConquistas {
     );
   }
 }
+
+/// Implementação nula para a web, onde flutter_local_notifications não
+/// tem suporte.
+class NotificadorConquistasNulo implements NotificadorConquistas {
+  const NotificadorConquistasNulo();
+
+  @override
+  Future<void> notificar({required String titulo, required String corpo}) async {}
+}

@@ -84,3 +84,19 @@ class AgendadorNotificacoesLocal implements AgendadorNotificacoes {
   @override
   Future<void> cancelarTodos() => _plugin.cancelAll();
 }
+
+/// Implementação nula para a web, onde flutter_local_notifications não
+/// tem suporte — evita expor a funcionalidade de lembretes até que haja
+/// uma alternativa (ex: notificações push via navegador).
+class AgendadorNotificacoesNulo implements AgendadorNotificacoes {
+  const AgendadorNotificacoesNulo();
+
+  @override
+  Future<bool> solicitarPermissao() async => false;
+
+  @override
+  Future<void> agendarLembretesDeTreino(List<DateTime> datas) async {}
+
+  @override
+  Future<void> cancelarTodos() async {}
+}

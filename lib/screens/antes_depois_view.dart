@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../models/registro_foto.dart';
 import '../services/progresso_repository.dart';
+import '../widgets/indisponivel_na_web.dart';
 import 'foto_detalhe_screen.dart';
 
 /// Comparação entre a foto mais antiga e a mais recente registradas, mais
@@ -30,6 +32,11 @@ class _AntesDepoisViewState extends State<AntesDepoisView> {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return const IndisponivelNaWeb(
+        mensagem: 'A comparação antes/depois ainda não está disponível na versão web.',
+      );
+    }
     return FutureBuilder<List<RegistroFoto>>(
       future: _fotosFuture,
       builder: (context, snapshot) {

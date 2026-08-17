@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 import '../models/ficha_treino.dart';
 import 'agendador_notificacoes.dart';
 import 'preferencias_repository.dart';
@@ -9,7 +11,7 @@ class NotificacoesTreinoService {
   NotificacoesTreinoService({
     AgendadorNotificacoes? agendador,
     PreferenciasRepository? preferenciasRepositorio,
-  }) : agendador = agendador ?? AgendadorNotificacoesLocal(),
+  }) : agendador = agendador ?? (kIsWeb ? const AgendadorNotificacoesNulo() : AgendadorNotificacoesLocal()),
        preferenciasRepositorio = preferenciasRepositorio ?? PreferenciasRepository();
 
   final AgendadorNotificacoes agendador;

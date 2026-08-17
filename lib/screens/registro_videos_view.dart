@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models/registro_video.dart';
 import '../services/progresso_repository.dart';
+import '../widgets/indisponivel_na_web.dart';
 import 'video_detalhe_screen.dart';
 
 typedef SelecionarVideo = Future<String?> Function(ImageSource fonte);
@@ -53,6 +55,11 @@ class _RegistroVideosViewState extends State<RegistroVideosView> {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return const IndisponivelNaWeb(
+        mensagem: 'Vídeos de progresso ainda não estão disponíveis na versão web.',
+      );
+    }
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(

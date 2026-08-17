@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models/registro_foto.dart';
 import '../services/progresso_repository.dart';
+import '../widgets/indisponivel_na_web.dart';
 import 'foto_detalhe_screen.dart';
 
 typedef SelecionarImagem = Future<String?> Function(ImageSource fonte);
@@ -50,6 +52,11 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return const IndisponivelNaWeb(
+        mensagem: 'Fotos de progresso ainda não estão disponíveis na versão web.',
+      );
+    }
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
