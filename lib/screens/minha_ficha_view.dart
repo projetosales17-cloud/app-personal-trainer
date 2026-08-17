@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../models/anamnese.dart';
@@ -32,7 +33,9 @@ class MinhaFichaView extends StatefulWidget {
        checkinRepositorio = checkinRepositorio ?? CheckinTreinoRepository(),
        motorAderencia = motorAderencia ?? MotorAderencia(),
        gamificacaoService = gamificacaoService ?? GamificacaoService(),
-       notificadorConquistas = notificadorConquistas ?? NotificadorConquistasLocal();
+       notificadorConquistas =
+           notificadorConquistas ??
+           (kIsWeb ? const NotificadorConquistasNulo() : NotificadorConquistasLocal());
 
   final AnamneseRepository anamneseRepositorio;
   final GeradorFichaTreino geradorFicha;
