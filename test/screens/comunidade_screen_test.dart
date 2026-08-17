@@ -22,18 +22,18 @@ void main() {
     // filtro, sempre visíveis).
     expect(find.text('Fernanda S.'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilterChip, 'Dica'));
+    await tester.tap(find.widgetWithText(FilterChip, 'Consejo'));
     await tester.pump();
 
     expect(find.text('Fernanda S.'), findsNothing);
-    expect(find.text('Equipe'), findsWidgets);
+    expect(find.text('Equipo'), findsWidgets);
   });
 
   testWidgets('Voltar para "Todos" mostra tudo de novo', (tester) async {
     await tester.pumpWidget(MaterialApp(home: ComunidadeScreen()));
     await tester.pump();
 
-    await tester.tap(find.widgetWithText(FilterChip, 'Conquista'));
+    await tester.tap(find.widgetWithText(FilterChip, 'Logro'));
     await tester.pump();
     expect(find.text('Fernanda S.'), findsNothing);
 

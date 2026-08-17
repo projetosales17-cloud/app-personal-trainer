@@ -59,7 +59,7 @@ void main() {
   test('label é legível para cada fase', () {
     expect(FaseCiclo.menstrual.label, 'Menstrual');
     expect(FaseCiclo.folicular.label, 'Folicular');
-    expect(FaseCiclo.ovulacao.label, 'Ovulação');
+    expect(FaseCiclo.ovulacao.label, 'Ovulación');
     expect(FaseCiclo.lutea.label, 'Lútea');
   });
 }

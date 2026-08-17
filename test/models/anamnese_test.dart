@@ -64,7 +64,7 @@ void main() {
     expect(anamnese.pesoDesejadoKg, isNull);
     expect(anamnese.sexo, Sexo.feminino);
     expect(anamnese.cirurgiaBariatrica, isFalse);
-    expect(anamnese.condicaoHormonal, 'Nenhuma');
+    expect(anamnese.condicaoHormonal, 'Ninguna');
     expect(anamnese.restricoesAlimentares, isEmpty);
     expect(anamnese.lesoesLimitacoes, isEmpty);
     expect(anamnese.regioesPriorizadas, isEmpty);

@@ -36,7 +36,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Entrar'), findsWidgets);
+    expect(find.text('Iniciar sesión'), findsWidgets);
   });
 
   testWidgets('Logada sem anamnese salva, o app abre no onboarding', (tester) async {
@@ -53,7 +53,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Bem-vinda!'), findsOneWidget);
+    expect(find.text('¡Bienvenida!'), findsOneWidget);
   });
 
   testWidgets('Logada com anamnese já salva, o app vai direto para a navegação principal', (
@@ -80,7 +80,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Início'), findsWidgets);
+    expect(find.text('Inicio'), findsWidgets);
     expect(find.byType(NavigationDestination), findsNWidgets(8));
   });
 }

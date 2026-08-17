@@ -14,7 +14,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: RegistroPesoView())));
     await tester.pump();
 
-    expect(find.textContaining('Nenhum registro de peso ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay registros de peso'), findsOneWidget);
   });
 
   testWidgets('Registrar um peso adiciona à lista e limpa o campo', (tester) async {
@@ -75,6 +75,6 @@ void main() {
     await tester.tap(find.byKey(const Key('botao-registrar-peso')));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Nenhum registro de peso ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay registros de peso'), findsOneWidget);
   });
 }

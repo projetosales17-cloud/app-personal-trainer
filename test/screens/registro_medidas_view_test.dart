@@ -14,7 +14,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: RegistroMedidasView())));
     await tester.pump();
 
-    expect(find.textContaining('Nenhum registro de medidas ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay registros de medidas'), findsOneWidget);
   });
 
   testWidgets('Registrar preenchendo só alguns campos adiciona à lista e limpa o formulário', (
@@ -32,7 +32,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Cintura 80cm'), findsOneWidget);
-    expect(find.textContaining('Quadril 100cm'), findsOneWidget);
+    expect(find.textContaining('Cadera 100cm'), findsOneWidget);
 
     final campoCintura = tester.widget<TextField>(find.byKey(const Key('campo-cintura')));
     expect(campoCintura.controller!.text, isEmpty);
@@ -48,6 +48,6 @@ void main() {
     await tester.tap(find.byKey(const Key('botao-registrar-medidas')));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Nenhum registro de medidas ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay registros de medidas'), findsOneWidget);
   });
 }

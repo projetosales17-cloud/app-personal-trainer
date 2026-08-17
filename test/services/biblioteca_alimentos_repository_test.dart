@@ -20,7 +20,7 @@ void main() {
   });
 
   test('filtrar por restrição "Lactose" exclui alimentos com lactose', () {
-    final resultado = repositorio.filtrar(restricoesUsuaria: const ['Lactose']);
+    final resultado = repositorio.filtrar(restricoesUsuaria: const ['Lactosa']);
     for (final alimento in resultado) {
       expect(alimento.contemLactose, isFalse);
     }

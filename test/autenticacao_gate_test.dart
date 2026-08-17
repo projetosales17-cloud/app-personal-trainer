@@ -41,7 +41,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Entrar'), findsWidgets);
+    expect(find.text('Iniciar sesión'), findsWidgets);
   });
 
   testWidgets('Logada, mostra o restante do app (onboarding)', (tester) async {
@@ -62,7 +62,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Bem-vinda!'), findsOneWidget);
+    expect(find.text('¡Bienvenida!'), findsOneWidget);
   });
 
   testWidgets(
@@ -91,8 +91,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(mockAuth.currentUser, isNull);
-      expect(find.textContaining('acessada em outro aparelho'), findsOneWidget);
-      expect(find.text('Entrar'), findsWidgets);
+      expect(find.textContaining('accedida desde otro dispositivo'), findsOneWidget);
+      expect(find.text('Iniciar sesión'), findsWidgets);
     },
   );
 }

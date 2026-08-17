@@ -6,7 +6,7 @@ import 'package:app_personal_trainer/screens/onboarding/onboarding_flow.dart';
 import 'package:app_personal_trainer/services/anamnese_repository.dart';
 
 Future<void> _avancar(WidgetTester tester) async {
-  await tester.tap(find.widgetWithText(FilledButton, 'Avançar'));
+  await tester.tap(find.widgetWithText(FilledButton, 'Siguiente'));
   await tester.pumpAndSettle();
 }
 
@@ -26,7 +26,7 @@ void main() {
     await _avancar(tester); // boas-vindas -> dados básicos
 
     final botaoDesabilitado =
-        tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Avançar'));
+        tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Siguiente'));
     expect(botaoDesabilitado.onPressed, isNull);
 
     await tester.enterText(find.byType(TextField).at(0), '30');
@@ -35,7 +35,7 @@ void main() {
     await tester.pump();
 
     final botaoHabilitado =
-        tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Avançar'));
+        tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Siguiente'));
     expect(botaoHabilitado.onPressed, isNotNull);
 
     expect(concluido, isFalse);
@@ -57,7 +57,7 @@ void main() {
     await tester.pump();
     await _avancar(tester); // dados básicos -> objetivo
 
-    await tester.tap(find.text('Emagrecimento'));
+    await tester.tap(find.text('Pérdida de peso'));
     await tester.pump();
     await _avancar(tester); // objetivo -> cirurgia bariátrica
 
@@ -73,11 +73,11 @@ void main() {
 
     await _avancar(tester); // pós-parto (não) -> atividade
 
-    await tester.tap(find.text('Moderado'));
+    await tester.tap(find.text('Moderada'));
     await tester.pump();
     await _avancar(tester); // atividade -> local de treino
 
-    await tester.tap(find.text('Academia'));
+    await tester.tap(find.text('Gimnasio'));
     await tester.pump();
     await _avancar(tester); // local de treino -> preferência de treino (já vem pré-selecionada)
 
@@ -85,12 +85,12 @@ void main() {
 
     await _avancar(tester); // priorização de região -> resumo
 
-    expect(find.text('Resumo'), findsOneWidget);
+    expect(find.text('Resumen'), findsOneWidget);
 
     // Não usamos pumpAndSettle aqui: o passo de resumo mostra um
     // CircularProgressIndicator (animação indeterminada) enquanto salva,
     // que nunca "assenta" e faria pumpAndSettle estourar o tempo limite.
-    await tester.tap(find.widgetWithText(FilledButton, 'Concluir'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Finalizar'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
@@ -119,7 +119,7 @@ void main() {
     await tester.pump();
     await _avancar(tester); // dados básicos -> objetivo
 
-    await tester.tap(find.text('Emagrecimento'));
+    await tester.tap(find.text('Pérdida de peso'));
     await tester.pump();
     await _avancar(tester); // objetivo -> cirurgia bariátrica
 
@@ -132,11 +132,11 @@ void main() {
 
     await _avancar(tester); // pós-parto (não) -> atividade
 
-    await tester.tap(find.text('Moderado'));
+    await tester.tap(find.text('Moderada'));
     await tester.pump();
     await _avancar(tester); // atividade -> local de treino
 
-    await tester.tap(find.text('Academia'));
+    await tester.tap(find.text('Gimnasio'));
     await tester.pump();
     await _avancar(tester); // local de treino -> preferência de treino (já vem pré-selecionada)
 
@@ -145,9 +145,9 @@ void main() {
     await _avancar(tester); // priorização de região -> resumo
 
     expect(find.text('IMC: 22.86 (Peso normal)'), findsOneWidget);
-    expect(find.text('Taxa Metabólica Basal: 1482.75 kcal/dia'), findsOneWidget);
-    expect(find.text('Gasto calórico diário estimado: 2298.26 kcal'), findsOneWidget);
-    expect(find.textContaining('ATENÇÃO'), findsNothing);
+    expect(find.text('Tasa Metabólica Basal: 1482.75 kcal/día'), findsOneWidget);
+    expect(find.text('Gasto calórico diario estimado: 2298.26 kcal'), findsOneWidget);
+    expect(find.textContaining('ATENCIÓN'), findsNothing);
   });
 
   testWidgets('Ativar "tive um parto recente" sem escolher data salva sem data do parto', (
@@ -167,7 +167,7 @@ void main() {
     await tester.pump();
     await _avancar(tester); // dados básicos -> objetivo
 
-    await tester.tap(find.text('Tonificação'));
+    await tester.tap(find.text('Tonificación'));
     await tester.pump();
     await _avancar(tester); // objetivo -> cirurgia bariátrica
 
@@ -177,10 +177,10 @@ void main() {
     await _avancar(tester); // restrições -> lesões
     await _avancar(tester); // lesões -> pós-parto
 
-    expect(find.text('Data do parto'), findsNothing);
-    await tester.tap(find.widgetWithText(SwitchListTile, 'Tive um parto recente'));
+    expect(find.text('Fecha del parto'), findsNothing);
+    await tester.tap(find.widgetWithText(SwitchListTile, 'Tuve un parto reciente'));
     await tester.pump();
-    expect(find.text('Data do parto'), findsOneWidget);
+    expect(find.text('Fecha del parto'), findsOneWidget);
 
     await _avancar(tester); // pós-parto (sim, sem data) -> atividade
 
@@ -188,14 +188,14 @@ void main() {
     await tester.pump();
     await _avancar(tester); // atividade -> local de treino
 
-    await tester.tap(find.text('Academia'));
+    await tester.tap(find.text('Gimnasio'));
     await tester.pump();
     await _avancar(tester); // local de treino -> preferência de treino
 
     await _avancar(tester); // preferência de treino -> priorização de região
     await _avancar(tester); // priorização de região -> resumo
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Concluir'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Finalizar'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
@@ -219,17 +219,17 @@ void main() {
     await tester.pump();
     await _avancar(tester); // dados básicos -> objetivo
 
-    await tester.tap(find.text('Saúde geral (ex: menopausa)'));
+    await tester.tap(find.text('Salud general (ej: menopausia)'));
     await tester.pump();
     await _avancar(tester); // objetivo -> cirurgia bariátrica
 
     await _avancar(tester); // bariátrica (não) -> condição hormonal
     await _avancar(tester); // condição hormonal (padrão) -> ciclo menstrual
 
-    expect(find.text('Data da última menstruação'), findsOneWidget);
-    await tester.tap(find.widgetWithText(SwitchListTile, 'Meu ciclo é regular'));
+    expect(find.text('Fecha de la última menstruación'), findsOneWidget);
+    await tester.tap(find.widgetWithText(SwitchListTile, 'Mi ciclo es regular'));
     await tester.pump();
-    expect(find.text('Data da última menstruação'), findsNothing);
+    expect(find.text('Fecha de la última menstruación'), findsNothing);
 
     await _avancar(tester); // ciclo menstrual (irregular) -> restrições
     await _avancar(tester); // restrições -> lesões
@@ -240,14 +240,14 @@ void main() {
     await tester.pump();
     await _avancar(tester); // atividade -> local de treino
 
-    await tester.tap(find.text('Academia'));
+    await tester.tap(find.text('Gimnasio'));
     await tester.pump();
     await _avancar(tester); // local de treino -> preferência de treino
 
     await _avancar(tester); // preferência de treino -> priorização de região
     await _avancar(tester); // priorização de região -> resumo
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Concluir'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Finalizar'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 

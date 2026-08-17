@@ -16,10 +16,10 @@ void main() {
   });
 
   test('classificarImc', () {
-    expect(classificarImc(17), 'Abaixo do peso');
+    expect(classificarImc(17), 'Bajo peso');
     expect(classificarImc(22), 'Peso normal');
     expect(classificarImc(27), 'Sobrepeso');
-    expect(classificarImc(32), 'Obesidade');
+    expect(classificarImc(32), 'Obesidad');
   });
 
   test('verificarAlertaSaude', () {

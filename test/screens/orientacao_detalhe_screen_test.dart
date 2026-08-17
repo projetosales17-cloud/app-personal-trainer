@@ -31,15 +31,15 @@ void main() {
   testWidgets('Sem vídeo, mostra aviso e nenhum botão de assistir', (tester) async {
     await tester.pumpWidget(MaterialApp(home: OrientacaoDetalheScreen(orientacao: _semVideo)));
 
-    expect(find.text('Vídeo em breve.'), findsOneWidget);
-    expect(find.text('Assistir vídeo'), findsNothing);
+    expect(find.text('Video próximamente.'), findsOneWidget);
+    expect(find.text('Ver video'), findsNothing);
   });
 
   testWidgets('Com vídeo, mostra o botão de assistir e nenhum aviso', (tester) async {
     await tester.pumpWidget(MaterialApp(home: OrientacaoDetalheScreen(orientacao: _comVideo)));
 
-    expect(find.text('Assistir vídeo'), findsOneWidget);
-    expect(find.text('Vídeo em breve.'), findsNothing);
+    expect(find.text('Ver video'), findsOneWidget);
+    expect(find.text('Video próximamente.'), findsNothing);
   });
 
   testWidgets('Conteúdo FAQ mostra o selo "FAQ"', (tester) async {

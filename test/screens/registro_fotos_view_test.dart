@@ -40,7 +40,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.textContaining('Nenhuma foto ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay fotos'), findsOneWidget);
   });
 
   testWidgets('Com uma foto já registrada, mostra a grade', (tester) async {
@@ -56,7 +56,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.textContaining('Nenhuma foto ainda'), findsNothing);
+    expect(find.textContaining('Aún no hay fotos'), findsNothing);
     expect(find.byType(GridView), findsOneWidget);
     expect(find.byType(Image), findsOneWidget);
   });
@@ -83,7 +83,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(fonteRecebida, ImageSource.camera);
-    expect(find.textContaining('Nenhuma foto ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay fotos'), findsOneWidget);
   });
 
   testWidgets('Tocar em "Galeria" aciona o seletor com a fonte galeria', (tester) async {
@@ -127,6 +127,6 @@ void main() {
     await tester.tap(find.byKey(const Key('botao-camera')));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Nenhuma foto ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay fotos'), findsOneWidget);
   });
 }

@@ -13,7 +13,7 @@ void main() {
 
   test('calcularZonasTreino', () {
     final zonas = calcularZonasTreino(190);
-    expect(zonas['Zona 1 - Recuperação (50-60%)'], (95, 114));
+    expect(zonas['Zona 1 - Recuperación (50-60%)'], (95, 114));
     expect(zonas['Zona 2 - Leve (60-70%)'], (114, 133));
     expect(zonas['Zona 3 - Moderada (70-80%)'], (133, 152));
     expect(zonas['Zona 4 - Intensa (80-90%)'], (152, 171));

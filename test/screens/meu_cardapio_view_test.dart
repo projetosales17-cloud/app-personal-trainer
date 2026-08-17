@@ -15,7 +15,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: MeuCardapioView()));
     await tester.pump();
 
-    expect(find.textContaining('Complete a anamnese'), findsOneWidget);
+    expect(find.textContaining('Completa la anamnesis'), findsOneWidget);
   });
 
   testWidgets('Com anamnese salva, mostra os dias de cardápio gerados', (tester) async {
@@ -36,16 +36,16 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.textContaining('Válido até'), findsOneWidget);
-    expect(find.text('Dia 1'), findsOneWidget);
-    expect(find.text('Almoço'), findsWidgets);
+    expect(find.textContaining('Válido hasta'), findsOneWidget);
+    expect(find.text('Día 1'), findsOneWidget);
+    expect(find.text('Almuerzo'), findsWidgets);
 
     await tester.dragUntilVisible(
-      find.text('Dia 3'),
+      find.text('Día 3'),
       find.byType(ListView),
       const Offset(0, -300),
     );
-    expect(find.text('Dia 3'), findsOneWidget);
+    expect(find.text('Día 3'), findsOneWidget);
   });
 
   testWidgets('Anamnese com cirurgia bariátrica mostra aviso de orientação profissional', (
@@ -69,6 +69,6 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.textContaining('não substitui a orientação de um(a) nutricionista'), findsOneWidget);
+    expect(find.textContaining('no sustituye la orientación de un(a) nutricionista'), findsOneWidget);
   });
 }

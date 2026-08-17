@@ -7,29 +7,33 @@ void main() {
   testWidgets('Mostra a primeira orientação da lista por padrão (sem filtro)', (tester) async {
     await tester.pumpWidget(MaterialApp(home: OrientacoesScreen()));
 
-    expect(find.text('Por que aquecer antes de treinar'), findsOneWidget);
+    expect(find.text('Por qué calentar antes de entrenar'), findsOneWidget);
   });
 
   testWidgets('Filtrar por tema mostra só as orientações daquele tema', (tester) async {
     await tester.pumpWidget(MaterialApp(home: OrientacoesScreen()));
 
-    await tester.drag(find.byKey(const Key('filtro-temas')), const Offset(-500, 0));
+    await tester.dragUntilVisible(
+      find.widgetWithText(FilterChip, 'Hábitos saludables'),
+      find.byKey(const Key('filtro-temas')),
+      const Offset(-100, 0),
+    );
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilterChip, 'Hábitos saudáveis'));
+    await tester.tap(find.widgetWithText(FilterChip, 'Hábitos saludables'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Sono e recuperação'), findsOneWidget);
-    expect(find.text('Por que aquecer antes de treinar'), findsNothing);
+    expect(find.text('Sueño y recuperación'), findsOneWidget);
+    expect(find.text('Por qué calentar antes de entrenar'), findsNothing);
   });
 
   testWidgets('Buscar por palavra-chave filtra a lista', (tester) async {
     await tester.pumpWidget(MaterialApp(home: OrientacoesScreen()));
 
-    await tester.enterText(find.byKey(const Key('campo-busca-orientacoes')), 'menopausa');
+    await tester.enterText(find.byKey(const Key('campo-busca-orientacoes')), 'menopausia');
     await tester.pump();
 
-    expect(find.text('Atividade física na menopausa'), findsOneWidget);
-    expect(find.text('Por que aquecer antes de treinar'), findsNothing);
+    expect(find.text('Actividad física en la menopausia'), findsOneWidget);
+    expect(find.text('Por qué calentar antes de entrenar'), findsNothing);
   });
 
   testWidgets('Busca sem correspondência mostra estado vazio', (tester) async {
@@ -38,13 +42,13 @@ void main() {
     await tester.enterText(find.byKey(const Key('campo-busca-orientacoes')), 'xyzabc123');
     await tester.pump();
 
-    expect(find.text('Nenhum conteúdo encontrado.'), findsOneWidget);
+    expect(find.text('No se encontró contenido.'), findsOneWidget);
   });
 
   testWidgets('Tocar em uma orientação abre a tela de detalhe', (tester) async {
     await tester.pumpWidget(MaterialApp(home: OrientacoesScreen()));
 
-    await tester.tap(find.text('Por que aquecer antes de treinar'));
+    await tester.tap(find.text('Por qué calentar antes de entrenar'));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('aumenta'), findsOneWidget);
@@ -56,8 +60,8 @@ void main() {
     await tester.tap(find.widgetWithText(ChoiceChip, 'FAQ'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Quantas vezes por semana devo treinar?'), findsOneWidget);
-    expect(find.text('Por que aquecer antes de treinar'), findsNothing);
+    expect(find.text('¿Cuántas veces por semana debo entrenar?'), findsOneWidget);
+    expect(find.text('Por qué calentar antes de entrenar'), findsNothing);
   });
 
   testWidgets('Item de FAQ mostra o selo "FAQ" no subtítulo', (tester) async {

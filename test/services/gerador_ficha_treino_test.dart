@@ -54,7 +54,7 @@ void main() {
       alturaCm: 170,
       pesoAtualKg: 65,
       objetivoPrincipal: Objetivo.hipertrofia,
-      lesoesLimitacoes: ['Joelho'],
+      lesoesLimitacoes: ['Rodilla'],
       nivelAtividade: NivelAtividade.moderado,
       frequenciaSemanalDias: 3,
     );

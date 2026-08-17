@@ -15,7 +15,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: HomeScreen()));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Complete a anamnese'), findsOneWidget);
+    expect(find.textContaining('Completa la anamnesis'), findsOneWidget);
   });
 
   testWidgets('Com anamnese salva, mostra o card de treino do dia', (tester) async {
@@ -36,17 +36,17 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Olá!'), findsOneWidget);
-    expect(find.text('Treino do dia'), findsOneWidget);
-    expect(find.textContaining('Ficha válida até'), findsOneWidget);
-    expect(find.text('Alimentação do dia'), findsOneWidget);
-    expect(find.text('Almoço'), findsOneWidget);
-    expect(find.textContaining('refeições · veja na aba Alimentação'), findsOneWidget);
-    expect(find.textContaining('Cardápio válido até'), findsOneWidget);
-    expect(find.text('Progresso'), findsOneWidget);
+    expect(find.text('¡Hola!'), findsOneWidget);
+    expect(find.text('Entrenamiento del día'), findsOneWidget);
+    expect(find.textContaining('Rutina válida hasta'), findsOneWidget);
+    expect(find.text('Alimentación del día'), findsOneWidget);
+    expect(find.text('Almuerzo'), findsOneWidget);
+    expect(find.textContaining('comidas · míralas en la pestaña Alimentación'), findsOneWidget);
+    expect(find.textContaining('Menú válido hasta'), findsOneWidget);
+    expect(find.text('Progreso'), findsOneWidget);
     expect(find.text('65.0 kg'), findsOneWidget);
     expect(
-      find.text('Registre seu peso na aba Progresso para acompanhar a evolução.'),
+      find.text('Registra tu peso en la pestaña Progreso para seguir tu evolución.'),
       findsOneWidget,
     );
   });

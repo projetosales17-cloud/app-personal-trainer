@@ -7,9 +7,9 @@ void main() {
   testWidgets('Mostra os produtos do catálogo com faixa de preço e tags', (tester) async {
     await tester.pumpWidget(MaterialApp(home: VitrineProdutosScreen()));
 
-    expect(find.text('Kit de faixas de resistência'), findsOneWidget);
-    expect(find.text('Roda abdominal'), findsOneWidget);
-    expect(find.text('Terceira idade'), findsWidgets);
+    expect(find.text('Kit de bandas de resistencia'), findsOneWidget);
+    expect(find.text('Rueda abdominal'), findsOneWidget);
+    expect(find.text('Adultos mayores'), findsWidgets);
   });
 
   testWidgets('Sem link externo ainda, o botão de compra fica desabilitado e mostra "Em breve"', (
@@ -18,7 +18,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: VitrineProdutosScreen()));
 
     final botoes = tester.widgetList<FilledButton>(
-      find.widgetWithText(FilledButton, 'Em breve'),
+      find.widgetWithText(FilledButton, 'Próximamente'),
     );
     expect(botoes, isNotEmpty);
     for (final botao in botoes) {

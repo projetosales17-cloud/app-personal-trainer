@@ -29,7 +29,7 @@ void main() {
   });
 
   test('busca encontra pelo título', () {
-    final resultado = repositorio.filtrar(busca: 'omelete');
+    final resultado = repositorio.filtrar(busca: 'omelette');
     expect(resultado.any((r) => r.id == 'omelete-de-espinafre'), isTrue);
   });
 

@@ -15,7 +15,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: HidratacaoView()));
     await tester.pump();
 
-    expect(find.textContaining('Complete a anamnese'), findsOneWidget);
+    expect(find.textContaining('Completa la anamnesis'), findsOneWidget);
   });
 
   testWidgets('Com anamnese salva, mostra a meta de hidratação calculada', (tester) async {
@@ -34,6 +34,6 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: HidratacaoView(repositorio: repositorio)));
     await tester.pump();
 
-    expect(find.text('2.1 L por dia'), findsOneWidget);
+    expect(find.text('2.1 L por día'), findsOneWidget);
   });
 }

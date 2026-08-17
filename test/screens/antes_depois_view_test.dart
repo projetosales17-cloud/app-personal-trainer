@@ -40,7 +40,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.textContaining('Registre pelo menos duas fotos'), findsOneWidget);
+    expect(find.textContaining('Registra al menos dos fotos'), findsOneWidget);
   });
 
   testWidgets('Com 2 fotos, mostra os cartões "Antes" e "Depois"', (tester) async {
@@ -56,8 +56,8 @@ void main() {
     await tester.pump();
 
     expect(find.text('Antes'), findsOneWidget);
-    expect(find.text('Depois'), findsOneWidget);
-    expect(find.textContaining('Registre pelo menos duas fotos'), findsNothing);
+    expect(find.text('Después'), findsOneWidget);
+    expect(find.textContaining('Registra al menos dos fotos'), findsNothing);
   });
 
   testWidgets('Com 3 fotos, a linha do tempo mostra todas elas', (tester) async {
@@ -73,7 +73,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Linha do tempo completa'), findsOneWidget);
+    expect(find.text('Línea de tiempo completa'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('linha-do-tempo')),

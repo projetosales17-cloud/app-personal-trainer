@@ -74,7 +74,7 @@ void main() {
     await tester.tap(find.byKey(const Key('botao-entrar')));
     await tester.pumpAndSettle();
 
-    expect(find.text('E-mail ou senha incorretos.'), findsOneWidget);
+    expect(find.text('Correo o contraseña incorrectos.'), findsOneWidget);
   });
 
   testWidgets('Esqueci minha senha sem e-mail preenchido mostra aviso', (tester) async {
@@ -90,7 +90,7 @@ void main() {
     await tester.tap(find.byKey(const Key('botao-esqueci-senha')));
     await tester.pump();
 
-    expect(find.text('Digite seu e-mail para redefinir a senha.'), findsOneWidget);
+    expect(find.text('Ingresa tu correo electrónico para restablecer la contraseña.'), findsOneWidget);
   });
 
   testWidgets('Esqueci minha senha com e-mail preenchido mostra confirmação', (tester) async {
@@ -107,7 +107,7 @@ void main() {
     await tester.tap(find.byKey(const Key('botao-esqueci-senha')));
     await tester.pumpAndSettle();
 
-    expect(find.text('E-mail de redefinição de senha enviado.'), findsOneWidget);
+    expect(find.text('Te enviamos un correo para restablecer tu contraseña.'), findsOneWidget);
   });
 
   testWidgets('Tocar em "Cadastre-se" abre a tela de cadastro', (tester) async {
@@ -123,7 +123,7 @@ void main() {
     await tester.tap(find.byKey(const Key('botao-ir-para-cadastro')));
     await tester.pumpAndSettle();
 
-    // "Criar conta" aparece tanto no título da AppBar quanto no botão.
-    expect(find.text('Criar conta'), findsWidgets);
+    // "Crear cuenta" aparece tanto no título da AppBar quanto no botão.
+    expect(find.text('Crear cuenta'), findsWidgets);
   });
 }

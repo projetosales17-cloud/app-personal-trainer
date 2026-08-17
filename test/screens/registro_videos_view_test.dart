@@ -52,7 +52,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.textContaining('Nenhum vídeo ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay videos'), findsOneWidget);
   });
 
   testWidgets('Com um vídeo já registrado, mostra na lista', (tester) async {
@@ -66,7 +66,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.textContaining('Nenhum vídeo ainda'), findsNothing);
+    expect(find.textContaining('Aún no hay videos'), findsNothing);
     expect(find.byType(ListTile), findsOneWidget);
     expect(find.byIcon(Icons.play_circle_outline), findsOneWidget);
   });
@@ -113,7 +113,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(fonteRecebida, ImageSource.camera);
-    expect(find.textContaining('Nenhum vídeo ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay videos'), findsOneWidget);
   });
 
   testWidgets('Tocar em "Galeria" aciona o seletor com a fonte galeria', (tester) async {
@@ -157,6 +157,6 @@ void main() {
     await tester.tap(find.byKey(const Key('botao-camera-video')));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Nenhum vídeo ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay videos'), findsOneWidget);
   });
 }

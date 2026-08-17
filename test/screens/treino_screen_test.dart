@@ -14,19 +14,19 @@ void main() {
   testWidgets('Mostra o primeiro exercício da lista por padrão (sem filtro)', (tester) async {
     await tester.pumpWidget(MaterialApp(home: TreinoScreen()));
 
-    expect(find.text('Flexão de braço'), findsOneWidget);
+    expect(find.text('Flexión de brazos'), findsOneWidget);
   });
 
   testWidgets('É possível rolar até exercícios mais abaixo na lista', (tester) async {
     await tester.pumpWidget(MaterialApp(home: TreinoScreen()));
 
     await tester.dragUntilVisible(
-      find.text('Prancha'),
+      find.text('Plancha'),
       find.byKey(_lista),
       const Offset(0, -300),
     );
 
-    expect(find.text('Prancha'), findsOneWidget);
+    expect(find.text('Plancha'), findsOneWidget);
   });
 
   testWidgets('Filtrar por grupo muscular mostra só os exercícios daquele grupo', (tester) async {
@@ -39,26 +39,26 @@ void main() {
     await tester.tap(find.widgetWithText(FilterChip, 'Glúteo'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Elevação pélvica'), findsOneWidget);
-    expect(find.text('Flexão de braço'), findsNothing);
+    expect(find.text('Elevación de cadera'), findsOneWidget);
+    expect(find.text('Flexión de brazos'), findsNothing);
   });
 
   testWidgets('Tocar em um exercício abre a tela de detalhe', (tester) async {
     await tester.pumpWidget(MaterialApp(home: TreinoScreen()));
 
-    await tester.tap(find.text('Flexão de braço'));
+    await tester.tap(find.text('Flexión de brazos'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Como executar'), findsOneWidget);
-    expect(find.textContaining('largura dos ombros'), findsOneWidget);
+    expect(find.text('Cómo hacerlo'), findsOneWidget);
+    expect(find.textContaining('ancho de los hombros'), findsOneWidget);
   });
 
   testWidgets('Trocar para a aba "Minha ficha" mostra o estado sem anamnese', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: TreinoScreen()));
 
-    await tester.tap(find.text('Minha ficha'));
+    await tester.tap(find.text('Mi rutina'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Complete a anamnese'), findsOneWidget);
+    expect(find.textContaining('Completa la anamnesis'), findsOneWidget);
   });
 }

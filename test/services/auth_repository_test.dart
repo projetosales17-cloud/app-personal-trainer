@@ -6,21 +6,21 @@ import 'package:app_personal_trainer/services/auth_repository.dart';
 void main() {
   group('mensagemDeErroAuth', () {
     test('traduz códigos conhecidos', () {
-      expect(mensagemDeErroAuth('email-already-in-use'), 'Este e-mail já está cadastrado.');
+      expect(mensagemDeErroAuth('email-already-in-use'), 'Este correo ya está registrado.');
       expect(
         mensagemDeErroAuth('weak-password'),
-        'A senha precisa ter pelo menos 6 caracteres.',
+        'La contraseña debe tener al menos 6 caracteres.',
       );
-      expect(mensagemDeErroAuth('invalid-email'), 'E-mail inválido.');
-      expect(mensagemDeErroAuth('user-not-found'), 'E-mail ou senha incorretos.');
-      expect(mensagemDeErroAuth('wrong-password'), 'E-mail ou senha incorretos.');
-      expect(mensagemDeErroAuth('invalid-credential'), 'E-mail ou senha incorretos.');
+      expect(mensagemDeErroAuth('invalid-email'), 'Correo inválido.');
+      expect(mensagemDeErroAuth('user-not-found'), 'Correo o contraseña incorrectos.');
+      expect(mensagemDeErroAuth('wrong-password'), 'Correo o contraseña incorrectos.');
+      expect(mensagemDeErroAuth('invalid-credential'), 'Correo o contraseña incorrectos.');
     });
 
     test('usa mensagem genérica para código desconhecido', () {
       expect(
         mensagemDeErroAuth('algum-codigo-novo-da-api'),
-        'Não foi possível completar a operação. Tente novamente.',
+        'No se pudo completar la operación. Vuelve a intentarlo.',
       );
     });
   });

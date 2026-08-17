@@ -20,7 +20,7 @@ void main() {
   });
 
   test('busca encontra por palavra no título', () {
-    final resultado = repositorio.filtrar(busca: 'aquecer');
+    final resultado = repositorio.filtrar(busca: 'calentar');
     expect(resultado.any((o) => o.id == 'aquecimento-antes-do-treino'), isTrue);
   });
 
@@ -30,7 +30,7 @@ void main() {
   });
 
   test('busca é case-insensitive', () {
-    final resultado = repositorio.filtrar(busca: 'AQUECER');
+    final resultado = repositorio.filtrar(busca: 'CALENTAR');
     expect(resultado.any((o) => o.id == 'aquecimento-antes-do-treino'), isTrue);
   });
 

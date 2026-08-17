@@ -40,9 +40,9 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao)));
     await tester.pump();
     await tester.pump();
-    await _rolarAte(tester, find.textContaining('Nenhum registro de carga ainda'));
+    await _rolarAte(tester, find.textContaining('Aún no hay registros de carga'));
 
-    expect(find.textContaining('Nenhum registro de carga ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay registros de carga'), findsOneWidget);
   });
 
   testWidgets('Registrar uma carga adiciona ao histórico e limpa os campos', (tester) async {
@@ -99,7 +99,7 @@ void main() {
     await tester.pump();
     await _rolarAte(tester, find.byType(ListTile));
 
-    expect(find.textContaining('Nenhum registro de carga ainda'), findsNothing);
+    expect(find.textContaining('Aún no hay registros de carga'), findsNothing);
     final tiles = tester.widgetList<ListTile>(find.byType(ListTile)).toList();
     expect(tiles, hasLength(1));
   });
@@ -117,9 +117,9 @@ void main() {
     await tester.enterText(find.byKey(const Key('campo-peso-carga')), 'abc');
     await tester.tap(find.byKey(const Key('botao-registrar-carga')));
     await tester.pumpAndSettle();
-    await _rolarAte(tester, find.textContaining('Nenhum registro de carga ainda'));
+    await _rolarAte(tester, find.textContaining('Aún no hay registros de carga'));
 
-    expect(find.textContaining('Nenhum registro de carga ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay registros de carga'), findsOneWidget);
   });
 
   testWidgets('Peso 0 registra normalmente (exercício de peso do corpo)', (tester) async {
@@ -148,7 +148,7 @@ void main() {
     await tester.pump();
     await _rolarAte(tester, find.byKey(const Key('texto-cronometro')));
 
-    expect(find.text('Cronômetro de descanso'), findsOneWidget);
+    expect(find.text('Cronómetro de descanso'), findsOneWidget);
     expect(find.byKey(const Key('texto-cronometro')), findsOneWidget);
   });
 
@@ -159,7 +159,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(Image), findsOneWidget);
-    expect(find.textContaining('Ilustração genérica do grupo muscular'), findsOneWidget);
+    expect(find.textContaining('Ilustración genérica del grupo muscular'), findsOneWidget);
   });
 
   testWidgets('Com imagem real, mostra a imagem e some o aviso de ilustração genérica', (
@@ -182,6 +182,6 @@ void main() {
 
     expect(find.byType(Image), findsOneWidget);
     expect(find.byType(SvgPicture), findsNothing);
-    expect(find.textContaining('Ilustração genérica do grupo muscular'), findsNothing);
+    expect(find.textContaining('Ilustración genérica del grupo muscular'), findsNothing);
   });
 }

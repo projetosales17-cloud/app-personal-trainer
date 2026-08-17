@@ -13,7 +13,7 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: ProgressoScreen()));
     await tester.pump();
 
-    expect(find.textContaining('Nenhum registro de peso ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay registros de peso'), findsOneWidget);
   });
 
   testWidgets('Trocar para a aba "Medidas" mostra o formulário de medidas', (tester) async {
@@ -23,7 +23,7 @@ void main() {
     await tester.tap(find.text('Medidas'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Nenhum registro de medidas ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay registros de medidas'), findsOneWidget);
     expect(find.byKey(const Key('campo-cintura')), findsOneWidget);
   });
 
@@ -34,7 +34,7 @@ void main() {
     await tester.tap(find.text('Fotos'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Nenhuma foto ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay fotos'), findsOneWidget);
   });
 
   testWidgets('Trocar para a aba "Vídeos" mostra o estado vazio', (tester) async {
@@ -43,10 +43,10 @@ void main() {
 
     await tester.drag(find.byType(TabBar), const Offset(-500, 0));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Vídeos'));
+    await tester.tap(find.text('Videos'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Nenhum vídeo ainda'), findsOneWidget);
+    expect(find.textContaining('Aún no hay videos'), findsOneWidget);
   });
 
   testWidgets('Trocar para a aba "Antes/Depois" pede mais fotos', (tester) async {
@@ -55,9 +55,9 @@ void main() {
 
     await tester.drag(find.byType(TabBar), const Offset(-500, 0));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Antes/Depois'));
+    await tester.tap(find.text('Antes/Después'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Registre pelo menos duas fotos'), findsOneWidget);
+    expect(find.textContaining('Registra al menos dos fotos'), findsOneWidget);
   });
 }

@@ -13,21 +13,21 @@ const bibliotecaProdutos = <Produto>[
     descricao:
         'Bandas elásticas de diferentes intensidades + mini bandas, para '
         'entrenar en casa o complementar tu rutina en el gimnasio.',
-    faixaPrecoReferencia: 'R\$ 30 – R\$ 70',
+    faixaPrecoReferencia: 'US\$ 6 – US\$ 13',
     tags: [TagPerfil.emagrecimento, TagPerfil.terceiraIdade],
   ),
   Produto(
     id: 'halteres-ajustaveis',
     nome: 'Mancuernas ajustables compactas',
     descricao: 'Peso regulable en un solo par de mancuernas, que ocupa poco espacio en casa.',
-    faixaPrecoReferencia: 'R\$ 150 – R\$ 400',
+    faixaPrecoReferencia: 'US\$ 28 – US\$ 73',
     tags: [TagPerfil.hipertrofia, TagPerfil.emagrecimento],
   ),
   Produto(
     id: 'tapete-yoga',
     nome: 'Tapete de yoga antideslizante',
     descricao: 'Base cómoda para estiramientos, movilidad y ejercicios en el piso.',
-    faixaPrecoReferencia: 'R\$ 40 – R\$ 90',
+    faixaPrecoReferencia: 'US\$ 7 – US\$ 16',
     tags: [TagPerfil.terceiraIdade, TagPerfil.menopausa, TagPerfil.bariatrica],
   ),
   Produto(
@@ -36,14 +36,14 @@ const bibliotecaProdutos = <Produto>[
     descricao:
         'Cuerda con rodamiento, digital 2 en 1 con contador — ideal para '
         'cardio rápido en casa.',
-    faixaPrecoReferencia: 'R\$ 25 – R\$ 60',
+    faixaPrecoReferencia: 'US\$ 5 – US\$ 11',
     tags: [TagPerfil.emagrecimento],
   ),
   Produto(
     id: 'conjunto-seamless',
     nome: 'Conjunto deportivo sin costuras',
     descricao: 'Top y legging sin costuras, comodidad y libertad de movimiento durante el entrenamiento.',
-    faixaPrecoReferencia: 'R\$ 90 – R\$ 180',
+    faixaPrecoReferencia: 'US\$ 16 – US\$ 33',
     tags: [TagPerfil.emagrecimento, TagPerfil.hipertrofia],
   ),
   Produto(
@@ -53,7 +53,7 @@ const bibliotecaProdutos = <Produto>[
         'Fortalecimiento del core y la estabilidad — no se recomienda '
         'para quienes están en el período de restricción posparto o en '
         'el perfil de tercera edad (ver anamnesis).',
-    faixaPrecoReferencia: 'R\$ 30 – R\$ 60',
+    faixaPrecoReferencia: 'US\$ 6 – US\$ 11',
     tags: [TagPerfil.hipertrofia],
   ),
 ];

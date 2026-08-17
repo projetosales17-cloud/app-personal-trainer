@@ -56,7 +56,7 @@ void main() {
 
     final cardapio = gerador.gerar(anamneseHipertrofia);
     for (final dia in cardapio.dias) {
-      expect(dia.refeicoes.map((r) => r.nome), contains('Ceia'));
+      expect(dia.refeicoes.map((r) => r.nome), contains('Colación nocturna'));
     }
   });
 
@@ -75,7 +75,7 @@ void main() {
       alturaCm: 170,
       pesoAtualKg: 65,
       objetivoPrincipal: Objetivo.emagrecimento,
-      restricoesAlimentares: ['Lactose'],
+      restricoesAlimentares: ['Lactosa'],
       nivelAtividade: NivelAtividade.moderado,
       frequenciaSemanalDias: 3,
     );

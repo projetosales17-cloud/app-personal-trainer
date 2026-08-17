@@ -44,7 +44,7 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.textContaining('Complete a anamnese'), findsOneWidget);
+    expect(find.textContaining('Completa la anamnesis'), findsOneWidget);
   });
 
   testWidgets('Com anamnese salva, mostra os dados da usuária', (tester) async {
@@ -74,11 +74,11 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.text('30 anos'), findsOneWidget);
+    expect(find.text('30 años'), findsOneWidget);
     expect(find.text('170 cm'), findsOneWidget);
     expect(find.text('65.0 kg'), findsOneWidget);
     expect(find.text('60.0 kg'), findsOneWidget);
-    expect(find.text('Emagrecimento'), findsOneWidget);
+    expect(find.text('Pérdida de peso'), findsOneWidget);
     expect(find.text('Menopausa'), findsOneWidget);
     expect(find.text('Lactose'), findsOneWidget);
   });
@@ -228,7 +228,7 @@ void main() {
       await tester.tap(find.byKey(const Key('switch-notificacoes')));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Permissão de notificações negada'), findsOneWidget);
+      expect(find.textContaining('Permiso de notificaciones denegado'), findsOneWidget);
       expect(await preferenciasRepositorio.notificacoesAtivadas(), isFalse);
       expect(
         tester.widget<SwitchListTile>(find.byKey(const Key('switch-notificacoes'))).value,
@@ -242,12 +242,12 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.textContaining('cobrança de assinatura ainda não'), findsOneWidget);
+    expect(find.textContaining('cobro de la suscripción todavía no'), findsOneWidget);
     // "Suporte" fica abaixo da dobra na viewport de teste (a nova seção
     // "Conta" empurrou o conteúdo) — usamos skipOffstage:false, já
     // construído com o texto certo, só não visível sem rolar.
     expect(
-      find.textContaining('Canal de suporte em breve', skipOffstage: false),
+      find.textContaining('Canal de soporte próximamente', skipOffstage: false),
       findsOneWidget,
     );
   });

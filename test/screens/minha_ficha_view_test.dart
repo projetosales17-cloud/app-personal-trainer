@@ -31,7 +31,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(find.textContaining('Complete a anamnese'), findsOneWidget);
+    expect(find.textContaining('Completa la anamnesis'), findsOneWidget);
   });
 
   testWidgets('Com anamnese salva, mostra os dias de treino gerados', (tester) async {
@@ -54,16 +54,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(find.textContaining('Válida até'), findsOneWidget);
-    expect(find.text('Dia 1'), findsOneWidget);
-    expect(find.textContaining('Datas sugeridas:'), findsWidgets);
+    expect(find.textContaining('Válida hasta'), findsOneWidget);
+    expect(find.text('Día 1'), findsOneWidget);
+    expect(find.textContaining('Fechas sugeridas:'), findsWidgets);
 
     await tester.dragUntilVisible(
-      find.text('Dia 3'),
+      find.text('Día 3'),
       find.byType(ListView),
       const Offset(0, -300),
     );
-    expect(find.text('Dia 3'), findsOneWidget);
+    expect(find.text('Día 3'), findsOneWidget);
   });
 
   testWidgets('Preferência combinada mostra atividade de cardio no dia', (tester) async {
@@ -237,7 +237,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
 
-      expect(find.textContaining('pulou os últimos treinos'), findsOneWidget);
+      expect(find.textContaining('saltaste los últimos entrenamientos'), findsOneWidget);
     },
   );
 
@@ -274,7 +274,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(find.textContaining('pulou os últimos treinos'), findsNothing);
+    expect(find.textContaining('saltaste los últimos entrenamientos'), findsNothing);
   });
 
   testWidgets('Mostra o cartão de gamificação com streak e pontos', (tester) async {
@@ -297,8 +297,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(find.textContaining('Streak: 0 dia(s)'), findsOneWidget);
-    expect(find.textContaining('0 pontos'), findsOneWidget);
+    expect(find.textContaining('Racha: 0 día(s)'), findsOneWidget);
+    expect(find.textContaining('0 puntos'), findsOneWidget);
   });
 
   testWidgets('Bater um marco de streak (3 dias) dispara uma notificação de conquista', (
@@ -345,6 +345,6 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(notificador.chamadas, ['Sequência de 3 dias!']);
+    expect(notificador.chamadas, ['¡Racha de 3 días!']);
   });
 }

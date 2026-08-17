@@ -16,7 +16,7 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: AlimentacaoScreen()));
     await tester.pump();
 
-    expect(find.text('Frango grelhado (peito)'), findsOneWidget);
+    expect(find.text('Pechuga de pollo a la plancha'), findsOneWidget);
   });
 
   testWidgets('É possível rolar até alimentos mais abaixo na lista', (tester) async {
@@ -24,12 +24,12 @@ void main() {
     await tester.pump();
 
     await tester.dragUntilVisible(
-      find.text('Bebida de soja sem açúcar'),
+      find.text('Bebida de soya sin azúcar'),
       find.byKey(_lista),
       const Offset(0, -300),
     );
 
-    expect(find.text('Bebida de soja sem açúcar'), findsOneWidget);
+    expect(find.text('Bebida de soya sin azúcar'), findsOneWidget);
   });
 
   testWidgets('Filtrar por categoria mostra só os alimentos daquela categoria', (tester) async {
@@ -41,59 +41,59 @@ void main() {
     await tester.tap(find.widgetWithText(FilterChip, 'Vegetal'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Brócolis cozido no vapor'), findsOneWidget);
-    expect(find.text('Frango grelhado (peito)'), findsNothing);
+    expect(find.text('Brócoli cocido al vapor'), findsOneWidget);
+    expect(find.text('Pechuga de pollo a la plancha'), findsNothing);
   });
 
   testWidgets('Tocar em um alimento abre a tela de detalhe com substituições', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: AlimentacaoScreen()));
     await tester.pump();
 
-    await tester.tap(find.text('Frango grelhado (peito)'));
+    await tester.tap(find.text('Pechuga de pollo a la plancha'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Substituições nesta categoria'), findsOneWidget);
-    expect(find.text('Tilápia assada'), findsOneWidget);
+    expect(find.text('Sustituciones en esta categoría'), findsOneWidget);
+    expect(find.text('Tilapia al horno'), findsOneWidget);
   });
 
   testWidgets('Trocar para a aba "Cardápio" mostra o estado sem anamnese', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: AlimentacaoScreen()));
     await tester.pump();
 
-    await tester.tap(find.text('Cardápio'));
+    await tester.tap(find.text('Menú'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Complete a anamnese'), findsOneWidget);
+    expect(find.textContaining('Completa la anamnesis'), findsOneWidget);
   });
 
   testWidgets('Trocar para a aba "Hidratação" mostra o estado sem anamnese', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: AlimentacaoScreen()));
     await tester.pump();
 
-    await tester.tap(find.text('Hidratação'));
+    await tester.tap(find.text('Hidratación'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Complete a anamnese'), findsOneWidget);
+    expect(find.textContaining('Completa la anamnesis'), findsOneWidget);
   });
 
   testWidgets('Trocar para a aba "Diário" mostra o estado vazio', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: AlimentacaoScreen()));
     await tester.pump();
 
-    await tester.tap(find.text('Diário'));
+    await tester.tap(find.text('Diario'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Nenhum registro no diário ainda'), findsOneWidget);
+    expect(find.textContaining('Todavía no hay registros en el diario'), findsOneWidget);
   });
 
   testWidgets('Trocar para a aba "Receitas" mostra a lista de receitas', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: AlimentacaoScreen()));
     await tester.pump();
 
-    await tester.tap(find.text('Receitas'));
+    await tester.tap(find.text('Recetas'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Omelete de espinafre'), findsOneWidget);
+    expect(find.text('Omelette de espinaca'), findsOneWidget);
   });
 
   testWidgets('Trocar para a aba "Suplementos" mostra a lista e o aviso educativo', (
@@ -107,7 +107,7 @@ void main() {
     await tester.tap(find.text('Suplementos'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Whey protein'), findsOneWidget);
-    expect(find.textContaining('não recomendação individualizada'), findsOneWidget);
+    expect(find.text('Proteína de suero (whey protein)'), findsOneWidget);
+    expect(find.textContaining('no una recomendación individualizada'), findsOneWidget);
   });
 }

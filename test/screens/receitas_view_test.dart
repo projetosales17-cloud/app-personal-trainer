@@ -13,7 +13,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: ReceitasView())));
     await tester.pump();
 
-    expect(find.text('Omelete de espinafre'), findsOneWidget);
+    expect(find.text('Omelette de espinaca'), findsOneWidget);
   });
 
   testWidgets('Filtrar por tipo de refeição mostra só receitas daquele tipo', (tester) async {
@@ -22,32 +22,32 @@ void main() {
 
     await tester.drag(find.byKey(const Key('filtro-tipo-refeicao')), const Offset(-500, 0));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilterChip, 'Jantar'));
+    await tester.tap(find.widgetWithText(FilterChip, 'Cena'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Sopa de legumes com lentilha'), findsOneWidget);
-    expect(find.text('Omelete de espinafre'), findsNothing);
+    expect(find.text('Sopa de vegetales con lentejas'), findsOneWidget);
+    expect(find.text('Omelette de espinaca'), findsNothing);
   });
 
   testWidgets('Buscar por palavra-chave filtra a lista', (tester) async {
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: ReceitasView())));
     await tester.pump();
 
-    await tester.enterText(find.byKey(const Key('campo-busca-receitas')), 'atum');
+    await tester.enterText(find.byKey(const Key('campo-busca-receitas')), 'atún');
     await tester.pump();
 
-    expect(find.text('Salada de atum com folhas verdes'), findsOneWidget);
-    expect(find.text('Omelete de espinafre'), findsNothing);
+    expect(find.text('Ensalada de atún con hojas verdes'), findsOneWidget);
+    expect(find.text('Omelette de espinaca'), findsNothing);
   });
 
   testWidgets('Tocar em uma receita abre a tela de detalhe com ingredientes', (tester) async {
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: ReceitasView())));
     await tester.pump();
 
-    await tester.tap(find.text('Omelete de espinafre'));
+    await tester.tap(find.text('Omelette de espinaca'));
     await tester.pumpAndSettle();
 
     expect(find.text('Ingredientes'), findsOneWidget);
-    expect(find.textContaining('2 ovos'), findsOneWidget);
+    expect(find.textContaining('2 huevos'), findsOneWidget);
   });
 }

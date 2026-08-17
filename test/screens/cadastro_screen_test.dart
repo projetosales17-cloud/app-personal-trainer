@@ -151,6 +151,6 @@ void main() {
     await tester.tap(find.byKey(const Key('botao-cadastrar')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Este e-mail já está cadastrado.'), findsOneWidget);
+    expect(find.text('Este correo ya está registrado.'), findsOneWidget);
   });
 }

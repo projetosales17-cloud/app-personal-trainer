@@ -5,11 +5,11 @@ import 'package:app_personal_trainer/saude/triagem.dart';
 void main() {
   test('classificarPressaoArterial', () {
     expect(classificarPressaoArterial(110, 70), 'Normal');
-    expect(classificarPressaoArterial(125, 70), 'Pressão elevada');
-    expect(classificarPressaoArterial(132, 82), 'Hipertensão estágio 1');
-    expect(classificarPressaoArterial(150, 95), 'Hipertensão estágio 2');
-    expect(classificarPressaoArterial(185, 125), 'Crise hipertensiva');
-    expect(classificarPressaoArterial(85, 55), 'Hipotensão');
+    expect(classificarPressaoArterial(125, 70), 'Presión elevada');
+    expect(classificarPressaoArterial(132, 82), 'Hipertensión etapa 1');
+    expect(classificarPressaoArterial(150, 95), 'Hipertensión etapa 2');
+    expect(classificarPressaoArterial(185, 125), 'Crisis hipertensiva');
+    expect(classificarPressaoArterial(85, 55), 'Hipotensión');
   });
 
   test('classificarPressaoArterial com valores inválidos lança ArgumentError', () {
@@ -18,8 +18,8 @@ void main() {
 
   test('verificarAlertaPressaoArterial', () {
     expect(verificarAlertaPressaoArterial('Normal'), isNull);
-    expect(verificarAlertaPressaoArterial('Hipotensão'), isNotNull);
-    expect(verificarAlertaPressaoArterial('Crise hipertensiva'), contains('imediatamente'));
+    expect(verificarAlertaPressaoArterial('Hipotensión'), isNotNull);
+    expect(verificarAlertaPressaoArterial('Crisis hipertensiva'), contains('inmediato'));
   });
 
   test('triagemParQ sem fatores de risco', () {

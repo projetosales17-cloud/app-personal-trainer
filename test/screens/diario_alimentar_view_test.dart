@@ -14,7 +14,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: DiarioAlimentarView())));
     await tester.pump();
 
-    expect(find.textContaining('Nenhum registro no diário ainda'), findsOneWidget);
+    expect(find.textContaining('Todavía no hay registros en el diario'), findsOneWidget);
   });
 
   testWidgets('Registrar uma refeição adiciona à lista e limpa o campo', (tester) async {
@@ -29,7 +29,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Frango com arroz'), findsOneWidget);
-    expect(find.textContaining('Café da manhã ·'), findsOneWidget);
+    expect(find.textContaining('Desayuno ·'), findsOneWidget);
 
     final campo = tester.widget<TextField>(find.byKey(const Key('campo-descricao')));
     expect(campo.controller!.text, isEmpty);
@@ -44,14 +44,14 @@ void main() {
 
     await tester.tap(find.byKey(const Key('campo-refeicao')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Jantar').last);
+    await tester.tap(find.text('Cena').last);
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byKey(const Key('campo-descricao')), 'Sopa de legumes');
     await tester.tap(find.byKey(const Key('botao-registrar-diario')));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Jantar ·'), findsOneWidget);
+    expect(find.textContaining('Cena ·'), findsOneWidget);
   });
 
   testWidgets('Descrição vazia não registra nada', (tester) async {
@@ -64,6 +64,6 @@ void main() {
     await tester.tap(find.byKey(const Key('botao-registrar-diario')));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Nenhum registro no diário ainda'), findsOneWidget);
+    expect(find.textContaining('Todavía no hay registros en el diario'), findsOneWidget);
   });
 }
