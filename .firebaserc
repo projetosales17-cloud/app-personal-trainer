@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "app-personal-trainer-48012"
+  },
+  "targets": {
+    "app-personal-trainer-48012": {
+      "hosting": {
+        "mx": [
+          "meupersonal-mx"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
