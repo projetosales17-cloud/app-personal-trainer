@@ -4,7 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'onboarding_gate.dart';
+import 'screens/assinatura_necessaria_screen.dart';
 import 'screens/login_screen.dart';
+import 'services/assinatura_repository.dart';
 import 'services/auth_repository.dart';
 import 'services/sessao_unica_service.dart';
 
@@ -14,12 +16,18 @@ import 'services/sessao_unica_service.dart';
 /// assumida por outro aparelho ("1 licença = 1 usuária", ver briefing do
 /// produto) e força saída se sim.
 class AutenticacaoGate extends StatefulWidget {
-  AutenticacaoGate({super.key, AuthRepository? authRepositorio, SessaoUnicaService? sessaoUnicaService})
-    : authRepositorio = authRepositorio ?? AuthRepository(),
-      sessaoUnicaService = sessaoUnicaService ?? SessaoUnicaService();
+  AutenticacaoGate({
+    super.key,
+    AuthRepository? authRepositorio,
+    SessaoUnicaService? sessaoUnicaService,
+    AssinaturaRepository? assinaturaRepositorio,
+  }) : authRepositorio = authRepositorio ?? AuthRepository(),
+       sessaoUnicaService = sessaoUnicaService ?? SessaoUnicaService(),
+       assinaturaRepositorio = assinaturaRepositorio ?? AssinaturaRepositoryFirestore();
 
   final AuthRepository authRepositorio;
   final SessaoUnicaService sessaoUnicaService;
+  final AssinaturaRepository assinaturaRepositorio;
 
   @override
   State<AutenticacaoGate> createState() => _AutenticacaoGateState();
@@ -78,7 +86,18 @@ class _AutenticacaoGateState extends State<AutenticacaoGate> {
         }
 
         _vigiarSessao(usuario.uid);
-        return OnboardingGate(authRepositorio: widget.authRepositorio);
+        return StreamBuilder<bool>(
+          stream: widget.assinaturaRepositorio.observarAssinaturaAtiva(usuario.uid),
+          builder: (context, assinaturaSnapshot) {
+            if (assinaturaSnapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            }
+            if (assinaturaSnapshot.data != true) {
+              return AssinaturaNecessariaScreen(authRepositorio: widget.authRepositorio);
+            }
+            return OnboardingGate(authRepositorio: widget.authRepositorio);
+          },
+        );
       },
     );
   }

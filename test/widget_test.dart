@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app_personal_trainer/app.dart';
+import 'package:app_personal_trainer/services/assinatura_repository.dart';
 import 'package:app_personal_trainer/services/auth_repository.dart';
 import 'package:app_personal_trainer/services/controle_sessao.dart';
 import 'package:app_personal_trainer/services/sessao_unica_service.dart';
@@ -22,6 +23,14 @@ class _ControleSessaoSemEfeito implements ControleSessao {
   Stream<String?> observarTokenSessao(String uid) => const Stream.empty();
 }
 
+/// Fake com assinatura sempre ativa — usado nos testes em que a checagem de
+/// assinatura não é o foco (ver test/autenticacao_gate_test.dart para os
+/// testes dedicados a essa lógica).
+class _AssinaturaSempreAtiva implements AssinaturaRepository {
+  @override
+  Stream<bool> observarAssinaturaAtiva(String uid) => Stream.value(true);
+}
+
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
@@ -32,7 +41,11 @@ void main() {
     final sessaoUnicaService = SessaoUnicaService(controleSessao: _ControleSessaoSemEfeito());
 
     await tester.pumpWidget(
-      App(authRepositorio: authRepositorio, sessaoUnicaService: sessaoUnicaService),
+      App(
+        authRepositorio: authRepositorio,
+        sessaoUnicaService: sessaoUnicaService,
+        assinaturaRepositorio: _AssinaturaSempreAtiva(),
+      ),
     );
     await tester.pump();
 
@@ -49,7 +62,11 @@ void main() {
     final sessaoUnicaService = SessaoUnicaService(controleSessao: _ControleSessaoSemEfeito());
 
     await tester.pumpWidget(
-      App(authRepositorio: authRepositorio, sessaoUnicaService: sessaoUnicaService),
+      App(
+        authRepositorio: authRepositorio,
+        sessaoUnicaService: sessaoUnicaService,
+        assinaturaRepositorio: _AssinaturaSempreAtiva(),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -76,7 +93,11 @@ void main() {
     final sessaoUnicaService = SessaoUnicaService(controleSessao: _ControleSessaoSemEfeito());
 
     await tester.pumpWidget(
-      App(authRepositorio: authRepositorio, sessaoUnicaService: sessaoUnicaService),
+      App(
+        authRepositorio: authRepositorio,
+        sessaoUnicaService: sessaoUnicaService,
+        assinaturaRepositorio: _AssinaturaSempreAtiva(),
+      ),
     );
     await tester.pumpAndSettle();
 

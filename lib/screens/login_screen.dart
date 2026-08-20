@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../services/auth_repository.dart';
 import '../services/sessao_unica_service.dart';
-import 'cadastro_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({super.key, AuthRepository? authRepositorio, SessaoUnicaService? sessaoUnicaService})
@@ -112,21 +111,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 key: const Key('botao-esqueci-senha'),
                 onPressed: _carregando ? null : _esqueciSenha,
                 child: const Text('Olvidé mi contraseña'),
-              ),
-              const Divider(height: 32),
-              TextButton(
-                key: const Key('botao-ir-para-cadastro'),
-                onPressed: _carregando
-                    ? null
-                    : () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => CadastroScreen(
-                            authRepositorio: widget.authRepositorio,
-                            sessaoUnicaService: widget.sessaoUnicaService,
-                          ),
-                        ),
-                      ),
-                child: const Text('¿Aún no tienes cuenta? Regístrate'),
               ),
             ],
           ),
