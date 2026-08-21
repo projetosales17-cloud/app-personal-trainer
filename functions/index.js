@@ -27,7 +27,17 @@ async function buscarOuCriarUsuario(email) {
     return await admin.auth().getUserByEmail(email);
   } catch (erro) {
     if (erro.code === "auth/user-not-found") {
-      return await admin.auth().createUser({email});
+      try {
+        return await admin.auth().createUser({email});
+      } catch (erroCriacao) {
+        // Corrida entre eventos simultâneos da Hotmart para o mesmo e-mail
+        // novo: outra requisição já criou o usuário entre o getUserByEmail
+        // e o createUser acima — basta buscar o que foi criado.
+        if (erroCriacao.code === "auth/email-already-exists") {
+          return await admin.auth().getUserByEmail(email);
+        }
+        throw erroCriacao;
+      }
     }
     throw erro;
   }
