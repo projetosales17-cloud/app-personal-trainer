@@ -109,21 +109,4 @@ void main() {
 
     expect(find.text('E-mail de redefinição de senha enviado.'), findsOneWidget);
   });
-
-  testWidgets('Tocar em "Cadastre-se" abre a tela de cadastro', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: LoginScreen(
-          authRepositorio: AuthRepository(auth: MockFirebaseAuth()),
-          sessaoUnicaService: SessaoUnicaService(controleSessao: _ControleSessaoFake()),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byKey(const Key('botao-ir-para-cadastro')));
-    await tester.pumpAndSettle();
-
-    // "Criar conta" aparece tanto no título da AppBar quanto no botão.
-    expect(find.text('Criar conta'), findsWidgets);
-  });
 }

@@ -1,0 +1,19 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Controle de "1 licença = 1 usuária": cada conta gerencia seu
+    // próprio documento de sessão diretamente pelo app.
+    match /sessoes/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Status da assinatura Hotmart: só a Cloud Function do webhook
+    // (via Admin SDK, que ignora estas regras) pode escrever aqui.
+    // O app só pode ler o próprio status.
+    match /assinaturas/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+  }
+}
