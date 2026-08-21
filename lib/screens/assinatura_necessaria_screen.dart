@@ -12,9 +12,7 @@ class AssinaturaNecessariaScreen extends StatelessWidget {
 
   final AuthRepository authRepositorio;
 
-  // TODO: atualizar com o link real assim que o produto brasileiro for
-  // criado no Hotmart (ver produto MiPersonal/México como referência).
-  static const _linkCompra = 'https://go.hotmart.com/PENDENTE-PRODUTO-BR';
+  static const _linkCompra = 'https://go.hotmart.com/Y107272946Y';
 
   @override
   Widget build(BuildContext context) {
