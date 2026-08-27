@@ -52,10 +52,6 @@ class GeradorFichaTreino {
     'elevacao-pelvica-barra',
   };
 
-  /// Equipamentos disponíveis para quem treina em casa. Academia não tem
-  /// restrição de equipamento.
-  static const _equipamentosCasa = {Equipamento.nenhum, Equipamento.elastico};
-
   /// Período de precaução pós-parto em que exercícios de abdômen ficam
   /// bloqueados por padrão (~12 semanas), até liberação médica — regra
   /// simples de segurança, não substitui avaliação profissional (ver
@@ -86,7 +82,7 @@ class GeradorFichaTreino {
     final dias = anamnese.frequenciaSemanalDias.clamp(1, 7);
     final objetivoExercicio = _mapaObjetivo[anamnese.objetivoPrincipal]!;
     final equipamentosPermitidos = anamnese.localTreino == LocalTreino.casa
-        ? _equipamentosCasa
+        ? equipamentosCasa
         : null;
     final restringirTerceiraIdade = anamnese.objetivoPrincipal == Objetivo.terceiraIdade;
 

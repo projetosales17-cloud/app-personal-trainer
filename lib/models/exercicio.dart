@@ -72,6 +72,11 @@ extension EquipamentoLabel on Equipamento {
   };
 }
 
+/// Equipamentos que quem treina em casa normalmente tem à mão (peso do
+/// corpo e faixa elástica). Fonte única usada tanto pelo gerador de ficha
+/// quanto pelo filtro "en casa" da biblioteca de exercícios.
+const equipamentosCasa = {Equipamento.nenhum, Equipamento.elastico};
+
 /// Um exercício da biblioteca. `caminhoImagem` fica nulo por enquanto para
 /// todos os exercícios — a demonstração visual foi decidida como imagem
 /// gerada por IA (personagem consistente), não vídeo/GIF nem banco de
