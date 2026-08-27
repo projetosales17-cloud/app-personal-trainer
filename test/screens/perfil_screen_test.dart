@@ -83,6 +83,38 @@ void main() {
     expect(find.text('Lactose'), findsOneWidget);
   });
 
+  testWidgets('Botão "Editar mis datos" abre o fluxo pré-preenchido', (tester) async {
+    final anamneseRepositorio = AnamneseRepository();
+    await anamneseRepositorio.salvar(
+      const Anamnese(
+        idade: 42,
+        alturaCm: 168,
+        pesoAtualKg: 70,
+        objetivoPrincipal: Objetivo.tonificacao,
+        nivelAtividade: NivelAtividade.leve,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PerfilScreen(
+          anamneseRepositorio: anamneseRepositorio,
+          authRepositorio: _authComUsuaria(),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('botao-editar-anamnese')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Editar mis datos'), findsOneWidget);
+    expect(find.text('Datos básicos'), findsOneWidget);
+    expect(tester.widget<TextField>(find.byType(TextField).at(0)).controller!.text, '42');
+  });
+
   testWidgets('Mostra o e-mail da conta logada', (tester) async {
     await tester.pumpWidget(
       MaterialApp(

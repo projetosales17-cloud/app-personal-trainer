@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/anamnese.dart';
+import 'onboarding/onboarding_flow.dart';
 import '../services/anamnese_repository.dart';
 import '../services/auth_repository.dart';
 import '../services/gerador_ficha_treino.dart';
@@ -35,8 +36,25 @@ class PerfilScreen extends StatefulWidget {
 }
 
 class _PerfilScreenState extends State<PerfilScreen> {
-  late final Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
+  late Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
   late Future<bool> _notificacoesFuture = widget.preferenciasRepositorio.notificacoesAtivadas();
+
+  Future<void> _editarAnamnese(Anamnese anamnese) async {
+    final atualizou = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => OnboardingFlow(
+          repositorio: widget.anamneseRepositorio,
+          anamneseInicial: anamnese,
+          onConcluido: () => Navigator.of(context).pop(true),
+        ),
+      ),
+    );
+    if (atualizou == true && mounted) {
+      setState(() {
+        _anamneseFuture = widget.anamneseRepositorio.carregar();
+      });
+    }
+  }
 
   Future<void> _alterarNotificacoes(bool ativado) async {
     if (ativado) {
@@ -86,8 +104,19 @@ class _PerfilScreenState extends State<PerfilScreen> {
               const SizedBox(height: 8),
               if (anamnese == null)
                 const Text('Completa la anamnesis en el onboarding para ver tus datos aquí.')
-              else
+              else ...[
                 _CardDadosAnamnese(anamnese: anamnese),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: OutlinedButton.icon(
+                    key: const Key('botao-editar-anamnese'),
+                    onPressed: () => _editarAnamnese(anamnese),
+                    icon: const Icon(Icons.edit_outlined),
+                    label: const Text('Editar mis datos'),
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
               Text('Notificaciones', style: Theme.of(context).textTheme.titleMedium),
               FutureBuilder<bool>(
