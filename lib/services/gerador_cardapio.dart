@@ -21,7 +21,11 @@ class GeradorCardapio {
   /// Objetivos com maior demanda calórica/proteica ganham uma refeição
   /// extra (Ceia) — orientação prática comum, não um ajuste calórico
   /// calculado.
-  static const _objetivosComCeia = {Objetivo.hipertrofia, Objetivo.performanceAtletica};
+  static const _objetivosComCeia = {
+    Objetivo.hipertrofia,
+    Objetivo.gluteoPernas,
+    Objetivo.performanceAtletica,
+  };
 
   /// Dicas nutricionais gerais e não-prescritivas por fase do ciclo (ver
   /// briefing do produto) — não muda a seleção de alimentos, só complementa

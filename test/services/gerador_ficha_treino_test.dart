@@ -350,4 +350,105 @@ void main() {
       expect(dia.exercicios.length, fichaBase.dias[dia.dia - 1].exercicios.length);
     }
   });
+
+  test('todo objetivo gera ficha com prescrição preenchida e sem erro', () {
+    for (final objetivo in Objetivo.values) {
+      final ficha = gerador.gerar(
+        Anamnese(
+          idade: 35,
+          alturaCm: 165,
+          pesoAtualKg: 68,
+          objetivoPrincipal: objetivo,
+          nivelAtividade: NivelAtividade.moderado,
+          frequenciaSemanalDias: 3,
+        ),
+      );
+      expect(ficha.prescricao, isNotNull, reason: objetivo.name);
+      expect(ficha.prescricao!.repeticoes, isNotEmpty, reason: objetivo.name);
+      for (final dia in ficha.dias) {
+        expect(dia.exercicios, isNotEmpty, reason: '${objetivo.name} dia ${dia.dia}');
+      }
+    }
+  });
+
+  test('a prescrição muda conforme o objetivo (hipertrofia x tonificação)', () {
+    Anamnese comObjetivo(Objetivo o) => Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: o,
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+    );
+
+    final hipertrofia = gerador.gerar(comObjetivo(Objetivo.hipertrofia)).prescricao!;
+    final tonificacao = gerador.gerar(comObjetivo(Objetivo.tonificacao)).prescricao!;
+    final performance = gerador.gerar(comObjetivo(Objetivo.performanceAtletica)).prescricao!;
+
+    expect(hipertrofia.repeticoes, isNot(tonificacao.repeticoes));
+    expect(hipertrofia.descanso, isNot(performance.descanso));
+  });
+
+  test('objetivo "glúteos e pernas" prioriza glúteo e perna com mais volume', () {
+    const anamneseGluteo = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.gluteoPernas,
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+      regioesPriorizadas: ['Aumentar glúteo', 'Aumentar piernas'],
+    );
+
+    final ficha = gerador.gerar(anamneseGluteo);
+    // Grupos priorizados vêm antes na rotação — glúteo e perna aparecem
+    // já nos dois primeiros dias da semana.
+    final gruposInicio = ficha.dias.take(2).expand((d) => d.gruposMusculares).toSet();
+    expect(gruposInicio, containsAll(<GrupoMuscular>[GrupoMuscular.gluteo, GrupoMuscular.perna]));
+
+    final exerciciosGluteo = ficha.dias
+        .expand((d) => d.exercicios)
+        .where((e) => e.grupoMuscularPrincipal == GrupoMuscular.gluteo)
+        .length;
+    // Sem priorização, glúteo recebe no máximo 3; priorizado, pode passar disso.
+    const anamneseSemPrioridade = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.hipertrofia,
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+    );
+    final gluteoBase = gerador
+        .gerar(anamneseSemPrioridade)
+        .dias
+        .expand((d) => d.exercicios)
+        .where((e) => e.grupoMuscularPrincipal == GrupoMuscular.gluteo)
+        .length;
+    expect(exerciciosGluteo, greaterThanOrEqualTo(gluteoBase));
+  });
+
+  test('objetivo "voltar a treinar" reduz o volume e evita nível avançado', () {
+    const anamneseRetomada = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.voltarATreinar,
+      nivelAtividade: NivelAtividade.leve,
+      frequenciaSemanalDias: 3,
+    );
+
+    final ficha = gerador.gerar(anamneseRetomada);
+    final fichaBase = gerador.gerar(_anamneseBase);
+
+    final totalRetomada = ficha.dias.expand((d) => d.exercicios).length;
+    final totalBase = fichaBase.dias.expand((d) => d.exercicios).length;
+    expect(totalRetomada, lessThan(totalBase));
+
+    for (final dia in ficha.dias) {
+      for (final exercicio in dia.exercicios) {
+        expect(exercicio.nivel, isNot(NivelExercicio.avancado));
+      }
+    }
+  });
 }

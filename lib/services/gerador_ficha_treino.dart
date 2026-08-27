@@ -5,6 +5,31 @@ import '../models/ficha_treino.dart';
 import 'biblioteca_cardio_repository.dart';
 import 'biblioteca_exercicios_repository.dart';
 
+/// Configuração de treino por objetivo — a fonte que faz cada objetivo da
+/// anamnese entregar um treino realmente diferente, e não só uma seleção
+/// de exercícios parecida.
+class _ConfigObjetivo {
+  const _ConfigObjetivo({
+    required this.tagExercicio,
+    required this.prescricao,
+    this.maxExerciciosPorGrupo = 3,
+    this.evitarNivelAvancado = false,
+  });
+
+  /// Tag usada para filtrar exercícios da biblioteca.
+  final ObjetivoExercicio tagExercicio;
+
+  /// Séries/repetições/descanso sugeridos.
+  final PrescricaoTreino prescricao;
+
+  /// Volume-alvo por grupo muscular.
+  final int maxExerciciosPorGrupo;
+
+  /// Objetivos voltados a segurança/retomada não usam exercícios de nível
+  /// avançado.
+  final bool evitarNivelAvancado;
+}
+
 /// Gera uma ficha de treino a partir da anamnese, usando a biblioteca de
 /// exercícios. É uma primeira versão simples de personalização — não
 /// substitui a avaliação de um educador físico.
@@ -19,7 +44,6 @@ class GeradorFichaTreino {
   final BibliotecaCardioRepository repositorioCardio;
 
   static const duracaoValidadeDias = 30;
-  static const _maxExerciciosPorGrupo = 3;
 
   /// Mapeia os textos de lesão coletados no onboarding para o grupo
   /// muscular correspondente, para excluir da ficha. Lesões digitadas em
@@ -32,15 +56,15 @@ class GeradorFichaTreino {
     'Tobillo': GrupoMuscular.perna,
   };
 
-  /// Mapeia o objetivo principal da anamnese para a tag de objetivo usada
-  /// na biblioteca de exercícios.
-  static const _mapaObjetivo = {
-    Objetivo.emagrecimento: ObjetivoExercicio.emagrecimento,
-    Objetivo.tonificacao: ObjetivoExercicio.hipertrofia,
-    Objetivo.hipertrofia: ObjetivoExercicio.hipertrofia,
-    Objetivo.performanceAtletica: ObjetivoExercicio.forca,
-    Objetivo.saudeGeral: ObjetivoExercicio.mobilidade,
-    Objetivo.terceiraIdade: ObjetivoExercicio.mobilidade,
+  /// Mapeia os textos de "priorização de região" coletados no onboarding
+  /// para os grupos musculares que ganham volume extra e entram primeiro
+  /// na semana. Textos não reconhecidos são ignorados.
+  static const _mapaRegiaoParaGrupos = {
+    'Aumentar glúteo': [GrupoMuscular.gluteo],
+    'Aumentar piernas': [GrupoMuscular.perna],
+    'Reducir brazo': [GrupoMuscular.biceps, GrupoMuscular.triceps],
+    'Reducir abdomen': [GrupoMuscular.abdomen],
+    'Fortalecer el core': [GrupoMuscular.abdomen],
   };
 
   /// Perfil de terceira idade prioriza segurança: fora o nível avançado
@@ -58,11 +82,119 @@ class GeradorFichaTreino {
   /// briefing do produto).
   static const _diasRestricaoAbdomenPosParto = 84;
 
+  static const _configPorObjetivo = <Objetivo, _ConfigObjetivo>{
+    Objetivo.emagrecimento: _ConfigObjetivo(
+      tagExercicio: ObjetivoExercicio.emagrecimento,
+      prescricao: PrescricaoTreino(
+        series: '3 series',
+        repeticoes: '12 a 15 repeticiones',
+        descanso: '30 a 45 segundos entre series',
+        estilo:
+            'Circuito de ritmo constante: descansos cortos para mantener el gasto calórico alto.',
+      ),
+    ),
+    Objetivo.recomposicao: _ConfigObjetivo(
+      tagExercicio: ObjetivoExercicio.hipertrofia,
+      prescricao: PrescricaoTreino(
+        series: '3 a 4 series',
+        repeticoes: '10 a 12 repeticiones',
+        descanso: '45 a 60 segundos entre series',
+        estilo:
+            'Cargas moderadas con poco descanso: estimula el músculo mientras reduces grasa.',
+      ),
+    ),
+    Objetivo.tonificacao: _ConfigObjetivo(
+      tagExercicio: ObjetivoExercicio.hipertrofia,
+      prescricao: PrescricaoTreino(
+        series: '3 series',
+        repeticoes: '15 a 20 repeticiones',
+        descanso: '30 a 45 segundos entre series',
+        estilo:
+            'Muchas repeticiones con carga ligera o moderada: firmeza y resistencia muscular.',
+      ),
+    ),
+    Objetivo.gluteoPernas: _ConfigObjetivo(
+      tagExercicio: ObjetivoExercicio.hipertrofia,
+      maxExerciciosPorGrupo: 3,
+      prescricao: PrescricaoTreino(
+        series: '3 a 4 series',
+        repeticoes: '10 a 15 repeticiones',
+        descanso: '45 a 60 segundos entre series',
+        estilo:
+            'Más volumen para glúteos y piernas, que entran primero en la semana.',
+      ),
+    ),
+    Objetivo.hipertrofia: _ConfigObjetivo(
+      tagExercicio: ObjetivoExercicio.hipertrofia,
+      prescricao: PrescricaoTreino(
+        series: '3 a 4 series',
+        repeticoes: '8 a 12 repeticiones',
+        descanso: '60 a 90 segundos entre series',
+        estilo:
+            'Cargas exigentes y descanso completo: el foco es el crecimiento muscular.',
+      ),
+    ),
+    Objetivo.performanceAtletica: _ConfigObjetivo(
+      tagExercicio: ObjetivoExercicio.forca,
+      prescricao: PrescricaoTreino(
+        series: '4 a 5 series',
+        repeticoes: '4 a 6 repeticiones',
+        descanso: '2 a 3 minutos entre series',
+        estilo: 'Cargas altas y pocas repeticiones: fuerza y potencia.',
+      ),
+    ),
+    Objetivo.voltarATreinar: _ConfigObjetivo(
+      tagExercicio: ObjetivoExercicio.mobilidade,
+      maxExerciciosPorGrupo: 2,
+      evitarNivelAvancado: true,
+      prescricao: PrescricaoTreino(
+        series: '2 series',
+        repeticoes: '12 a 15 repeticiones',
+        descanso: '60 segundos entre series',
+        estilo:
+            'Volumen bajo y movimientos simples: crear constancia sin sobrecargar el cuerpo.',
+      ),
+    ),
+    Objetivo.saudeGeral: _ConfigObjetivo(
+      tagExercicio: ObjetivoExercicio.mobilidade,
+      evitarNivelAvancado: true,
+      prescricao: PrescricaoTreino(
+        series: '2 a 3 series',
+        repeticoes: '12 a 15 repeticiones',
+        descanso: '45 a 60 segundos entre series',
+        estilo: 'Ritmo cómodo, con foco en moverte bien y con regularidad.',
+      ),
+    ),
+    Objetivo.menopausa: _ConfigObjetivo(
+      tagExercicio: ObjetivoExercicio.hipertrofia,
+      evitarNivelAvancado: true,
+      prescricao: PrescricaoTreino(
+        series: '2 a 3 series',
+        repeticoes: '8 a 12 repeticiones',
+        descanso: '60 a 90 segundos entre series',
+        estilo:
+            'Fuerza con cargas moderadas para preservar músculo y masa ósea.',
+      ),
+    ),
+    Objetivo.terceiraIdade: _ConfigObjetivo(
+      tagExercicio: ObjetivoExercicio.mobilidade,
+      maxExerciciosPorGrupo: 2,
+      prescricao: PrescricaoTreino(
+        series: '2 series',
+        repeticoes: '10 a 12 repeticiones',
+        descanso: 'lo que necesites para recuperarte',
+        estilo: 'Movimientos controlados, con foco en equilibrio y movilidad.',
+      ),
+    ),
+  };
+
   /// [reduzirVolumeRetomada] vem do `MotorAderencia` (ver briefing do
   /// produto): quando a usuária pulou treinos consecutivos, a próxima
   /// ficha vem com volume reduzido e sem nível avançado, como uma sessão
   /// de retomada mais leve.
   FichaTreino gerar(Anamnese anamnese, {bool reduzirVolumeRetomada = false}) {
+    final config = _configPorObjetivo[anamnese.objetivoPrincipal]!;
+
     final emRestricaoAbdomenPosParto = anamnese.dataParto != null &&
         DateTime.now().difference(anamnese.dataParto!).inDays < _diasRestricaoAbdomenPosParto;
 
@@ -74,13 +206,24 @@ class GeradorFichaTreino {
       gruposExcluidos.add(GrupoMuscular.abdomen);
     }
 
-    final gruposDisponiveis = [
+    final gruposPriorizados = anamnese.regioesPriorizadas
+        .expand((regiao) => _mapaRegiaoParaGrupos[regiao] ?? const <GrupoMuscular>[])
+        .where((grupo) => !gruposExcluidos.contains(grupo))
+        .toSet();
+
+    final disponiveis = [
       for (final grupo in GrupoMuscular.values)
         if (!gruposExcluidos.contains(grupo)) grupo,
     ];
+    // Grupos priorizados entram primeiro na semana (mantendo a ordem
+    // relativa original entre eles), o resto vem depois.
+    final gruposDisponiveis = [
+      ...disponiveis.where(gruposPriorizados.contains),
+      ...disponiveis.where((grupo) => !gruposPriorizados.contains(grupo)),
+    ];
 
     final dias = anamnese.frequenciaSemanalDias.clamp(1, 7);
-    final objetivoExercicio = _mapaObjetivo[anamnese.objetivoPrincipal]!;
+    final objetivoExercicio = config.tagExercicio;
     final equipamentosPermitidos = anamnese.localTreino == LocalTreino.casa
         ? equipamentosCasa
         : null;
@@ -91,11 +234,18 @@ class GeradorFichaTreino {
     // (sem nível avançado); fase lútea só reduz intensidade. Folicular e
     // ovulação não têm restrição — são as fases de mais energia/força.
     final faseCiclo = anamnese.faseCiclo;
-    final excluirNivelAvancado =
-        faseCiclo == FaseCiclo.menstrual || faseCiclo == FaseCiclo.lutea || reduzirVolumeRetomada;
-    final maxExerciciosPorGrupo = (faseCiclo == FaseCiclo.menstrual || reduzirVolumeRetomada)
-        ? _maxExerciciosPorGrupo - 1
-        : _maxExerciciosPorGrupo;
+    final excluirNivelAvancado = config.evitarNivelAvancado ||
+        faseCiclo == FaseCiclo.menstrual ||
+        faseCiclo == FaseCiclo.lutea ||
+        reduzirVolumeRetomada;
+    final reduzirVolume = faseCiclo == FaseCiclo.menstrual || reduzirVolumeRetomada;
+
+    int maxParaGrupo(GrupoMuscular grupo) {
+      var max = config.maxExerciciosPorGrupo;
+      if (gruposPriorizados.contains(grupo)) max += 1;
+      if (reduzirVolume) max -= 1;
+      return max.clamp(1, 99);
+    }
 
     final incluirMusculacao = anamnese.preferenciaTreino != PreferenciaTreino.soCardio;
     final incluirCardio = anamnese.preferenciaTreino != PreferenciaTreino.soMusculacao;
@@ -119,7 +269,7 @@ class GeradorFichaTreino {
             equipamentosPermitidos: equipamentosPermitidos,
             restringirTerceiraIdade: restringirTerceiraIdade,
             excluirNivelAvancado: excluirNivelAvancado,
-            maxExercicios: maxExerciciosPorGrupo,
+            maxExercicios: maxParaGrupo(grupo),
           ),
       ];
       final atividadesCardio = candidatosCardio.isNotEmpty
@@ -140,6 +290,7 @@ class GeradorFichaTreino {
       dias: diasDeTreino,
       geradaEm: geradaEm,
       validaAte: geradaEm.add(const Duration(days: duracaoValidadeDias)),
+      prescricao: config.prescricao,
     );
   }
 
@@ -149,7 +300,7 @@ class GeradorFichaTreino {
     Set<Equipamento>? equipamentosPermitidos,
     bool restringirTerceiraIdade = false,
     bool excluirNivelAvancado = false,
-    int? maxExercicios,
+    required int maxExercicios,
   }) {
     var candidatos = repositorio.filtrar(grupoMuscular: grupo);
     if (equipamentosPermitidos != null) {
@@ -173,6 +324,6 @@ class GeradorFichaTreino {
     final comObjetivo = candidatos.where((exercicio) => exercicio.objetivos.contains(objetivo));
     final base = comObjetivo.isNotEmpty ? comObjetivo.toList() : candidatos;
     final ordenados = [...base]..sort((a, b) => a.nivel.index.compareTo(b.nivel.index));
-    return ordenados.take(maxExercicios ?? _maxExerciciosPorGrupo).toList();
+    return ordenados.take(maxExercicios).toList();
   }
 }

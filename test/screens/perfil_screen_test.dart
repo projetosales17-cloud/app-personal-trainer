@@ -78,7 +78,7 @@ void main() {
     expect(find.text('170 cm'), findsOneWidget);
     expect(find.text('65.0 kg'), findsOneWidget);
     expect(find.text('60.0 kg'), findsOneWidget);
-    expect(find.text('Pérdida de peso'), findsOneWidget);
+    expect(find.text('Bajar de peso y perder medidas'), findsOneWidget);
     expect(find.text('Menopausa'), findsOneWidget);
     expect(find.text('Lactose'), findsOneWidget);
   });

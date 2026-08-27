@@ -179,6 +179,10 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 8),
+                    if (ficha.prescricao != null) ...[
+                      _CartaoPrescricao(prescricao: ficha.prescricao!),
+                      const SizedBox(height: 8),
+                    ],
                     _CartaoGamificacao(resultado: gamificacao),
                     if (aderencia.emAlerta) ...[
                       const SizedBox(height: 8),
@@ -294,6 +298,33 @@ class _SeletorDiasDaSemanaState extends State<_SeletorDiasDaSemana> {
                 child: const Text('Guardar días'),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CartaoPrescricao extends StatelessWidget {
+  const _CartaoPrescricao({required this.prescricao});
+
+  final PrescricaoTreino prescricao;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Cómo hacer este entrenamiento', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 6),
+            Text('${prescricao.series} · ${prescricao.repeticoes}'),
+            Text('Descanso: ${prescricao.descanso}'),
+            const SizedBox(height: 6),
+            Text(prescricao.estilo, style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
       ),
