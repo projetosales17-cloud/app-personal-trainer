@@ -116,6 +116,31 @@ void main() {
     expect(salvo.cirurgiaBariatrica, isFalse);
   });
 
+  testWidgets('Dados básicos fora da faixa não deixam avançar e mostram erro', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: OnboardingFlow(onConcluido: () {}),
+    ));
+    await _avancar(tester); // boas-vindas -> dados básicos
+
+    await tester.enterText(find.byType(TextField).at(0), '30');
+    await tester.enterText(find.byType(TextField).at(1), '170');
+    await tester.enterText(find.byType(TextField).at(2), '7070'); // peso absurdo
+    await tester.pump();
+
+    expect(find.textContaining('entre 30 y 300 kg'), findsOneWidget);
+    expect(
+      tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Siguiente')).onPressed,
+      isNull,
+    );
+
+    await tester.enterText(find.byType(TextField).at(2), '68');
+    await tester.pump();
+    expect(
+      tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Siguiente')).onPressed,
+      isNotNull,
+    );
+  });
+
   testWidgets('Modo de edição pré-preenche os campos e salva as alterações', (tester) async {
     final repositorio = AnamneseRepository();
     const original = Anamnese(
