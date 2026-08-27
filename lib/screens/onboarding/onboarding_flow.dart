@@ -130,6 +130,11 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       if (_passo == 11 && _preferenciaTreino == null && _objetivo != null) {
         _preferenciaTreino = _objetivo!.preferenciaTreinoRecomendada;
       }
+      // Objetivo "glúteo e pernas" já entra com essas regiões marcadas
+      // (a usuária pode mudar) — é o que dá sentido ao objetivo.
+      if (_passo == 12 && _regioes.isEmpty && _objetivo == Objetivo.gluteoPernas) {
+        _regioes.addAll(['Aumentar glúteo', 'Aumentar pernas']);
+      }
     });
   }
 
@@ -310,6 +315,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           RadioListTile<Objetivo>(
             contentPadding: EdgeInsets.zero,
             title: Text(opcao.label),
+            subtitle: Text(opcao.descricao),
+            isThreeLine: true,
             value: opcao,
             // ignore: deprecated_member_use
             groupValue: _objetivo,

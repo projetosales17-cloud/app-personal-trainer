@@ -10,6 +10,16 @@ Future<void> _avancar(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+/// A lista de objetivos ficou longa (10 opções em três linhas) — o item
+/// pode estar fora da área visível, então garante o scroll antes de tocar.
+Future<void> _escolherObjetivo(WidgetTester tester, String label) async {
+  final alvo = find.text(label);
+  await tester.ensureVisible(alvo);
+  await tester.pumpAndSettle();
+  await tester.tap(alvo);
+  await tester.pump();
+}
+
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
@@ -57,8 +67,7 @@ void main() {
     await tester.pump();
     await _avancar(tester); // dados básicos -> objetivo
 
-    await tester.tap(find.text('Emagrecimento'));
-    await tester.pump();
+    await _escolherObjetivo(tester, 'Emagrecer e perder medidas');
     await _avancar(tester); // objetivo -> cirurgia bariátrica
 
     await _avancar(tester); // bariátrica (não) -> condição hormonal
@@ -119,8 +128,7 @@ void main() {
     await tester.pump();
     await _avancar(tester); // dados básicos -> objetivo
 
-    await tester.tap(find.text('Emagrecimento'));
-    await tester.pump();
+    await _escolherObjetivo(tester, 'Emagrecer e perder medidas');
     await _avancar(tester); // objetivo -> cirurgia bariátrica
 
     await _avancar(tester); // bariátrica (não) -> condição hormonal
@@ -167,8 +175,7 @@ void main() {
     await tester.pump();
     await _avancar(tester); // dados básicos -> objetivo
 
-    await tester.tap(find.text('Tonificação'));
-    await tester.pump();
+    await _escolherObjetivo(tester, 'Definir e deixar o corpo tonificado');
     await _avancar(tester); // objetivo -> cirurgia bariátrica
 
     await _avancar(tester); // bariátrica (não) -> condição hormonal
@@ -219,8 +226,7 @@ void main() {
     await tester.pump();
     await _avancar(tester); // dados básicos -> objetivo
 
-    await tester.tap(find.text('Saúde geral (ex: menopausa)'));
-    await tester.pump();
+    await _escolherObjetivo(tester, 'Saúde e disposição no dia a dia');
     await _avancar(tester); // objetivo -> cirurgia bariátrica
 
     await _avancar(tester); // bariátrica (não) -> condição hormonal
