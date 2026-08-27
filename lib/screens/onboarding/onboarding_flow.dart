@@ -74,6 +74,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   int _passo = 0;
   static const _totalPassos = 14;
 
+  final _nomeController = TextEditingController();
+  final _apelidoController = TextEditingController();
   final _idadeController = TextEditingController();
   final _alturaController = TextEditingController();
   final _pesoAtualController = TextEditingController();
@@ -173,6 +175,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   @override
   void dispose() {
     for (final controller in [
+      _nomeController,
+      _apelidoController,
       _idadeController,
       _alturaController,
       _pesoAtualController,
@@ -215,6 +219,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       double.parse(_idadeController.text.trim().replaceAll(',', '.')).round();
 
   bool get _podeAvancar => switch (_passo) {
+    0 => _nomeController.text.trim().isNotEmpty,
     1 =>
       _numeroNaFaixa(_idadeController.text, _faixaIdade) != null &&
           _numeroNaFaixa(_alturaController.text, _faixaAltura) != null &&
@@ -261,7 +266,10 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   Future<void> _concluir() async {
     setState(() => _salvando = true);
 
+    final apelido = _apelidoController.text.trim();
     final anamnese = Anamnese(
+      nome: _nomeController.text.trim(),
+      apelido: apelido.isEmpty ? null : apelido,
       idade: _idadeInformada,
       alturaCm: double.parse(_alturaController.text.replaceAll(',', '.')),
       pesoAtualKg: double.parse(_pesoAtualController.text.replaceAll(',', '.')),
@@ -338,12 +346,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   Widget _conteudoDoPasso() {
     switch (_passo) {
       case 0:
-        return const _TextoPasso(
-          titulo: 'Bem-vinda!',
-          texto:
-              'Vamos configurar seu plano personalizado de treino e alimentação. '
-              'Isso leva só alguns minutos.',
-        );
+        return _passoBoasVindas();
       case 1:
         return _passoDadosBasicos();
       case 2:
@@ -388,6 +391,40 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       default:
         return const SizedBox.shrink();
     }
+  }
+
+  Widget _passoBoasVindas() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Bem-vinda!', style: Theme.of(context).textTheme.headlineMedium),
+        const SizedBox(height: 16),
+        Text(
+          'Vamos configurar seu plano personalizado de treino e alimentação. '
+          'Primeiro, como podemos te chamar?',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        const SizedBox(height: 24),
+        TextField(
+          key: const Key('campo-nome-onboarding'),
+          controller: _nomeController,
+          textCapitalization: TextCapitalization.words,
+          decoration: const InputDecoration(labelText: 'Nome'),
+          onChanged: (_) => setState(() {}),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          key: const Key('campo-apelido-onboarding'),
+          controller: _apelidoController,
+          textCapitalization: TextCapitalization.words,
+          decoration: const InputDecoration(
+            labelText: 'Apelido — opcional',
+            helperText: 'É assim que o app vai te saudar.',
+          ),
+          onChanged: (_) => setState(() {}),
+        ),
+      ],
+    );
   }
 
   Widget _passoDadosBasicos() {
@@ -807,25 +844,6 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               ? 'Salve para atualizar seu plano com esses dados.'
               : 'Confirme para gerar seu plano inicial.',
         ),
-      ],
-    );
-  }
-}
-
-class _TextoPasso extends StatelessWidget {
-  const _TextoPasso({required this.titulo, required this.texto});
-
-  final String titulo;
-  final String texto;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(titulo, style: Theme.of(context).textTheme.headlineMedium),
-        const SizedBox(height: 16),
-        Text(texto, style: Theme.of(context).textTheme.bodyLarge),
       ],
     );
   }

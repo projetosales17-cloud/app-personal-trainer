@@ -121,6 +121,11 @@ extension NivelAtividadeLabel on NivelAtividade {
 /// inicial de treino e alimentação.
 class Anamnese {
   const Anamnese({
+    // Nome e apelido deixam o app mais pessoal — a partir da 2ª abertura a
+    // usuária é saudada pelo nome. `nome` vazio em anamneses salvas antes
+    // desse campo existir.
+    this.nome = '',
+    this.apelido,
     required this.idade,
     required this.alturaCm,
     required this.pesoAtualKg,
@@ -156,10 +161,21 @@ class Anamnese {
     this.dataUltimaMenstruacao,
   });
 
+  final String nome;
+  final String? apelido;
   final int idade;
   final double alturaCm;
   final double pesoAtualKg;
   final double? pesoDesejadoKg;
+
+  /// Como o app deve se dirigir à usuária: o apelido, se houver; senão o
+  /// primeiro nome. Vazio quando nenhum nome foi informado.
+  String get nomeExibicao {
+    final apel = apelido?.trim() ?? '';
+    if (apel.isNotEmpty) return apel;
+    final partes = nome.trim().split(RegExp(r'\s+'));
+    return partes.isEmpty ? '' : partes.first;
+  }
   final Sexo sexo;
   final Objetivo objetivoPrincipal;
   final bool cirurgiaBariatrica;
@@ -185,6 +201,8 @@ class Anamnese {
       : null;
 
   Map<String, dynamic> toJson() => {
+    'nome': nome,
+    'apelido': apelido,
     'idade': idade,
     'alturaCm': alturaCm,
     'pesoAtualKg': pesoAtualKg,
@@ -208,6 +226,8 @@ class Anamnese {
   };
 
   factory Anamnese.fromJson(Map<String, dynamic> json) => Anamnese(
+    nome: json['nome'] as String? ?? '',
+    apelido: json['apelido'] as String?,
     idade: json['idade'] as int,
     alturaCm: (json['alturaCm'] as num).toDouble(),
     pesoAtualKg: (json['pesoAtualKg'] as num).toDouble(),
