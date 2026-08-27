@@ -4,6 +4,7 @@ import 'autenticacao_gate.dart';
 import 'services/assinatura_repository.dart';
 import 'services/auth_repository.dart';
 import 'services/sessao_unica_service.dart';
+import 'services/sincronizador_dados.dart';
 import 'tema.dart';
 
 class App extends StatelessWidget {
@@ -12,6 +13,7 @@ class App extends StatelessWidget {
     AuthRepository? authRepositorio,
     SessaoUnicaService? sessaoUnicaService,
     AssinaturaRepository? assinaturaRepositorio,
+    this.sincronizador,
   }) : authRepositorio = authRepositorio ?? AuthRepository(),
        sessaoUnicaService = sessaoUnicaService ?? SessaoUnicaService(),
        assinaturaRepositorio = assinaturaRepositorio ?? AssinaturaRepositoryFirestore();
@@ -19,6 +21,7 @@ class App extends StatelessWidget {
   final AuthRepository authRepositorio;
   final SessaoUnicaService sessaoUnicaService;
   final AssinaturaRepository assinaturaRepositorio;
+  final SincronizadorDados? sincronizador;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +34,7 @@ class App extends StatelessWidget {
         authRepositorio: authRepositorio,
         sessaoUnicaService: sessaoUnicaService,
         assinaturaRepositorio: assinaturaRepositorio,
+        sincronizador: sincronizador,
       ),
       debugShowCheckedModeBanner: false,
     );

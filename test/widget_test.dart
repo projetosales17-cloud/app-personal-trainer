@@ -1,3 +1,4 @@
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,6 +9,10 @@ import 'package:app_personal_trainer/services/assinatura_repository.dart';
 import 'package:app_personal_trainer/services/auth_repository.dart';
 import 'package:app_personal_trainer/services/controle_sessao.dart';
 import 'package:app_personal_trainer/services/sessao_unica_service.dart';
+import 'package:app_personal_trainer/services/sincronizador_dados.dart';
+
+SincronizadorDados _sincronizadorFake() =>
+    SincronizadorDados(firestore: FakeFirebaseFirestore());
 
 /// Fake que não escreve em nenhum lugar real — usado nos testes em que o
 /// controle de sessão única não é o foco (ver test/autenticacao_gate_test.dart
@@ -45,6 +50,7 @@ void main() {
         authRepositorio: authRepositorio,
         sessaoUnicaService: sessaoUnicaService,
         assinaturaRepositorio: _AssinaturaSempreAtiva(),
+        sincronizador: _sincronizadorFake(),
       ),
     );
     await tester.pump();
@@ -66,6 +72,7 @@ void main() {
         authRepositorio: authRepositorio,
         sessaoUnicaService: sessaoUnicaService,
         assinaturaRepositorio: _AssinaturaSempreAtiva(),
+        sincronizador: _sincronizadorFake(),
       ),
     );
     await tester.pumpAndSettle();
@@ -97,6 +104,7 @@ void main() {
         authRepositorio: authRepositorio,
         sessaoUnicaService: sessaoUnicaService,
         assinaturaRepositorio: _AssinaturaSempreAtiva(),
+        sincronizador: _sincronizadorFake(),
       ),
     );
     await tester.pumpAndSettle();

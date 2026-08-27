@@ -3,9 +3,10 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/checkin_treino.dart';
+import 'sincronizador_dados.dart';
 
-/// Persiste localmente quais dias da ficha de treino foram marcados como
-/// concluídos (sem backend, mesmo padrão de peso/medidas/carga).
+/// Persiste os check-ins de treino localmente e sincroniza com o Firestore
+/// por conta (ver [SincronizadorDados]).
 class CheckinTreinoRepository {
   static const _chave = 'checkins_treino';
 
@@ -57,5 +58,6 @@ class CheckinTreinoRepository {
       _chave,
       jsonEncode([for (final registro in registros) registro.toJson()]),
     );
+    await SincronizadorDados.instancia.aposEscrita(_chave);
   }
 }
