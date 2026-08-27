@@ -87,6 +87,7 @@ void main() {
     final anamneseRepositorio = AnamneseRepository();
     await anamneseRepositorio.salvar(
       const Anamnese(
+        nome: 'Lucía',
         idade: 42,
         alturaCm: 168,
         pesoAtualKg: 70,
@@ -111,8 +112,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Editar mis datos'), findsOneWidget);
-    expect(find.text('Datos básicos'), findsOneWidget);
-    expect(tester.widget<TextField>(find.byType(TextField).at(0)).controller!.text, '42');
+    // Abre na etapa de nome, já preenchida.
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('campo-nome-onboarding'))).controller!.text,
+      'Lucía',
+    );
   });
 
   testWidgets('Mostra o e-mail da conta logada', (tester) async {

@@ -5,6 +5,8 @@ import 'package:app_personal_trainer/models/anamnese.dart';
 void main() {
   test('toJson/fromJson preserva todos os campos', () {
     final original = Anamnese(
+      nome: 'Ana Pérez',
+      apelido: 'Aninha',
       idade: 35,
       alturaCm: 165,
       pesoAtualKg: 80,
@@ -29,6 +31,9 @@ void main() {
 
     final reconstruido = Anamnese.fromJson(original.toJson());
 
+    expect(reconstruido.nome, 'Ana Pérez');
+    expect(reconstruido.apelido, 'Aninha');
+    expect(reconstruido.nomeExibicao, 'Aninha');
     expect(reconstruido.idade, original.idade);
     expect(reconstruido.alturaCm, original.alturaCm);
     expect(reconstruido.pesoAtualKg, original.pesoAtualKg);

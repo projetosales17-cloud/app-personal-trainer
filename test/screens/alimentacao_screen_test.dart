@@ -66,14 +66,14 @@ void main() {
     expect(find.textContaining('Completa la anamnesis'), findsOneWidget);
   });
 
-  testWidgets('Trocar para a aba "Hidratação" mostra o estado sem anamnese', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: AlimentacaoScreen()));
-    await tester.pump();
+  testWidgets('Trocar para a aba "Hidratação" mostra a calculadora', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: AlimentacaoScreen()));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Hidratación'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Completa la anamnesis'), findsOneWidget);
+    expect(find.byKey(const Key('campo-peso-hidratacion')), findsOneWidget);
   });
 
   testWidgets('Trocar para a aba "Diário" mostra o estado vazio', (tester) async {

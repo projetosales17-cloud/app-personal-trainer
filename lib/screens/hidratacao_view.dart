@@ -4,6 +4,9 @@ import '../models/anamnese.dart';
 import '../saude/hidratacao.dart';
 import '../services/anamnese_repository.dart';
 
+/// Calculadora interativa de hidratação: a usuária ajusta peso, nível de
+/// atividade e se o dia é quente / com treino longo, e a meta diária de
+/// água atualiza na hora. Começa pré-preenchida com os dados da anamnese.
 class HidratacaoView extends StatefulWidget {
   HidratacaoView({super.key, AnamneseRepository? repositorio})
     : repositorio = repositorio ?? AnamneseRepository();
@@ -15,57 +18,115 @@ class HidratacaoView extends StatefulWidget {
 }
 
 class _HidratacaoViewState extends State<HidratacaoView> {
-  late final Future<Anamnese?> _anamneseFuture = widget.repositorio.carregar();
+  final _pesoController = TextEditingController();
+  NivelAtividade _nivel = NivelAtividade.moderado;
+  bool _diaQuente = false;
+  bool _carregado = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.repositorio.carregar().then((anamnese) {
+      if (!mounted) return;
+      setState(() {
+        if (anamnese != null) {
+          _pesoController.text = _numero(anamnese.pesoAtualKg);
+          _nivel = anamnese.nivelAtividade;
+        }
+        _carregado = true;
+      });
+    });
+  }
+
+  static String _numero(double v) =>
+      v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(1);
+
+  @override
+  void dispose() {
+    _pesoController.dispose();
+    super.dispose();
+  }
+
+  double? get _peso {
+    final v = double.tryParse(_pesoController.text.trim().replaceAll(',', '.'));
+    return (v != null && v > 0 && v <= 300) ? v : null;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Anamnese?>(
-      future: _anamneseFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    if (!_carregado) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        final anamnese = snapshot.data;
-        if (anamnese == null) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(24),
-              child: Text(
-                'Completa la anamnesis en el onboarding para ver tu meta de hidratación.',
-                textAlign: TextAlign.center,
-              ),
-            ),
-          );
-        }
+    final peso = _peso;
+    final metaMl = peso == null
+        ? null
+        : calcularHidratacaoDiaria(peso, _nivel, diaQuente: _diaQuente);
 
-        final metaMl = calcularHidratacaoDiaria(anamnese.pesoAtualKg, anamnese.nivelAtividade);
-        final metaLitros = (metaMl / 1000).toStringAsFixed(1);
-
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.local_drink,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(height: 16),
-                Text('$metaLitros L por día', style: Theme.of(context).textTheme.headlineMedium),
-                const SizedBox(height: 8),
-                Text(
-                  'Meta calculada a partir de tu peso y nivel de actividad.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        Center(
+          child: Icon(
+            Icons.local_drink,
+            size: 56,
+            color: Theme.of(context).colorScheme.primary,
           ),
-        );
-      },
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: Text(
+            metaMl == null ? '—' : '${(metaMl / 1000).toStringAsFixed(1)} L por día',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Center(
+          child: Text(
+            metaMl == null
+                ? 'Ingresa tu peso para calcular la meta.'
+                : 'Unos ${(metaMl / 250).round()} vasos de 250 ml a lo largo del día.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
+        const SizedBox(height: 24),
+        TextField(
+          key: const Key('campo-peso-hidratacion'),
+          controller: _pesoController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(labelText: 'Peso (kg)'),
+          onChanged: (_) => setState(() {}),
+        ),
+        const SizedBox(height: 16),
+        Text('Nivel de actividad', style: Theme.of(context).textTheme.titleSmall),
+        for (final n in NivelAtividade.values)
+          RadioListTile<NivelAtividade>(
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+            title: Text(n.label),
+            value: n,
+            // ignore: deprecated_member_use
+            groupValue: _nivel,
+            // ignore: deprecated_member_use
+            onChanged: (v) => setState(() => _nivel = v ?? _nivel),
+          ),
+        SwitchListTile(
+          key: const Key('switch-dia-quente'),
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Día caluroso o entrenamiento largo hoy'),
+          subtitle: const Text('Suma medio litro extra.'),
+          value: _diaQuente,
+          onChanged: (v) => setState(() => _diaQuente = v),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Cálculo aproximado (35 ml por kg + ajuste por actividad y calor). '
+          'La altura no influye en la hidratación. No sustituye la '
+          'orientación de un profesional de salud.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
     );
   }
 }

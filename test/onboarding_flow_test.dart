@@ -7,6 +7,14 @@ import 'package:app_personal_trainer/screens/onboarding/onboarding_flow.dart';
 import 'package:app_personal_trainer/services/anamnese_repository.dart';
 
 Future<void> _avancar(WidgetTester tester) async {
+  // A etapa de boas-vindas agora pede o nome — preenche na primeira vez
+  // para o resto do fluxo poder avançar.
+  final campoNome = find.byKey(const Key('campo-nome-onboarding'));
+  if (campoNome.evaluate().isNotEmpty &&
+      tester.widget<TextField>(campoNome).controller!.text.isEmpty) {
+    await tester.enterText(campoNome, 'María');
+    await tester.pump();
+  }
   await tester.tap(find.widgetWithText(FilledButton, 'Siguiente'));
   await tester.pumpAndSettle();
 }
@@ -144,6 +152,7 @@ void main() {
   testWidgets('Modo de edição pré-preenche os campos e salva as alterações', (tester) async {
     final repositorio = AnamneseRepository();
     const original = Anamnese(
+      nome: 'Ana Pérez',
       idade: 30,
       alturaCm: 170,
       pesoAtualKg: 65,
@@ -169,7 +178,12 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    // Começa direto nos dados básicos (pula boas-vindas) e já vem preenchido.
+    // Na edição começa na etapa de nome, já preenchida.
+    expect(tester.widget<TextField>(find.byKey(const Key('campo-nome-onboarding'))).controller!.text,
+        'Ana Pérez');
+    await tester.tap(find.widgetWithText(FilledButton, 'Siguiente'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Datos básicos'), findsOneWidget);
     expect(tester.widget<TextField>(find.byType(TextField).at(0)).controller!.text, '30');
     expect(tester.widget<TextField>(find.byType(TextField).at(2)).controller!.text, '65');
