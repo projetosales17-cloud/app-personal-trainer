@@ -19,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
   bool _carregando = false;
+  bool _senhaVisivel = false;
   String? _erro;
 
   @override
@@ -88,8 +89,16 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 key: const Key('campo-senha-login'),
                 controller: _senhaController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Contraseña'),
+                obscureText: !_senhaVisivel,
+                decoration: InputDecoration(
+                  labelText: 'Contraseña',
+                  suffixIcon: IconButton(
+                    key: const Key('botao-ver-senha-login'),
+                    icon: Icon(_senhaVisivel ? Icons.visibility_off : Icons.visibility),
+                    tooltip: _senhaVisivel ? 'Ocultar contraseña' : 'Mostrar contraseña',
+                    onPressed: () => setState(() => _senhaVisivel = !_senhaVisivel),
+                  ),
+                ),
               ),
               if (_erro != null) ...[
                 const SizedBox(height: 12),
