@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 
 import '../models/anamnese.dart';
 import '../models/checkin_treino.dart';
+import '../models/estrategia_bloco.dart';
 import '../models/exercicio.dart';
 import '../models/ficha_treino.dart';
+import '../models/programa_treino.dart';
 import '../services/anamnese_repository.dart';
 import '../services/biblioteca_exercicios_repository.dart';
 import '../services/checkin_treino_repository.dart';
@@ -13,6 +15,9 @@ import '../services/gerador_ficha_treino.dart';
 import '../services/motor_aderencia.dart';
 import '../services/notificador_conquistas.dart';
 import '../services/preferencias_repository.dart';
+import '../services/programa_treino_repository.dart';
+import '../services/progresso_repository.dart';
+import 'checkin_progresso_screen.dart';
 import 'exercicio_detalhe_screen.dart';
 
 const _rotulosDiasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
@@ -27,12 +32,16 @@ class MinhaFichaView extends StatefulWidget {
     MotorAderencia? motorAderencia,
     GamificacaoService? gamificacaoService,
     NotificadorConquistas? notificadorConquistas,
+    ProgramaTreinoRepository? programaRepositorio,
+    ProgressoRepository? progressoRepositorio,
   }) : anamneseRepositorio = anamneseRepositorio ?? AnamneseRepository(),
        geradorFicha = GeradorFichaTreino(repositorio: bibliotecaRepositorio),
        preferenciasRepositorio = preferenciasRepositorio ?? PreferenciasRepository(),
        checkinRepositorio = checkinRepositorio ?? CheckinTreinoRepository(),
        motorAderencia = motorAderencia ?? MotorAderencia(),
        gamificacaoService = gamificacaoService ?? GamificacaoService(),
+       programaRepositorio = programaRepositorio ?? ProgramaTreinoRepository(),
+       progressoRepositorio = progressoRepositorio ?? ProgressoRepository(),
        notificadorConquistas =
            notificadorConquistas ??
            (kIsWeb ? const NotificadorConquistasNulo() : NotificadorConquistasLocal());
@@ -44,6 +53,8 @@ class MinhaFichaView extends StatefulWidget {
   final MotorAderencia motorAderencia;
   final GamificacaoService gamificacaoService;
   final NotificadorConquistas notificadorConquistas;
+  final ProgramaTreinoRepository programaRepositorio;
+  final ProgressoRepository progressoRepositorio;
 
   @override
   State<MinhaFichaView> createState() => _MinhaFichaViewState();
@@ -60,6 +71,27 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
   late Future<List<int>?> _diasDaSemanaFuture =
       widget.preferenciasRepositorio.diasDaSemanaEscolhidos();
   late Future<List<CheckinTreino>> _checkinsFuture = widget.checkinRepositorio.listar();
+  late Future<ProgramaTreino> _programaFuture =
+      widget.programaRepositorio.iniciarSeNecessario();
+
+  Future<void> _abrirCheckin(ProgramaTreino programa) async {
+    final ultimoPeso = await widget.progressoRepositorio.ultimoPeso();
+    if (!mounted) return;
+    final fez = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => CheckinProgressoScreen(
+          blocoConcluido: programa.blocoAtual,
+          programaRepositorio: widget.programaRepositorio,
+          pesoSugerido: ultimoPeso?.pesoKg,
+        ),
+      ),
+    );
+    if (fez == true && mounted) {
+      setState(() {
+        _programaFuture = widget.programaRepositorio.iniciarSeNecessario();
+      });
+    }
+  }
 
   Future<void> _salvarDiasDaSemana(List<int> diasDaSemana) async {
     await widget.preferenciasRepositorio.definirDiasDaSemanaEscolhidos(diasDaSemana);
@@ -149,7 +181,20 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
 
             final diasDaSemana = diasSnapshot.data;
 
-            return FutureBuilder<List<CheckinTreino>>(
+            return FutureBuilder<ProgramaTreino>(
+              future: _programaFuture,
+              builder: (context, programaSnapshot) {
+                if (!programaSnapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final programa = programaSnapshot.data!;
+                final estrategia = calcularEstrategiaBloco(
+                  bloco: programa.blocoAtual,
+                  nivelLiberado: programa.nivelLiberado,
+                  ultimoCheckin: programa.ultimoCheckin,
+                );
+
+                return FutureBuilder<List<CheckinTreino>>(
               future: _checkinsFuture,
               builder: (context, checkinsSnapshot) {
                 if (checkinsSnapshot.connectionState != ConnectionState.done) {
@@ -169,18 +214,58 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                 final ficha = widget.geradorFicha.gerar(
                   anamnese,
                   reduzirVolumeRetomada: aderencia.emAlerta,
+                  estrategiaBloco: estrategia,
                 );
+                final precisaCheckin = programa.precisaCheckin();
 
                 return ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
+                    if (precisaCheckin) ...[
+                      Card(
+                        key: const Key('cartao-checkin-disponivel'),
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Terminaste el bloque ${programa.blocoAtual}',
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Haz tu check-in de progreso para generar la próxima rutina.',
+                              ),
+                              const SizedBox(height: 8),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: FilledButton(
+                                  key: const Key('botao-abrir-checkin'),
+                                  onPressed: () => _abrirCheckin(programa),
+                                  child: const Text('Hacer check-in'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                     Text(
                       'Válida hasta ${_formatarData(ficha.validaAte)}',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 8),
                     if (ficha.prescricao != null) ...[
-                      _CartaoPrescricao(prescricao: ficha.prescricao!),
+                      _CartaoPrescricao(
+                        prescricao: ficha.prescricao!,
+                        estrategia: estrategia,
+                        semana: programa.semanaAtual(),
+                        semanasParaCheckin:
+                            precisaCheckin ? 0 : programa.semanasParaProximoCheckin(),
+                      ),
                       const SizedBox(height: 8),
                     ],
                     _CartaoGamificacao(resultado: gamificacao),
@@ -213,6 +298,8 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                       ),
                   ],
                 );
+              },
+            );
               },
             );
           },
@@ -306,12 +393,21 @@ class _SeletorDiasDaSemanaState extends State<_SeletorDiasDaSemana> {
 }
 
 class _CartaoPrescricao extends StatelessWidget {
-  const _CartaoPrescricao({required this.prescricao});
+  const _CartaoPrescricao({
+    required this.prescricao,
+    this.estrategia,
+    this.semana,
+    this.semanasParaCheckin,
+  });
 
   final PrescricaoTreino prescricao;
+  final EstrategiaBloco? estrategia;
+  final int? semana;
+  final int? semanasParaCheckin;
 
   @override
   Widget build(BuildContext context) {
+    final estrategia = this.estrategia;
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
@@ -320,11 +416,31 @@ class _CartaoPrescricao extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Cómo hacer este entrenamiento', style: Theme.of(context).textTheme.titleSmall),
+            if (estrategia != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                semana != null
+                    ? 'Semana $semana · ${estrategia.faseNome}'
+                    : estrategia.faseNome,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
             const SizedBox(height: 6),
             Text('${prescricao.series} · ${prescricao.repeticoes}'),
             Text('Descanso: ${prescricao.descanso}'),
             const SizedBox(height: 6),
             Text(prescricao.estilo, style: Theme.of(context).textTheme.bodySmall),
+            if (estrategia != null && estrategia.mensagem != estrategia.faseDescricao) ...[
+              const SizedBox(height: 6),
+              Text(estrategia.mensagem, style: Theme.of(context).textTheme.bodySmall),
+            ],
+            if (semanasParaCheckin != null && semanasParaCheckin! > 0) ...[
+              const SizedBox(height: 6),
+              Text(
+                'Próximo check-in de progreso en $semanasParaCheckin semana(s).',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
           ],
         ),
       ),
