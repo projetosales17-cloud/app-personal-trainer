@@ -3,9 +3,10 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/registro_carga.dart';
+import 'sincronizador_dados.dart';
 
-/// Persiste o histórico de carga localmente no aparelho (sem backend por
-/// enquanto), como a anamnese e o progresso.
+/// Persiste o histórico de carga localmente e sincroniza com o Firestore
+/// por conta (ver [SincronizadorDados]).
 class TreinoRepository {
   static const _chave = 'registros_carga';
 
@@ -19,6 +20,7 @@ class TreinoRepository {
       _chave,
       jsonEncode([for (final registro in registros) registro.toJson()]),
     );
+    await SincronizadorDados.instancia.aposEscrita(_chave);
   }
 
   Future<List<RegistroCarga>> listarCargas() async {

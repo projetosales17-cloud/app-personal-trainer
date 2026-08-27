@@ -3,9 +3,10 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/registro_diario.dart';
+import 'sincronizador_dados.dart';
 
-/// Persiste o diário alimentar localmente no aparelho (sem backend por
-/// enquanto), como a anamnese e o progresso.
+/// Persiste o diário alimentar localmente e sincroniza com o Firestore por
+/// conta (ver [SincronizadorDados]).
 class DiarioAlimentarRepository {
   static const _chave = 'diario_alimentar';
 
@@ -19,6 +20,7 @@ class DiarioAlimentarRepository {
       _chave,
       jsonEncode([for (final registro in registros) registro.toJson()]),
     );
+    await SincronizadorDados.instancia.aposEscrita(_chave);
   }
 
   Future<List<RegistroDiario>> listar() async {

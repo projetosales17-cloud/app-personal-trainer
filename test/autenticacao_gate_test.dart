@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +11,7 @@ import 'package:app_personal_trainer/services/assinatura_repository.dart';
 import 'package:app_personal_trainer/services/auth_repository.dart';
 import 'package:app_personal_trainer/services/controle_sessao.dart';
 import 'package:app_personal_trainer/services/sessao_unica_service.dart';
+import 'package:app_personal_trainer/services/sincronizador_dados.dart';
 
 class _ControleSessaoFake implements ControleSessao {
   _ControleSessaoFake({String? tokenInicial}) : _tokenAtual = tokenInicial;
@@ -191,6 +193,44 @@ void main() {
       expect(mockAuth.currentUser, isNull);
       expect(find.textContaining('acessada em outro aparelho'), findsOneWidget);
       expect(find.text('Entrar'), findsWidgets);
+    },
+  );
+
+  testWidgets(
+    'No login, baixa a anamnese que estava só no Firestore (aparelho novo)',
+    (tester) async {
+      final firestore = FakeFirebaseFirestore();
+      await firestore.collection('usuarios').doc('uid-1').set({
+        'anamnese':
+            '{"idade":30,"alturaCm":170.0,"pesoAtualKg":65.0,"pesoDesejadoKg":null,'
+            '"objetivoPrincipal":"emagrecimento","cirurgiaBariatrica":false,'
+            '"tipoCirurgiaBariatrica":null,"mesesDesdeCirurgia":null,'
+            '"condicaoHormonal":"Nenhuma","restricoesAlimentares":[],"lesoesLimitacoes":[],'
+            '"nivelAtividade":"moderado","frequenciaSemanalDias":3,"regioesPriorizadas":[]}',
+        'anamnese__ts': 2000,
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AutenticacaoGate(
+            authRepositorio: AuthRepository(
+              auth: MockFirebaseAuth(
+                signedIn: true,
+                mockUser: MockUser(uid: 'uid-1', email: 'usuaria@example.com'),
+              ),
+            ),
+            sessaoUnicaService: SessaoUnicaService(controleSessao: _ControleSessaoFake()),
+            assinaturaRepositorio: _AssinaturaSempreAtiva(),
+            sincronizador: SincronizadorDados(firestore: firestore),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Como a anamnese desceu do servidor, o app vai direto pra navegação
+      // principal em vez do onboarding.
+      expect(find.text('Início'), findsWidgets);
+      expect(find.text('Bem-vinda!'), findsNothing);
     },
   );
 }

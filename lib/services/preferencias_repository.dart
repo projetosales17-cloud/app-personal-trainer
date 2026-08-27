@@ -1,6 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Persiste preferências simples do app localmente no aparelho.
+import 'sincronizador_dados.dart';
+
+/// Persiste preferências simples do app localmente e sincroniza com o
+/// Firestore por conta (ver [SincronizadorDados]).
 ///
 /// A preferência de notificações aqui é só a intenção da usuária — o app
 /// ainda não tem nenhum mecanismo real de notificação (push ou local) para
@@ -17,6 +20,7 @@ class PreferenciasRepository {
   Future<void> definirNotificacoesAtivadas(bool ativado) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_chaveNotificacoes, ativado);
+    await SincronizadorDados.instancia.aposEscrita(_chaveNotificacoes);
   }
 
   /// Dias da semana escolhidos manualmente para o treino (1 = segunda ... 7
@@ -36,5 +40,6 @@ class PreferenciasRepository {
     await prefs.setStringList(_chaveDiasSemanaTreino, [
       for (final dia in ordenados) dia.toString(),
     ]);
+    await SincronizadorDados.instancia.aposEscrita(_chaveDiasSemanaTreino);
   }
 }
