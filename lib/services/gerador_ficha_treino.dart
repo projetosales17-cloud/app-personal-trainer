@@ -1,5 +1,6 @@
 import '../models/anamnese.dart';
 import '../models/atividade_cardio.dart';
+import '../models/estrategia_bloco.dart';
 import '../models/exercicio.dart';
 import '../models/ficha_treino.dart';
 import 'biblioteca_cardio_repository.dart';
@@ -192,7 +193,18 @@ class GeradorFichaTreino {
   /// produto): quando a usuária pulou treinos consecutivos, a próxima
   /// ficha vem com volume reduzido e sem nível avançado, como uma sessão
   /// de retomada mais leve.
-  FichaTreino gerar(Anamnese anamnese, {bool reduzirVolumeRetomada = false}) {
+  ///
+  /// [estrategiaBloco] vem do `ProgramaTreinoRepository` (programa de longo
+  /// prazo): define a fase da periodização, o volume extra/reduzido, o teto
+  /// de nível, a rotação de exercícios e grupos a evitar por dor relatada
+  /// no check-in. Quando `null`, a ficha é gerada sem progressão de
+  /// programa (comportamento antigo — usado em testes e telas que não
+  /// dependem do programa).
+  FichaTreino gerar(
+    Anamnese anamnese, {
+    bool reduzirVolumeRetomada = false,
+    EstrategiaBloco? estrategiaBloco,
+  }) {
     final config = _configPorObjetivo[anamnese.objetivoPrincipal]!;
 
     final emRestricaoAbdomenPosParto = anamnese.dataParto != null &&
@@ -204,6 +216,9 @@ class GeradorFichaTreino {
         .toSet();
     if (emRestricaoAbdomenPosParto) {
       gruposExcluidos.add(GrupoMuscular.abdomen);
+    }
+    if (estrategiaBloco != null) {
+      gruposExcluidos.addAll(estrategiaBloco.gruposExcluidosExtra);
     }
 
     final gruposPriorizados = anamnese.regioesPriorizadas
@@ -240,8 +255,16 @@ class GeradorFichaTreino {
         reduzirVolumeRetomada;
     final reduzirVolume = faseCiclo == FaseCiclo.menstrual || reduzirVolumeRetomada;
 
+    // Teto de nível: o menor entre o que a fase do programa permite e o que
+    // o ciclo/retomada permite.
+    var tetoNivel = estrategiaBloco?.tetoNivel ?? NivelExercicio.avancado;
+    if (excluirNivelAvancado && tetoNivel == NivelExercicio.avancado) {
+      tetoNivel = NivelExercicio.intermediario;
+    }
+    final rotacaoOffset = estrategiaBloco?.rotacaoOffset ?? 0;
+
     int maxParaGrupo(GrupoMuscular grupo) {
-      var max = config.maxExerciciosPorGrupo;
+      var max = config.maxExerciciosPorGrupo + (estrategiaBloco?.volumeModificador ?? 0);
       if (gruposPriorizados.contains(grupo)) max += 1;
       if (reduzirVolume) max -= 1;
       return max.clamp(1, 99);
@@ -268,7 +291,8 @@ class GeradorFichaTreino {
             objetivoExercicio,
             equipamentosPermitidos: equipamentosPermitidos,
             restringirTerceiraIdade: restringirTerceiraIdade,
-            excluirNivelAvancado: excluirNivelAvancado,
+            tetoNivel: tetoNivel,
+            rotacaoOffset: rotacaoOffset,
             maxExercicios: maxParaGrupo(grupo),
           ),
       ];
@@ -299,7 +323,8 @@ class GeradorFichaTreino {
     ObjetivoExercicio objetivo, {
     Set<Equipamento>? equipamentosPermitidos,
     bool restringirTerceiraIdade = false,
-    bool excluirNivelAvancado = false,
+    NivelExercicio tetoNivel = NivelExercicio.avancado,
+    int rotacaoOffset = 0,
     required int maxExercicios,
   }) {
     var candidatos = repositorio.filtrar(grupoMuscular: grupo);
@@ -316,14 +341,22 @@ class GeradorFichaTreino {
                 !_exerciciosInseguraTerceiraIdade.contains(exercicio.id),
           )
           .toList();
-    } else if (excluirNivelAvancado) {
-      candidatos = candidatos
-          .where((exercicio) => exercicio.nivel != NivelExercicio.avancado)
-          .toList();
     }
+    candidatos = candidatos
+        .where((exercicio) => exercicio.nivel.index <= tetoNivel.index)
+        .toList();
+
     final comObjetivo = candidatos.where((exercicio) => exercicio.objetivos.contains(objetivo));
     final base = comObjetivo.isNotEmpty ? comObjetivo.toList() : candidatos;
-    final ordenados = [...base]..sort((a, b) => a.nivel.index.compareTo(b.nivel.index));
+    var ordenados = [...base]..sort((a, b) => a.nivel.index.compareTo(b.nivel.index));
+
+    // Rotação por bloco: gira a lista para não repetir sempre os mesmos
+    // exercícios ao longo dos meses.
+    if (rotacaoOffset > 0 && ordenados.length > 1) {
+      final o = rotacaoOffset % ordenados.length;
+      ordenados = [...ordenados.skip(o), ...ordenados.take(o)];
+    }
+
     return ordenados.take(maxExercicios).toList();
   }
 }

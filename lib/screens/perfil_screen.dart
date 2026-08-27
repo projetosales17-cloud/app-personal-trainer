@@ -7,6 +7,7 @@ import '../services/auth_repository.dart';
 import '../services/gerador_ficha_treino.dart';
 import '../services/notificacoes_treino_service.dart';
 import '../services/preferencias_repository.dart';
+import '../services/programa_treino_repository.dart';
 
 /// Assinatura/pagamento ainda não está implementado (ver briefing do
 /// produto) — conta e login já são reais (Firebase Authentication).
@@ -19,17 +20,20 @@ class PerfilScreen extends StatefulWidget {
     GeradorFichaTreino? geradorFicha,
     NotificacoesTreinoService? notificacoesService,
     AuthRepository? authRepositorio,
+    ProgramaTreinoRepository? programaRepositorio,
   }) : anamneseRepositorio = anamneseRepositorio ?? AnamneseRepository(),
        preferenciasRepositorio = preferenciasRepositorio ?? PreferenciasRepository(),
        geradorFicha = geradorFicha ?? GeradorFichaTreino(),
        notificacoesService = notificacoesService ?? NotificacoesTreinoService(),
-       authRepositorio = authRepositorio ?? AuthRepository();
+       authRepositorio = authRepositorio ?? AuthRepository(),
+       programaRepositorio = programaRepositorio ?? ProgramaTreinoRepository();
 
   final AnamneseRepository anamneseRepositorio;
   final PreferenciasRepository preferenciasRepositorio;
   final GeradorFichaTreino geradorFicha;
   final NotificacoesTreinoService notificacoesService;
   final AuthRepository authRepositorio;
+  final ProgramaTreinoRepository programaRepositorio;
 
   @override
   State<PerfilScreen> createState() => _PerfilScreenState();
@@ -54,6 +58,35 @@ class _PerfilScreenState extends State<PerfilScreen> {
         _anamneseFuture = widget.anamneseRepositorio.carregar();
       });
     }
+  }
+
+  Future<void> _recomecarPrograma() async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Recomeçar seu programa?'),
+        content: const Text(
+          'Sua ficha volta a começar da fase de adaptação (semana 1). '
+          'Sua anamnese e seu progresso registrado não são apagados.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Recomeçar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmar != true) return;
+    await widget.programaRepositorio.recomecarPrograma();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Seu programa começou de novo.')),
+    );
   }
 
   Future<void> _alterarNotificacoes(bool ativado) async {
@@ -114,6 +147,15 @@ class _PerfilScreenState extends State<PerfilScreen> {
                     onPressed: () => _editarAnamnese(anamnese),
                     icon: const Icon(Icons.edit_outlined),
                     label: const Text('Editar meus dados'),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    key: const Key('botao-recomecar-programa'),
+                    onPressed: _recomecarPrograma,
+                    icon: const Icon(Icons.restart_alt),
+                    label: const Text('Recomeçar meu programa'),
                   ),
                 ),
               ],
