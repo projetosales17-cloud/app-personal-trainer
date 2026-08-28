@@ -141,14 +141,39 @@ class _RefeicaoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final estiloPorcao = Theme.of(context).textTheme.bodySmall?.copyWith(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    );
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(refeicao.nome, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 4),
-          Text(refeicao.alimentos.map((alimento) => alimento.nome).join(', ')),
+          for (final alimento in refeicao.alimentos)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('•  '),
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        text: alimento.nome,
+                        children: [
+                          TextSpan(
+                            text: '  —  ${alimento.porcaoSugerida}',
+                            style: estiloPorcao,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );

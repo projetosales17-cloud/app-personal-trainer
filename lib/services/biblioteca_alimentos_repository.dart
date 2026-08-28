@@ -10,10 +10,18 @@ class BibliotecaAlimentosRepository {
 
   List<Alimento> filtrar({
     CategoriaAlimento? categoria,
+    Refeicao? refeicao,
+    bool? leguminosa,
     List<String> restricoesUsuaria = const [],
   }) {
     return bibliotecaAlimentos.where((alimento) {
       if (categoria != null && alimento.categoria != categoria) {
+        return false;
+      }
+      if (refeicao != null && !alimento.refeicoes.contains(refeicao)) {
+        return false;
+      }
+      if (leguminosa != null && alimento.leguminosa != leguminosa) {
         return false;
       }
       if (restricoesUsuaria.contains('Lactose') && alimento.contemLactose) {

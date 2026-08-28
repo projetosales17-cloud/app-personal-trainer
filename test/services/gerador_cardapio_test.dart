@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:app_personal_trainer/models/alimento.dart';
 import 'package:app_personal_trainer/models/anamnese.dart';
 import 'package:app_personal_trainer/services/gerador_cardapio.dart';
 
@@ -15,10 +16,61 @@ const _anamneseBase = Anamnese(
 void main() {
   final gerador = GeradorCardapio();
 
-  test('gera 3 dias de variação', () {
+  test('gera 7 dias de variação', () {
     final cardapio = gerador.gerar(_anamneseBase);
-    expect(cardapio.dias, hasLength(3));
-    expect(cardapio.dias.map((d) => d.dia), [1, 2, 3]);
+    expect(cardapio.dias, hasLength(7));
+    expect(cardapio.dias.map((d) => d.dia), [1, 2, 3, 4, 5, 6, 7]);
+  });
+
+  test('café da manhã nunca traz arroz, feijão nem carne de almoço', () {
+    final cardapio = gerador.gerar(_anamneseBase);
+    for (final dia in cardapio.dias) {
+      final cafe = dia.refeicoes.firstWhere((r) => r.nome == 'Café da manhã');
+      for (final alimento in cafe.alimentos) {
+        expect(
+          alimento.refeicoes.contains(Refeicao.cafeDaManha),
+          isTrue,
+          reason: '${alimento.nome} não é de café da manhã (dia ${dia.dia})',
+        );
+        expect(alimento.leguminosa, isFalse, reason: alimento.nome);
+      }
+      final ids = cafe.alimentos.map((a) => a.id);
+      expect(ids, isNot(contains('arroz-integral')));
+      expect(ids, isNot(contains('arroz-branco')));
+      expect(ids, isNot(contains('frango-grelhado')));
+    }
+  });
+
+  test('café da manhã sempre tem carboidrato e fruta', () {
+    final cardapio = gerador.gerar(_anamneseBase);
+    for (final dia in cardapio.dias) {
+      final cafe = dia.refeicoes.firstWhere((r) => r.nome == 'Café da manhã');
+      final categorias = cafe.alimentos.map((a) => a.categoria).toSet();
+      expect(categorias, contains(CategoriaAlimento.carboidrato), reason: 'dia ${dia.dia}');
+      expect(categorias, contains(CategoriaAlimento.fruta), reason: 'dia ${dia.dia}');
+    }
+  });
+
+  test('almoço sempre inclui uma leguminosa (o feijão do prato)', () {
+    final cardapio = gerador.gerar(_anamneseBase);
+    for (final dia in cardapio.dias) {
+      final almoco = dia.refeicoes.firstWhere((r) => r.nome == 'Almoço');
+      expect(
+        almoco.alimentos.any((a) => a.leguminosa),
+        isTrue,
+        reason: 'dia ${dia.dia}: ${almoco.alimentos.map((a) => a.nome)}',
+      );
+    }
+  });
+
+  test('nenhum alimento se repete dentro do mesmo dia', () {
+    final cardapio = gerador.gerar(_anamneseBase);
+    for (final dia in cardapio.dias) {
+      final ids = [
+        for (final r in dia.refeicoes) ...r.alimentos.map((a) => a.id),
+      ];
+      expect(ids.toSet(), hasLength(ids.length), reason: 'dia ${dia.dia}: $ids');
+    }
   });
 
   test('o cardápio fica válido por 30 dias a partir de agora', () {

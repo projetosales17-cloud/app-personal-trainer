@@ -41,7 +41,7 @@ void main() {
     await tester.tap(find.widgetWithText(FilterChip, 'Vegetal'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Brócolis cozido no vapor'), findsOneWidget);
+    expect(find.text('Brócolis no vapor'), findsOneWidget);
     expect(find.text('Frango grelhado (peito)'), findsNothing);
   });
 

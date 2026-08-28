@@ -3,12 +3,21 @@ import '../models/anamnese.dart';
 import '../models/cardapio.dart';
 import 'biblioteca_alimentos_repository.dart';
 
+/// Um "encaixe" dentro de uma refeição: uma categoria de alimento, filtrada
+/// pela refeição (café/almoço/…) e, opcionalmente, se é leguminosa
+/// (o "feijão do prato").
+class _Encaixe {
+  const _Encaixe(this.categoria, {this.leguminosa});
+  final CategoriaAlimento categoria;
+  final bool? leguminosa;
+}
+
 /// Gera um cardápio a partir da anamnese, usando a biblioteca de alimentos.
-/// É uma primeira versão simples de personalização — não substitui a
+/// Monta cada refeição a partir de um "molde" pensado pra ela (café da
+/// manhã não recebe arroz; almoço tem arroz + feijão + salada; jantar é
+/// mais leve), e não repete o mesmo alimento no mesmo dia. Não substitui a
 /// avaliação de um(a) nutricionista, especialmente para o perfil
-/// pós-bariátrica (ver briefing do produto: a trilha bariátrica precisa de
-/// validação profissional antes de virar conteúdo real, então não recebe
-/// nenhuma regra especial aqui).
+/// pós-bariátrica (ver briefing do produto).
 class GeradorCardapio {
   GeradorCardapio({BibliotecaAlimentosRepository? repositorio})
     : repositorio = repositorio ?? BibliotecaAlimentosRepository();
@@ -16,7 +25,7 @@ class GeradorCardapio {
   final BibliotecaAlimentosRepository repositorio;
 
   static const duracaoValidadeDias = 30;
-  static const _diasDeVariacao = 3;
+  static const _diasDeVariacao = 7;
 
   /// Objetivos com maior demanda calórica/proteica ganham uma refeição
   /// extra (Ceia) — orientação prática comum, não um ajuste calórico
@@ -26,6 +35,54 @@ class GeradorCardapio {
     Objetivo.gluteoPernas,
     Objetivo.performanceAtletica,
   };
+
+  /// Moldes de refeição: a ordem e a natureza dos encaixes. Filtrados por
+  /// `Refeicao` na hora de escolher, então cada item já sai adequado ao
+  /// horário.
+  // O café alterna entre uma versão salgada (pão/tapioca + ovo/queijo) e
+  // uma versão "tigela" (laticínio + aveia/granola), pra não repetir.
+  static const _moldeCafeSalgado = [
+    _Encaixe(CategoriaAlimento.carboidrato),
+    _Encaixe(CategoriaAlimento.proteina, leguminosa: false),
+    _Encaixe(CategoriaAlimento.fruta),
+  ];
+
+  static const _moldeCafeTigela = [
+    _Encaixe(CategoriaAlimento.laticinio),
+    _Encaixe(CategoriaAlimento.carboidrato),
+    _Encaixe(CategoriaAlimento.fruta),
+  ];
+
+  static const _moldeAlmoco = [
+    _Encaixe(CategoriaAlimento.proteina, leguminosa: false),
+    _Encaixe(CategoriaAlimento.carboidrato),
+    _Encaixe(CategoriaAlimento.proteina, leguminosa: true), // o feijão
+    _Encaixe(CategoriaAlimento.vegetal),
+    _Encaixe(CategoriaAlimento.vegetal),
+    _Encaixe(CategoriaAlimento.gordura),
+  ];
+
+  static const _moldeLancheLaticinio = [
+    _Encaixe(CategoriaAlimento.fruta),
+    _Encaixe(CategoriaAlimento.laticinio),
+  ];
+
+  static const _moldeLancheGordura = [
+    _Encaixe(CategoriaAlimento.fruta),
+    _Encaixe(CategoriaAlimento.gordura),
+  ];
+
+  static const _moldeJantar = [
+    _Encaixe(CategoriaAlimento.proteina, leguminosa: false),
+    _Encaixe(CategoriaAlimento.vegetal),
+    _Encaixe(CategoriaAlimento.vegetal),
+    _Encaixe(CategoriaAlimento.carboidrato),
+  ];
+
+  static const _moldeCeia = [
+    _Encaixe(CategoriaAlimento.laticinio),
+    _Encaixe(CategoriaAlimento.gordura),
+  ];
 
   /// Dicas nutricionais gerais e não-prescritivas por fase do ciclo (ver
   /// briefing do produto) — não muda a seleção de alimentos, só complementa
@@ -93,36 +150,7 @@ class GeradorCardapio {
 
     final dias = <DiaDeCardapio>[
       for (var indiceDia = 0; indiceDia < _diasDeVariacao; indiceDia++)
-        DiaDeCardapio(
-          dia: indiceDia + 1,
-          refeicoes: [
-            _montarRefeicao('Café da manhã', indiceDia, restricoes, const [
-              CategoriaAlimento.laticinio,
-              CategoriaAlimento.carboidrato,
-              CategoriaAlimento.fruta,
-            ]),
-            _montarRefeicao('Almoço', indiceDia, restricoes, const [
-              CategoriaAlimento.proteina,
-              CategoriaAlimento.carboidrato,
-              CategoriaAlimento.vegetal,
-              CategoriaAlimento.gordura,
-            ]),
-            _montarRefeicao('Lanche da tarde', indiceDia, restricoes, const [
-              CategoriaAlimento.fruta,
-              CategoriaAlimento.gordura,
-            ], idsExcluidos: _gordurasQueNaoSaoLanche),
-            _montarRefeicao('Jantar', indiceDia, restricoes, const [
-              CategoriaAlimento.proteina,
-              CategoriaAlimento.vegetal,
-              CategoriaAlimento.carboidrato,
-            ]),
-            if (incluirCeia)
-              _montarRefeicao('Ceia', indiceDia, restricoes, const [
-                CategoriaAlimento.proteina,
-                CategoriaAlimento.laticinio,
-              ]),
-          ],
-        ),
+        _montarDia(indiceDia, restricoes, incluirCeia),
     ];
 
     final geradaEm = DateTime.now();
@@ -135,40 +163,67 @@ class GeradorCardapio {
     );
   }
 
-  /// Itens da categoria "gordura" que são tempero/semente pra polvilhar, não
-  /// um lanche que se come sozinho — ficam fora do lanche da tarde pra não
-  /// gerar "Merienda: maçã + azeite de oliva". Continuam entrando no almoço.
-  static const _gordurasQueNaoSaoLanche = {
-    'azeite-de-oliva',
-    'linhaca-triturada',
-    'chia',
-  };
+  DiaDeCardapio _montarDia(int indiceDia, List<String> restricoes, bool incluirCeia) {
+    // Não repetir o mesmo alimento em duas refeições do mesmo dia.
+    final usadosNoDia = <String>{};
 
-  RefeicaoDoDia _montarRefeicao(
-    String nome,
-    int indiceDia,
-    List<String> restricoes,
-    List<CategoriaAlimento> categorias, {
-    Set<String> idsExcluidos = const {},
-  }) {
-    final alimentos = [
-      for (final categoria in categorias)
-        _escolherAlimento(categoria, indiceDia, restricoes, idsExcluidos),
-    ].whereType<Alimento>().toList();
-    return RefeicaoDoDia(nome: nome, alimentos: alimentos);
+    // Café e lanche alternam de formato conforme o dia, pra não cair
+    // sempre no mesmo.
+    final moldeCafe =
+        indiceDia.isEven ? _moldeCafeSalgado : _moldeCafeTigela;
+    final moldeLanche =
+        indiceDia.isEven ? _moldeLancheLaticinio : _moldeLancheGordura;
+
+    return DiaDeCardapio(
+      dia: indiceDia + 1,
+      refeicoes: [
+        _montarRefeicao(Refeicao.cafeDaManha, moldeCafe, indiceDia, restricoes, usadosNoDia),
+        _montarRefeicao(Refeicao.almoco, _moldeAlmoco, indiceDia, restricoes, usadosNoDia),
+        _montarRefeicao(Refeicao.lancheTarde, moldeLanche, indiceDia, restricoes, usadosNoDia),
+        _montarRefeicao(Refeicao.jantar, _moldeJantar, indiceDia, restricoes, usadosNoDia),
+        if (incluirCeia)
+          _montarRefeicao(Refeicao.ceia, _moldeCeia, indiceDia, restricoes, usadosNoDia),
+      ],
+    );
   }
 
-  Alimento? _escolherAlimento(
-    CategoriaAlimento categoria,
+  RefeicaoDoDia _montarRefeicao(
+    Refeicao refeicao,
+    List<_Encaixe> molde,
     int indiceDia,
     List<String> restricoes,
-    Set<String> idsExcluidos,
+    Set<String> usadosNoDia,
   ) {
-    final candidatos = repositorio
-        .filtrar(categoria: categoria, restricoesUsuaria: restricoes)
-        .where((alimento) => !idsExcluidos.contains(alimento.id))
-        .toList();
-    if (candidatos.isEmpty) return null;
-    return candidatos[indiceDia % candidatos.length];
+    final alimentos = <Alimento>[];
+    for (final encaixe in molde) {
+      final escolhido = _escolher(encaixe, refeicao, indiceDia, restricoes, usadosNoDia);
+      if (escolhido != null) {
+        alimentos.add(escolhido);
+        usadosNoDia.add(escolhido.id);
+      }
+    }
+    return RefeicaoDoDia(nome: refeicao.label, alimentos: alimentos);
+  }
+
+  Alimento? _escolher(
+    _Encaixe encaixe,
+    Refeicao refeicao,
+    int indiceDia,
+    List<String> restricoes,
+    Set<String> usadosNoDia,
+  ) {
+    final candidatos = repositorio.filtrar(
+      categoria: encaixe.categoria,
+      refeicao: refeicao,
+      leguminosa: encaixe.leguminosa,
+      restricoesUsuaria: restricoes,
+    );
+
+    // Preferir os que ainda não foram usados hoje; se todos já saíram
+    // (biblioteca pequena pra alguma restrição), aí sim repete.
+    final naoUsados = candidatos.where((a) => !usadosNoDia.contains(a.id)).toList();
+    final lista = naoUsados.isNotEmpty ? naoUsados : candidatos;
+    if (lista.isEmpty) return null;
+    return lista[indiceDia % lista.length];
   }
 }
