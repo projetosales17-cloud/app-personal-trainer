@@ -6,6 +6,7 @@ import 'package:mock_exceptions/mock_exceptions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app_personal_trainer/screens/login_screen.dart';
+import 'package:app_personal_trainer/screens/primeiro_acesso_screen.dart';
 import 'package:app_personal_trainer/services/auth_repository.dart';
 import 'package:app_personal_trainer/services/controle_sessao.dart';
 import 'package:app_personal_trainer/services/sessao_unica_service.dart';
@@ -131,5 +132,46 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('E-mail de redefinição de senha enviado.'), findsOneWidget);
+  });
+
+  testWidgets('Botão "Primeiro acesso" abre a tela de primeiro acesso', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LoginScreen(
+          authRepositorio: AuthRepository(auth: MockFirebaseAuth()),
+          sessaoUnicaService: SessaoUnicaService(controleSessao: _ControleSessaoFake()),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byKey(const Key('campo-email-login')), 'compra@hotmail.com');
+    await tester.tap(find.byKey(const Key('botao-primeiro-acesso')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PrimeiroAcessoScreen), findsOneWidget);
+    // e-mail já digitado no login é levado adiante
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('campo-email-primeiro-acesso'))).controller!.text,
+      'compra@hotmail.com',
+    );
+  });
+
+  testWidgets('URL com ?acesso=1 abre o primeiro acesso já preenchido', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LoginScreen(
+          authRepositorio: AuthRepository(auth: MockFirebaseAuth()),
+          sessaoUnicaService: SessaoUnicaService(controleSessao: _ControleSessaoFake()),
+          uriInicial: Uri.parse('https://app.exemplo/?acesso=1&email=nova%40hotmail.com&tx=HP42'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PrimeiroAcessoScreen), findsOneWidget);
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('campo-codigo-primeiro-acesso'))).controller!.text,
+      'HP42',
+    );
   });
 }

@@ -16,6 +16,13 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Ticket de primeiro acesso (e-mail + código da compra) gravado pelo
+    // webhook da Hotmart. Só o endpoint /api/primeiro-acesso (Admin SDK,
+    // que ignora estas regras) lê/escreve — o cliente nunca toca aqui.
+    match /primeiro_acesso/{uid} {
+      allow read, write: if false;
+    }
+
     // Dados da usuária sincronizados entre aparelhos (anamnese, programa,
     // progresso, check-ins, cargas, diário, preferências) — ver
     // SincronizadorDados. Cada conta lê/escreve só o próprio documento.
