@@ -41,7 +41,7 @@ void main() {
     await tester.tap(find.widgetWithText(FilterChip, 'Vegetal'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Brócoli cocido al vapor'), findsOneWidget);
+    expect(find.text('Brócoli al vapor'), findsOneWidget);
     expect(find.text('Pechuga de pollo a la plancha'), findsNothing);
   });
 
@@ -53,7 +53,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Sustituciones en esta categoría'), findsOneWidget);
-    expect(find.text('Tilapia al horno'), findsOneWidget);
+    expect(find.text('Mojarra (tilapia) al horno'), findsOneWidget);
   });
 
   testWidgets('Trocar para a aba "Cardápio" mostra o estado sem anamnese', (tester) async {

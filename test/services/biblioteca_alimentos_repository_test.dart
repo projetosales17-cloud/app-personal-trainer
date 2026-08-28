@@ -24,7 +24,7 @@ void main() {
     for (final alimento in resultado) {
       expect(alimento.contemLactose, isFalse);
     }
-    expect(resultado.any((a) => a.id == 'leite-desnatado'), isFalse);
+    expect(resultado.any((a) => a.id == 'leche-descremada'), isFalse);
   });
 
   test('filtrar por restrição "Vegana" retorna só alimentos veganos', () {
@@ -32,22 +32,31 @@ void main() {
     for (final alimento in resultado) {
       expect(alimento.vegano, isTrue);
     }
-    expect(resultado.any((a) => a.id == 'ovo-cozido'), isFalse);
+    expect(resultado.any((a) => a.id == 'huevo-cocido'), isFalse);
   });
 
   test('substitutos retorna outros alimentos da mesma categoria, sem incluir o próprio', () {
-    final frango = repositorio.porId('frango-grelhado')!;
-    final resultado = repositorio.substitutos(frango);
+    final pollo = repositorio.porId('pollo-plancha')!;
+    final resultado = repositorio.substitutos(pollo);
 
     expect(resultado, isNotEmpty);
-    expect(resultado.any((a) => a.id == 'frango-grelhado'), isFalse);
+    expect(resultado.any((a) => a.id == 'pollo-plancha'), isFalse);
     for (final alimento in resultado) {
       expect(alimento.categoria, CategoriaAlimento.proteina);
     }
   });
 
+  test('filtrar por refeição retorna só alimentos daquela refeição', () {
+    final desayuno = repositorio.filtrar(refeicao: Refeicao.cafeDaManha);
+    expect(desayuno, isNotEmpty);
+    for (final alimento in desayuno) {
+      expect(alimento.refeicoes, contains(Refeicao.cafeDaManha));
+    }
+    expect(desayuno.any((a) => a.id == 'arroz-blanco'), isFalse);
+  });
+
   test('porId encontra um alimento existente e retorna null para inexistente', () {
-    expect(repositorio.porId('banana'), isNotNull);
+    expect(repositorio.porId('platano'), isNotNull);
     expect(repositorio.porId('nao-existe'), isNull);
   });
 }
