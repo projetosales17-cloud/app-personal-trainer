@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:app_personal_trainer/models/anamnese.dart';
 import 'package:app_personal_trainer/screens/onboarding/onboarding_flow.dart';
 import 'package:app_personal_trainer/services/anamnese_repository.dart';
 
@@ -104,6 +105,63 @@ void main() {
     expect(salvo.objetivoPrincipal.name, 'emagrecimento');
     expect(salvo.nivelAtividade.name, 'moderado');
     expect(salvo.cirurgiaBariatrica, isFalse);
+  });
+
+  testWidgets('Modo de edição pré-preenche os campos e salva as alterações', (tester) async {
+    final repositorio = AnamneseRepository();
+    const original = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      pesoDesejadoKg: 60,
+      objetivoPrincipal: Objetivo.emagrecimento,
+      condicaoHormonal: 'Menopausa',
+      restricoesAlimentares: ['Lactose'],
+      lesoesLimitacoes: ['Joelho'],
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+      localTreino: LocalTreino.casa,
+      preferenciaTreino: PreferenciaTreino.combinado,
+    );
+    await repositorio.salvar(original);
+
+    var concluido = false;
+    await tester.pumpWidget(MaterialApp(
+      home: OnboardingFlow(
+        onConcluido: () => concluido = true,
+        repositorio: repositorio,
+        anamneseInicial: original,
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dados básicos'), findsOneWidget);
+    expect(tester.widget<TextField>(find.byType(TextField).at(0)).controller!.text, '30');
+    expect(tester.widget<TextField>(find.byType(TextField).at(2)).controller!.text, '65');
+
+    await tester.enterText(find.byType(TextField).at(2), '68');
+    await tester.pump();
+
+    for (var i = 0; i < 12; i++) {
+      await tester.tap(find.widgetWithText(FilledButton, 'Avançar'));
+      await tester.pumpAndSettle();
+    }
+
+    expect(find.text('Resumo'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Salvar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(concluido, isTrue);
+    final salvo = await repositorio.carregar();
+    expect(salvo!.pesoAtualKg, 68);
+    expect(salvo.idade, 30);
+    expect(salvo.objetivoPrincipal, Objetivo.emagrecimento);
+    expect(salvo.condicaoHormonal, 'Menopausa');
+    expect(salvo.restricoesAlimentares, contains('Lactose'));
+    expect(salvo.lesoesLimitacoes, contains('Joelho'));
+    expect(salvo.localTreino, LocalTreino.casa);
+    expect(salvo.preferenciaTreino, PreferenciaTreino.combinado);
   });
 
   testWidgets('Resumo mostra IMC, TMB e gasto calórico calculados', (tester) async {
