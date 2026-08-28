@@ -62,4 +62,65 @@ void main() {
     expect(FaseCiclo.ovulacao.label, 'Ovulação');
     expect(FaseCiclo.lutea.label, 'Lútea');
   });
+
+  test('duração padrão (28) reproduz as janelas originais', () {
+    expect(calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 4))),
+        FaseCiclo.menstrual);
+    expect(calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 12))),
+        FaseCiclo.folicular);
+    expect(calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 14))),
+        FaseCiclo.ovulacao);
+    expect(calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 20))),
+        FaseCiclo.lutea);
+  });
+
+  test('ciclo curto (24 dias) antecipa a ovulação e encurta a folicular', () {
+    // Ovulação estimada ~14 dias antes do fim: dias 9-11.
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 7)), duracaoCiclo: 24),
+      FaseCiclo.folicular,
+    );
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 10)), duracaoCiclo: 24),
+      FaseCiclo.ovulacao,
+    );
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 14)), duracaoCiclo: 24),
+      FaseCiclo.lutea,
+    );
+    // Repete a cada 24 dias.
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 24)), duracaoCiclo: 24),
+      FaseCiclo.menstrual,
+    );
+  });
+
+  test('ciclo longo (35 dias) estende a folicular e mantém a lútea ~14 dias', () {
+    // Dia 14 ainda é folicular num ciclo de 35 (era ovulação no de 28).
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 14)), duracaoCiclo: 35),
+      FaseCiclo.folicular,
+    );
+    // Ovulação estimada ~dias 20-22.
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 21)), duracaoCiclo: 35),
+      FaseCiclo.ovulacao,
+    );
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 28)), duracaoCiclo: 35),
+      FaseCiclo.lutea,
+    );
+  });
+
+  test('duração fora da faixa é ajustada para o limite mais próximo', () {
+    // 10 -> 21, 99 -> 40. Só não pode estourar nem lançar.
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio, duracaoCiclo: 10),
+      FaseCiclo.menstrual,
+    );
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 100)), duracaoCiclo: 99),
+      isA<FaseCiclo>(),
+    );
+  });
 }

@@ -47,3 +47,4 @@ app.*.map.json
 
 # Firebase CLI local cache
 .firebase/
+.claude/
