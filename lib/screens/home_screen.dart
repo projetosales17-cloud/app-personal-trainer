@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../models/anamnese.dart';
 import '../models/cardapio.dart';
+import '../models/checkin_treino.dart';
+import '../models/estrategia_bloco.dart';
 import '../models/exercicio.dart';
 import '../models/ficha_treino.dart';
+import '../models/programa_treino.dart';
 import '../models/registro_peso.dart';
 import '../services/anamnese_repository.dart';
+import '../services/checkin_treino_repository.dart';
 import '../services/gerador_cardapio.dart';
 import '../services/gerador_ficha_treino.dart';
+import '../services/motor_aderencia.dart';
+import '../services/preferencias_repository.dart';
+import '../services/programa_treino_repository.dart';
 import '../services/progresso_repository.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,18 +24,45 @@ class HomeScreen extends StatefulWidget {
     GeradorFichaTreino? geradorFicha,
     GeradorCardapio? geradorCardapio,
     ProgressoRepository? progressoRepositorio,
+    ProgramaTreinoRepository? programaRepositorio,
+    CheckinTreinoRepository? checkinRepositorio,
+    PreferenciasRepository? preferenciasRepositorio,
+    MotorAderencia? motorAderencia,
   }) : anamneseRepositorio = anamneseRepositorio ?? AnamneseRepository(),
        geradorFicha = geradorFicha ?? GeradorFichaTreino(),
        geradorCardapio = geradorCardapio ?? GeradorCardapio(),
-       progressoRepositorio = progressoRepositorio ?? ProgressoRepository();
+       progressoRepositorio = progressoRepositorio ?? ProgressoRepository(),
+       programaRepositorio = programaRepositorio ?? ProgramaTreinoRepository(),
+       checkinRepositorio = checkinRepositorio ?? CheckinTreinoRepository(),
+       preferenciasRepositorio = preferenciasRepositorio ?? PreferenciasRepository(),
+       motorAderencia = motorAderencia ?? MotorAderencia();
 
   final AnamneseRepository anamneseRepositorio;
   final GeradorFichaTreino geradorFicha;
   final GeradorCardapio geradorCardapio;
   final ProgressoRepository progressoRepositorio;
+  final ProgramaTreinoRepository programaRepositorio;
+  final CheckinTreinoRepository checkinRepositorio;
+  final PreferenciasRepository preferenciasRepositorio;
+  final MotorAderencia motorAderencia;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
+}
+
+/// Contexto do programa de longo prazo — os mesmos dados que a aba Minha
+/// ficha usa pra montar a ficha, pra Home mostrar exatamente o mesmo
+/// treino e a mesma contagem de semana.
+class _ContextoPrograma {
+  const _ContextoPrograma({
+    required this.programa,
+    required this.checkins,
+    required this.diasDaSemana,
+  });
+
+  final ProgramaTreino programa;
+  final List<CheckinTreino> checkins;
+  final List<int>? diasDaSemana;
 }
 
 const _mensagensMotivacionais = [
@@ -40,6 +74,18 @@ const _mensagensMotivacionais = [
 class _HomeScreenState extends State<HomeScreen> {
   late Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
   late final Future<RegistroPeso?> _ultimoPesoFuture = widget.progressoRepositorio.ultimoPeso();
+  late final Future<_ContextoPrograma> _contextoFuture = _carregarContexto();
+
+  Future<_ContextoPrograma> _carregarContexto() async {
+    final programa = await widget.programaRepositorio.iniciarSeNecessario();
+    final checkins = await widget.checkinRepositorio.listar();
+    final diasDaSemana = await widget.preferenciasRepositorio.diasDaSemanaEscolhidos();
+    return _ContextoPrograma(
+      programa: programa,
+      checkins: checkins,
+      diasDaSemana: diasDaSemana,
+    );
+  }
 
   @override
   void initState() {
@@ -84,7 +130,6 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           }
 
-          final ficha = widget.geradorFicha.gerar(anamnese);
           final cardapio = widget.geradorCardapio.gerar(anamnese);
 
           return ListView(
@@ -102,7 +147,40 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
-              _CardTreinoDoDia(dia: ficha.dias.first, validaAte: ficha.validaAte),
+              FutureBuilder<_ContextoPrograma>(
+                future: _contextoFuture,
+                builder: (context, ctxSnapshot) {
+                  if (!ctxSnapshot.hasData) {
+                    return const Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    );
+                  }
+                  final ctx = ctxSnapshot.data!;
+                  final estrategia = calcularEstrategiaBloco(
+                    bloco: ctx.programa.blocoAtual,
+                    nivelLiberado: ctx.programa.nivelLiberado,
+                    ultimoCheckin: ctx.programa.ultimoCheckin,
+                  );
+                  final aderencia = widget.motorAderencia.avaliar(
+                    diasDaSemanaEsperados: ctx.diasDaSemana,
+                    datasCheckin: [for (final c in ctx.checkins) c.data],
+                  );
+                  final ficha = widget.geradorFicha.gerar(
+                    anamnese,
+                    reduzirVolumeRetomada: aderencia.emAlerta,
+                    estrategiaBloco: estrategia,
+                  );
+                  return _CardTreinoDoDia(
+                    dia: ficha.dias.first,
+                    validaAte: ficha.validaAte,
+                    semana: ctx.programa.semanaAtual(),
+                    faseNome: estrategia.faseNome,
+                  );
+                },
+              ),
               const SizedBox(height: 16),
               _CardAlimentacaoDoDia(dia: cardapio.dias.first, validaAte: cardapio.validaAte),
               const SizedBox(height: 16),
@@ -130,10 +208,17 @@ String _formatarData(DateTime data) {
 }
 
 class _CardTreinoDoDia extends StatelessWidget {
-  const _CardTreinoDoDia({required this.dia, required this.validaAte});
+  const _CardTreinoDoDia({
+    required this.dia,
+    required this.validaAte,
+    required this.semana,
+    required this.faseNome,
+  });
 
   final DiaDeTreino dia;
   final DateTime validaAte;
+  final int semana;
+  final String faseNome;
 
   @override
   Widget build(BuildContext context) {
@@ -144,6 +229,11 @@ class _CardTreinoDoDia extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Entrenamiento del día', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+              'Semana $semana · $faseNome',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,

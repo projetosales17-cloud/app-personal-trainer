@@ -38,6 +38,8 @@ void main() {
 
     expect(find.text('¡Hola!'), findsOneWidget);
     expect(find.text('Entrenamiento del día'), findsOneWidget);
+    // Misma cuenta de semana/fase que la pestaña Mi rutina (bloque 1 = adaptación).
+    expect(find.text('Semana 1 · Bloque de adaptación'), findsOneWidget);
     expect(find.textContaining('Rutina válida hasta'), findsOneWidget);
     expect(find.text('Alimentación del día'), findsOneWidget);
     expect(find.text('Almuerzo'), findsOneWidget);
