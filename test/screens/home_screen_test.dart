@@ -38,6 +38,8 @@ void main() {
 
     expect(find.text('Olá!'), findsOneWidget);
     expect(find.text('Treino do dia'), findsOneWidget);
+    // Mesma contagem de semana/fase da aba Minha ficha (bloco 1 = adaptação).
+    expect(find.text('Semana 1 · Bloco de adaptação'), findsOneWidget);
     expect(find.textContaining('Ficha válida até'), findsOneWidget);
     expect(find.text('Alimentação do dia'), findsOneWidget);
     expect(find.text('Almoço'), findsOneWidget);
