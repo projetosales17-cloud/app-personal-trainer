@@ -8,10 +8,17 @@ import '../../services/anamnese_repository.dart';
 const _condicoesHormonais = [
   'Nenhuma',
   'Menopausa',
+  'Histerectomia (não tenho útero)',
   'TPM / ciclo irregular',
   'SOP (Síndrome do Ovário Policístico)',
   'Outra',
 ];
+
+/// Condições em que não faz sentido perguntar sobre fase do ciclo
+/// menstrual — a etapa de ciclo se auto-pula nesses casos. Reportado no
+/// QA: mulher sem útero (histerectomia) era forçada ao switch "meu ciclo
+/// é regular" sem ter resposta honesta.
+const _condicoesSemCiclo = {'Menopausa', 'Histerectomia (não tenho útero)'};
 
 const _restricoesComuns = [
   'Lactose',
@@ -82,6 +89,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   final Set<String> _regioes = {};
 
   bool _salvando = false;
+
+  bool get _semCicloMenstrual => _condicoesSemCiclo.contains(_condicaoHormonal);
 
   @override
   void dispose() {
@@ -167,8 +176,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       localTreino: _localTreino!,
       preferenciaTreino: _preferenciaTreino!,
       dataParto: _teveParto ? _dataParto : null,
-      cicloMenstrualRegular: _cicloMenstrualRegular,
-      dataUltimaMenstruacao: _cicloMenstrualRegular ? _dataUltimaMenstruacao : null,
+      cicloMenstrualRegular: _semCicloMenstrual ? false : _cicloMenstrualRegular,
+      dataUltimaMenstruacao:
+          (!_semCicloMenstrual && _cicloMenstrualRegular) ? _dataUltimaMenstruacao : null,
     );
 
     await widget.repositorio.salvar(anamnese);
@@ -377,6 +387,21 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   }
 
   Widget _passoCicloMenstrual() {
+    if (_semCicloMenstrual) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Ciclo menstrual', style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 8),
+          Text(
+            'Como você marcou "$_condicaoHormonal" na etapa anterior, esta '
+            'parte não se aplica ao seu perfil. Pode avançar — seu plano de '
+            'treino e alimentação não vai depender da fase do ciclo.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
