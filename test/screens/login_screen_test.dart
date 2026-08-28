@@ -29,6 +29,7 @@ class _ControleSessaoFake implements ControleSessao {
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    LoginScreen.resetarAutoAberturaPrimeiroAcesso();
   });
 
   testWidgets('Entrar com sucesso registra a sessão', (tester) async {

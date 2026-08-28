@@ -26,6 +26,15 @@ class LoginScreen extends StatefulWidget {
   /// código ya rellenados.
   final Uri uriInicial;
 
+  // El AutenticacaoGate reconstruye la LoginScreen en cada emisión del
+  // stream de auth. Sin este candado, el `?acesso=1` reabriría la pantalla
+  // de primer acceso en cada rebuild, apilando rutas. Una vez por sesión
+  // de la app basta — después la persona usa el botón.
+  static bool _primeiroAcessoAutoAberto = false;
+
+  @visibleForTesting
+  static void resetarAutoAberturaPrimeiroAcesso() => _primeiroAcessoAutoAberto = false;
+
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -41,7 +50,8 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     final params = widget.uriInicial.queryParameters;
-    if (params['acesso'] == '1') {
+    if (params['acesso'] == '1' && !LoginScreen._primeiroAcessoAutoAberto) {
+      LoginScreen._primeiroAcessoAutoAberto = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _abrirPrimeiroAcesso(
