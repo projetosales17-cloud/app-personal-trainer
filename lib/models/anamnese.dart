@@ -4,24 +4,61 @@ import '../saude/sexo.dart';
 export '../saude/ciclo_hormonal.dart' show FaseCiclo;
 export '../saude/sexo.dart' show Sexo;
 
+/// Objetivo principal escolhido na anamnese. A ordem aqui é a ordem em que
+/// aparecem na tela de onboarding. Os nomes internos (`emagrecimento`,
+/// `tonificacao`, ...) não podem mudar — anamneses salvas guardam o `.name`
+/// e quebrariam ao recarregar.
 enum Objetivo {
   emagrecimento,
+  recomposicao,
   tonificacao,
+  gluteoPernas,
   hipertrofia,
   performanceAtletica,
+  voltarATreinar,
   saudeGeral,
+  menopausa,
   terceiraIdade,
 }
 
 extension ObjetivoLabel on Objetivo {
   String get label => switch (this) {
-    Objetivo.emagrecimento => 'Emagrecimento',
-    Objetivo.tonificacao => 'Tonificação',
-    Objetivo.hipertrofia => 'Hipertrofia',
+    Objetivo.emagrecimento => 'Emagrecer e perder medidas',
+    Objetivo.recomposicao => 'Perder gordura e ganhar músculo ao mesmo tempo',
+    Objetivo.tonificacao => 'Definir e deixar o corpo tonificado',
+    Objetivo.gluteoPernas => 'Foco em glúteo e pernas',
+    Objetivo.hipertrofia => 'Ganhar massa muscular',
     Objetivo.performanceAtletica => 'Performance atlética',
-    Objetivo.saudeGeral => 'Saúde geral (ex: menopausa)',
+    Objetivo.voltarATreinar => 'Voltar a treinar / criar o hábito',
+    Objetivo.saudeGeral => 'Saúde e disposição no dia a dia',
+    Objetivo.menopausa => 'Saúde na menopausa',
     Objetivo.terceiraIdade =>
-      'Terceira idade (mobilidade, equilíbrio e prevenção de quedas)',
+      'Terceira idade: mobilidade, equilíbrio e prevenção de quedas',
+  };
+
+  /// Descrição curta mostrada abaixo do rótulo na tela de objetivos, para
+  /// ajudar a usuária a se identificar com o perfil certo.
+  String get descricao => switch (this) {
+    Objetivo.emagrecimento =>
+      'Reduzir o percentual de gordura e as medidas, com foco no gasto calórico.',
+    Objetivo.recomposicao =>
+      'Baixar gordura e ganhar um pouco de músculo ao mesmo tempo — ideal se você já está perto do seu peso.',
+    Objetivo.tonificacao =>
+      'Deixar o corpo mais firme e definido, sem necessariamente aumentar muito de tamanho.',
+    Objetivo.gluteoPernas =>
+      'Priorizar o desenvolvimento de glúteo e pernas, com mais volume nesses grupos.',
+    Objetivo.hipertrofia =>
+      'Aumentar o tamanho e o volume muscular com cargas mais exigentes.',
+    Objetivo.performanceAtletica =>
+      'Ganhar força e potência para render melhor num esporte ou teste físico.',
+    Objetivo.voltarATreinar =>
+      'Retomar o exercício com calma e criar constância, sem sobrecarregar o corpo.',
+    Objetivo.saudeGeral =>
+      'Se movimentar com regularidade para ter mais energia, dormir melhor e cuidar da saúde.',
+    Objetivo.menopausa =>
+      'Preservar músculo e massa óssea e controlar o peso durante a menopausa.',
+    Objetivo.terceiraIdade =>
+      'Manter a autonomia: mobilidade, equilíbrio e prevenção de quedas.',
   };
 }
 
@@ -51,13 +88,19 @@ extension PreferenciaTreinoLabel on PreferenciaTreino {
 /// combinar os dois.
 extension PreferenciaTreinoRecomendada on Objetivo {
   PreferenciaTreino get preferenciaTreinoRecomendada => switch (this) {
+    // Hipertrofia recomenda só musculação (cardio em excesso atrapalha o
+    // ganho de massa).
     Objetivo.hipertrofia => PreferenciaTreino.soMusculacao,
-    Objetivo.tonificacao => PreferenciaTreino.combinado,
+    // Todos os demais objetivos se beneficiam de combinar musculação e
+    // cardio.
     Objetivo.emagrecimento => PreferenciaTreino.combinado,
+    Objetivo.recomposicao => PreferenciaTreino.combinado,
+    Objetivo.tonificacao => PreferenciaTreino.combinado,
+    Objetivo.gluteoPernas => PreferenciaTreino.combinado,
     Objetivo.performanceAtletica => PreferenciaTreino.combinado,
+    Objetivo.voltarATreinar => PreferenciaTreino.combinado,
     Objetivo.saudeGeral => PreferenciaTreino.combinado,
-    // Cardio leve de baixo impacto + mobilidade combina bem com o
-    // objetivo de terceira idade (ver GeradorFichaTreino).
+    Objetivo.menopausa => PreferenciaTreino.combinado,
     Objetivo.terceiraIdade => PreferenciaTreino.combinado,
   };
 }
