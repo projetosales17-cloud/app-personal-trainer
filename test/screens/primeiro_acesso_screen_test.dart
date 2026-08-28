@@ -1,0 +1,184 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mock_exceptions/mock_exceptions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:app_personal_trainer/screens/primeiro_acesso_screen.dart';
+import 'package:app_personal_trainer/services/auth_repository.dart';
+import 'package:app_personal_trainer/services/controle_sessao.dart';
+import 'package:app_personal_trainer/services/primeiro_acesso_repository.dart';
+import 'package:app_personal_trainer/services/sessao_unica_service.dart';
+
+class _ControleSessaoFake implements ControleSessao {
+  String? ultimoUidRegistrado;
+  @override
+  String gerarTokenSessao() => 'token-fake';
+  @override
+  Future<void> registrarSessao(String uid, String tokenSessao) async {
+    ultimoUidRegistrado = uid;
+  }
+  @override
+  Stream<String?> observarTokenSessao(String uid) => const Stream.empty();
+}
+
+class _FakePrimeiroAcessoRepo extends PrimeiroAcessoRepository {
+  _FakePrimeiroAcessoRepo({this.erro}) : super(endpoint: Uri.parse('https://x.test'));
+
+  final String? erro;
+  Map<String, String>? chamada;
+
+  @override
+  Future<void> definirSenha({
+    required String email,
+    required String codigo,
+    required String senha,
+  }) async {
+    chamada = {'email': email, 'codigo': codigo, 'senha': senha};
+    if (erro != null) throw PrimeiroAcessoException(erro!);
+  }
+}
+
+Widget _tela({
+  required PrimeiroAcessoRepository repo,
+  required AuthRepository auth,
+  required SessaoUnicaService sessao,
+  String? emailInicial,
+  String? codigoInicial,
+}) {
+  return MaterialApp(
+    home: PrimeiroAcessoScreen(
+      authRepositorio: auth,
+      sessaoUnicaService: sessao,
+      primeiroAcessoRepositorio: repo,
+      emailInicial: emailInicial,
+      codigoInicial: codigoInicial,
+    ),
+  );
+}
+
+void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  testWidgets('rellena correo y código cuando vienen del enlace', (tester) async {
+    await tester.pumpWidget(_tela(
+      repo: _FakePrimeiroAcessoRepo(),
+      auth: AuthRepository(auth: MockFirebaseAuth()),
+      sessao: SessaoUnicaService(controleSessao: _ControleSessaoFake()),
+      emailInicial: 'nueva@hotmail.com',
+      codigoInicial: 'HP99',
+    ));
+
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('campo-email-primeiro-acesso'))).controller!.text,
+      'nueva@hotmail.com',
+    );
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('campo-codigo-primeiro-acesso'))).controller!.text,
+      'HP99',
+    );
+  });
+
+  testWidgets('éxito: llama al backend, define la contraseña e inicia sesión', (tester) async {
+    final repo = _FakePrimeiroAcessoRepo();
+    final auth = MockFirebaseAuth();
+    final controle = _ControleSessaoFake();
+
+    await tester.pumpWidget(_tela(
+      repo: repo,
+      auth: AuthRepository(auth: auth),
+      sessao: SessaoUnicaService(controleSessao: controle),
+      emailInicial: 'nueva@hotmail.com',
+      codigoInicial: 'HP99',
+    ));
+
+    await tester.enterText(find.byKey(const Key('campo-senha-primeiro-acesso')), 'senhaBoa1');
+    await tester.enterText(find.byKey(const Key('campo-confirma-primeiro-acesso')), 'senhaBoa1');
+    await tester.tap(find.byKey(const Key('botao-criar-senha-primeiro-acesso')));
+    await tester.pumpAndSettle();
+
+    expect(repo.chamada, {'email': 'nueva@hotmail.com', 'codigo': 'HP99', 'senha': 'senhaBoa1'});
+    expect(auth.currentUser, isNotNull);
+    expect(controle.ultimoUidRegistrado, isNotNull);
+  });
+
+  testWidgets('contraseñas distintas: ni llama al backend', (tester) async {
+    final repo = _FakePrimeiroAcessoRepo();
+    await tester.pumpWidget(_tela(
+      repo: repo,
+      auth: AuthRepository(auth: MockFirebaseAuth()),
+      sessao: SessaoUnicaService(controleSessao: _ControleSessaoFake()),
+      emailInicial: 'nueva@hotmail.com',
+      codigoInicial: 'HP99',
+    ));
+
+    await tester.enterText(find.byKey(const Key('campo-senha-primeiro-acesso')), 'senhaBoa1');
+    await tester.enterText(find.byKey(const Key('campo-confirma-primeiro-acesso')), 'otra');
+    await tester.tap(find.byKey(const Key('botao-criar-senha-primeiro-acesso')));
+    await tester.pump();
+
+    expect(find.text('Las dos contraseñas no coinciden.'), findsOneWidget);
+    expect(repo.chamada, isNull);
+  });
+
+  testWidgets('contraseña creada pero el login automático falla: vuelve al login sin atrapar', (tester) async {
+    final repo = _FakePrimeiroAcessoRepo();
+    final auth = MockFirebaseAuth();
+    whenCalling(Invocation.method(#signInWithEmailAndPassword, null))
+        .on(auth)
+        .thenThrow(FirebaseAuthException(code: 'network-request-failed'));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => PrimeiroAcessoScreen(
+                    authRepositorio: AuthRepository(auth: auth),
+                    sessaoUnicaService: SessaoUnicaService(controleSessao: _ControleSessaoFake()),
+                    primeiroAcessoRepositorio: repo,
+                    emailInicial: 'nueva@hotmail.com',
+                    codigoInicial: 'HP99',
+                  ),
+                ),
+              ),
+              child: const Text('abrir'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('abrir'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('campo-senha-primeiro-acesso')), 'senhaBoa1');
+    await tester.enterText(find.byKey(const Key('campo-confirma-primeiro-acesso')), 'senhaBoa1');
+    await tester.tap(find.byKey(const Key('botao-criar-senha-primeiro-acesso')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PrimeiroAcessoScreen), findsNothing);
+    expect(find.textContaining('Contraseña creada'), findsOneWidget);
+    expect(repo.chamada, isNotNull);
+  });
+
+  testWidgets('error del backend aparece en la pantalla', (tester) async {
+    final repo = _FakePrimeiroAcessoRepo(erro: 'El código no coincide.');
+    await tester.pumpWidget(_tela(
+      repo: repo,
+      auth: AuthRepository(auth: MockFirebaseAuth()),
+      sessao: SessaoUnicaService(controleSessao: _ControleSessaoFake()),
+      emailInicial: 'nueva@hotmail.com',
+      codigoInicial: 'HP99',
+    ));
+
+    await tester.enterText(find.byKey(const Key('campo-senha-primeiro-acesso')), 'senhaBoa1');
+    await tester.enterText(find.byKey(const Key('campo-confirma-primeiro-acesso')), 'senhaBoa1');
+    await tester.tap(find.byKey(const Key('botao-criar-senha-primeiro-acesso')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('El código no coincide.'), findsOneWidget);
+  });
+}

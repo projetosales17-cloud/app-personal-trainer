@@ -6,6 +6,7 @@ import 'package:mock_exceptions/mock_exceptions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app_personal_trainer/screens/login_screen.dart';
+import 'package:app_personal_trainer/screens/primeiro_acesso_screen.dart';
 import 'package:app_personal_trainer/services/auth_repository.dart';
 import 'package:app_personal_trainer/services/controle_sessao.dart';
 import 'package:app_personal_trainer/services/sessao_unica_service.dart';
@@ -28,6 +29,7 @@ class _ControleSessaoFake implements ControleSessao {
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    LoginScreen.resetarAutoAberturaPrimeiroAcesso();
   });
 
   testWidgets('Entrar com sucesso registra a sessão', (tester) async {
@@ -131,5 +133,45 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Te enviamos un correo para restablecer tu contraseña.'), findsOneWidget);
+  });
+
+  testWidgets('Botón "Primer acceso" abre la pantalla de primer acceso', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LoginScreen(
+          authRepositorio: AuthRepository(auth: MockFirebaseAuth()),
+          sessaoUnicaService: SessaoUnicaService(controleSessao: _ControleSessaoFake()),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byKey(const Key('campo-email-login')), 'compra@hotmail.com');
+    await tester.tap(find.byKey(const Key('botao-primeiro-acesso')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PrimeiroAcessoScreen), findsOneWidget);
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('campo-email-primeiro-acesso'))).controller!.text,
+      'compra@hotmail.com',
+    );
+  });
+
+  testWidgets('URL con ?acesso=1 abre el primer acceso ya rellenado', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LoginScreen(
+          authRepositorio: AuthRepository(auth: MockFirebaseAuth()),
+          sessaoUnicaService: SessaoUnicaService(controleSessao: _ControleSessaoFake()),
+          uriInicial: Uri.parse('https://app.exemplo/?acesso=1&email=nueva%40hotmail.com&tx=HP42'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PrimeiroAcessoScreen), findsOneWidget);
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('campo-codigo-primeiro-acesso'))).controller!.text,
+      'HP42',
+    );
   });
 }
