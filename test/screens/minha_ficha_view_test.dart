@@ -83,6 +83,32 @@ void main() {
     expect(find.text('Día 3'), findsOneWidget);
   });
 
+  testWidgets('El "?" al lado de Fechas sugeridas abre la explicación de marcación', (tester) async {
+    final repositorio = AnamneseRepository();
+    await repositorio.salvar(
+      const Anamnese(
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(home: MinhaFichaView(anamneseRepositorio: repositorio)),
+    );
+    await _carregar(tester);
+
+    await tester.tap(find.byKey(const Key('botao-ajuda-marcacao-treino')).first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cómo marcar tus entrenamientos'), findsOneWidget);
+    expect(find.textContaining('hoja de asistencia'), findsOneWidget);
+    expect(find.text('Evolución'), findsOneWidget);
+  });
+
   testWidgets('Preferência combinada mostra atividade de cardio no dia', (tester) async {
     final repositorio = AnamneseRepository();
     await repositorio.salvar(

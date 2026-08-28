@@ -18,6 +18,7 @@ import '../services/preferencias_repository.dart';
 import '../services/programa_treino_repository.dart';
 import '../services/progresso_repository.dart';
 import '../services/trocas_exercicio_repository.dart';
+import '../widgets/ajuda_marcacao_treino.dart';
 import 'checkin_progresso_screen.dart';
 import 'exercicio_detalhe_screen.dart';
 
@@ -662,7 +663,12 @@ class _DiaDeTreinoCard extends StatelessWidget {
             Text('Día ${dia.dia}', style: Theme.of(context).textTheme.titleMedium),
             if (datas.isNotEmpty) ...[
               const SizedBox(height: 4),
-              Text('Fechas sugeridas:', style: Theme.of(context).textTheme.bodySmall),
+              Row(
+                children: [
+                  Text('Fechas sugeridas:', style: Theme.of(context).textTheme.bodySmall),
+                  const BotaoAjudaMarcacaoTreino(),
+                ],
+              ),
               for (final data in datas)
                 CheckboxListTile(
                   key: Key('checkin-dia-${dia.dia}-${data.toIso8601String().substring(0, 10)}'),
