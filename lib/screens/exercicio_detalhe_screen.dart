@@ -3,8 +3,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../models/exercicio.dart';
 import '../models/registro_carga.dart';
+import '../saude/progressao_carga.dart';
 import '../services/treino_repository.dart';
 import '../widgets/cronometro_descanso.dart';
+import '../widgets/grafico_linha_simples.dart';
 
 class ExercicioDetalheScreen extends StatefulWidget {
   ExercicioDetalheScreen({super.key, required this.exercicio, TreinoRepository? repositorio})
@@ -54,8 +56,16 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
     _controladorPeso.clear();
     _controladorSeries.clear();
     _controladorRepeticoes.clear();
+
+    final historico = await _carregarHistorico();
+    final destaque = destaqueNovoRecorde(widget.exercicio.id, historico);
+    if (destaque != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(destaque)));
+    }
+
+    if (!mounted) return;
     setState(() {
-      _historicoFuture = _carregarHistorico();
+      _historicoFuture = Future.value(historico);
     });
   }
 
@@ -64,6 +74,9 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
     final mes = data.month.toString().padLeft(2, '0');
     return '$dia/$mes/${data.year}';
   }
+
+  String _kg(double v) =>
+      '${v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(1)} kg';
 
   @override
   Widget build(BuildContext context) {
@@ -167,14 +180,31 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              final historico = (snapshot.data ?? const <RegistroCarga>[]).reversed.toList();
+              final registros = snapshot.data ?? const <RegistroCarga>[];
+              final historico = registros.reversed.toList();
               if (historico.isEmpty) {
                 return const Text('Nenhum registro de carga ainda para este exercício.');
               }
 
+              final evolucao = resumirEvolucao(widget.exercicio.id, registros);
+
               return Column(
                 key: const Key('lista-historico-carga'),
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (evolucao != null) ...[
+                    GraficoLinhaSimples(valores: evolucao.pesos, altura: 100),
+                    const SizedBox(height: 8),
+                    Text(
+                      evolucao.progrediu
+                          ? 'De ${_kg(evolucao.pesoInicial)} para ${_kg(evolucao.pesoAtual)} '
+                                'em ${evolucao.semanas} semana(s).'
+                          : 'Carga estável em ${_kg(evolucao.pesoAtual)} — '
+                                'quando se sentir pronta, tente subir um pouco.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const Divider(height: 24),
+                  ],
                   for (final registro in historico)
                     ListTile(
                       contentPadding: EdgeInsets.zero,
