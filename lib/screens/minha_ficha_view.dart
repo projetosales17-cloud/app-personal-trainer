@@ -17,6 +17,7 @@ import '../services/notificador_conquistas.dart';
 import '../services/preferencias_repository.dart';
 import '../services/programa_treino_repository.dart';
 import '../services/progresso_repository.dart';
+import '../services/trocas_exercicio_repository.dart';
 import 'checkin_progresso_screen.dart';
 import 'exercicio_detalhe_screen.dart';
 
@@ -34,20 +35,27 @@ class MinhaFichaView extends StatefulWidget {
     NotificadorConquistas? notificadorConquistas,
     ProgramaTreinoRepository? programaRepositorio,
     ProgressoRepository? progressoRepositorio,
+    TrocasExercicioRepository? trocasRepositorio,
   }) : anamneseRepositorio = anamneseRepositorio ?? AnamneseRepository(),
-       geradorFicha = GeradorFichaTreino(repositorio: bibliotecaRepositorio),
+       bibliotecaRepositorio = bibliotecaRepositorio ?? BibliotecaExerciciosRepository(),
+       geradorFicha = GeradorFichaTreino(
+         repositorio: bibliotecaRepositorio ?? BibliotecaExerciciosRepository(),
+       ),
        preferenciasRepositorio = preferenciasRepositorio ?? PreferenciasRepository(),
        checkinRepositorio = checkinRepositorio ?? CheckinTreinoRepository(),
        motorAderencia = motorAderencia ?? MotorAderencia(),
        gamificacaoService = gamificacaoService ?? GamificacaoService(),
        programaRepositorio = programaRepositorio ?? ProgramaTreinoRepository(),
        progressoRepositorio = progressoRepositorio ?? ProgressoRepository(),
+       trocasRepositorio = trocasRepositorio ?? TrocasExercicioRepository(),
        notificadorConquistas =
            notificadorConquistas ??
            (kIsWeb ? const NotificadorConquistasNulo() : NotificadorConquistasLocal());
 
   final AnamneseRepository anamneseRepositorio;
+  final BibliotecaExerciciosRepository bibliotecaRepositorio;
   final GeradorFichaTreino geradorFicha;
+  final TrocasExercicioRepository trocasRepositorio;
   final PreferenciasRepository preferenciasRepositorio;
   final CheckinTreinoRepository checkinRepositorio;
   final MotorAderencia motorAderencia;
@@ -73,6 +81,76 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
   late Future<List<CheckinTreino>> _checkinsFuture = widget.checkinRepositorio.listar();
   late Future<ProgramaTreino> _programaFuture =
       widget.programaRepositorio.iniciarSeNecessario();
+  late Future<Map<String, String>> _trocasFuture = widget.trocasRepositorio.carregar();
+
+  /// Abre a folha de alternativas do mesmo grupo muscular para [original]
+  /// e persiste a troca escolhida. [jaNaFicha] são os ids de exercícios
+  /// que já estão no dia, para não oferecer repetição.
+  Future<void> _trocarExercicio(
+    Exercicio original,
+    Set<String> jaNaFicha, {
+    required bool somenteEmCasa,
+  }) async {
+    var alternativas = widget.bibliotecaRepositorio
+        .filtrar(grupoMuscular: original.grupoMuscularPrincipal)
+        .where((e) => e.id != original.id && !jaNaFicha.contains(e.id))
+        .toList();
+    if (somenteEmCasa) {
+      alternativas = alternativas
+          .where((e) => equipamentosCasa.contains(e.equipamento))
+          .toList();
+    }
+    // Mais leves primeiro — a troca costuma ser pra facilitar o dia.
+    alternativas.sort((a, b) => a.nivel.index.compareTo(b.nivel.index));
+
+    if (!mounted) return;
+    if (alternativas.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sin otra opción para ese grupo ahora.')),
+      );
+      return;
+    }
+
+    final escolhido = await showModalBottomSheet<Exercicio>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Cambiar "${original.nome}" por',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            for (final alternativa in alternativas)
+              ListTile(
+                key: Key('opcao-troca-${alternativa.id}'),
+                title: Text(alternativa.nome),
+                subtitle: Text('${alternativa.nivel.label} · ${alternativa.equipamento.label}'),
+                onTap: () => Navigator.of(context).pop(alternativa),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    if (escolhido == null) return;
+    await widget.trocasRepositorio.trocar(original.id, escolhido.id);
+    if (!mounted) return;
+    setState(() {
+      _trocasFuture = widget.trocasRepositorio.carregar();
+    });
+  }
+
+  Future<void> _desfazerTroca(String exercicioOriginalId) async {
+    await widget.trocasRepositorio.desfazer(exercicioOriginalId);
+    if (!mounted) return;
+    setState(() {
+      _trocasFuture = widget.trocasRepositorio.carregar();
+    });
+  }
 
   Future<void> _abrirCheckin(ProgramaTreino programa) async {
     final ultimoPeso = await widget.progressoRepositorio.ultimoPeso();
@@ -87,8 +165,13 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
       ),
     );
     if (fez == true && mounted) {
+      // Ficha nova entra em cena: as trocas manuais do bloco anterior
+      // deixam de fazer sentido.
+      await widget.trocasRepositorio.limparTudo();
+      if (!mounted) return;
       setState(() {
         _programaFuture = widget.programaRepositorio.iniciarSeNecessario();
+        _trocasFuture = widget.trocasRepositorio.carregar();
       });
     }
   }
@@ -218,7 +301,20 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                 );
                 final precisaCheckin = programa.precisaCheckin();
 
-                return ListView(
+                return FutureBuilder<Map<String, String>>(
+                  future: _trocasFuture,
+                  builder: (context, trocasSnapshot) {
+                    final trocas = trocasSnapshot.data ?? const <String, String>{};
+
+                    Exercicio comTroca(Exercicio original) {
+                      final substitutoId = trocas[original.id];
+                      if (substitutoId == null) return original;
+                      return widget.bibliotecaRepositorio.porId(substitutoId) ?? original;
+                    }
+
+                    final somenteEmCasa = anamnese.localTreino == LocalTreino.casa;
+
+                    return ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
                     if (precisaCheckin) ...[
@@ -295,8 +391,24 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                         datas: ficha.datasPara(dia, diasDaSemana: diasDaSemana),
                         checkins: checkins,
                         aoAlternarConcluido: _alternarConcluido,
+                        exerciciosExibidos: [
+                          for (final ex in dia.exercicios) comTroca(ex),
+                        ],
+                        exerciciosOriginais: dia.exercicios,
+                        idsTrocados: {
+                          for (final ex in dia.exercicios)
+                            if (trocas.containsKey(ex.id)) ex.id,
+                        },
+                        aoTrocar: (original) => _trocarExercicio(
+                          original,
+                          {for (final ex in dia.exercicios) comTroca(ex).id},
+                          somenteEmCasa: somenteEmCasa,
+                        ),
+                        aoDesfazerTroca: _desfazerTroca,
                       ),
                   ],
+                );
+                  },
                 );
               },
             );
@@ -483,12 +595,29 @@ class _DiaDeTreinoCard extends StatelessWidget {
     required this.datas,
     required this.checkins,
     required this.aoAlternarConcluido,
+    required this.exerciciosExibidos,
+    required this.exerciciosOriginais,
+    required this.idsTrocados,
+    required this.aoTrocar,
+    required this.aoDesfazerTroca,
   });
 
   final DiaDeTreino dia;
   final List<DateTime> datas;
   final List<CheckinTreino> checkins;
   final Future<void> Function(DateTime data, int diaFicha, bool concluido) aoAlternarConcluido;
+
+  /// Exercícios já com as trocas manuais aplicadas — é o que a usuária vê.
+  final List<Exercicio> exerciciosExibidos;
+
+  /// Exercícios como o gerador montou, na mesma ordem de [exerciciosExibidos].
+  final List<Exercicio> exerciciosOriginais;
+
+  /// Ids (dos originais) que estão trocados agora.
+  final Set<String> idsTrocados;
+
+  final void Function(Exercicio original) aoTrocar;
+  final void Function(String exercicioOriginalId) aoDesfazerTroca;
 
   bool _concluido(DateTime data) {
     final dataNormalizada = DateTime(data.year, data.month, data.day);
@@ -530,17 +659,13 @@ class _DiaDeTreinoCard extends StatelessWidget {
               ],
             ),
             const Divider(height: 24),
-            for (final exercicio in dia.exercicios)
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(exercicio.nome),
-                subtitle: Text(exercicio.grupoMuscularPrincipal.label),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => ExercicioDetalheScreen(exercicio: exercicio),
-                  ),
-                ),
+            for (var i = 0; i < exerciciosExibidos.length; i++)
+              _ExercicioTile(
+                exibido: exerciciosExibidos[i],
+                original: exerciciosOriginais[i],
+                trocado: idsTrocados.contains(exerciciosOriginais[i].id),
+                aoTrocar: aoTrocar,
+                aoDesfazerTroca: aoDesfazerTroca,
               ),
             for (final atividade in dia.atividadesCardio)
               ListTile(
@@ -550,6 +675,63 @@ class _DiaDeTreinoCard extends StatelessWidget {
                 subtitle: Text('${atividade.duracaoMinutosSugerida} min sugeridos'),
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Linha de um exercício na ficha, com a opção de trocar por uma
+/// alternativa mais leve do mesmo grupo ("aparelho ocupado", "hoje esse
+/// movimento incomoda") sem esperar o check-in de progresso.
+class _ExercicioTile extends StatelessWidget {
+  const _ExercicioTile({
+    required this.exibido,
+    required this.original,
+    required this.trocado,
+    required this.aoTrocar,
+    required this.aoDesfazerTroca,
+  });
+
+  final Exercicio exibido;
+  final Exercicio original;
+  final bool trocado;
+  final void Function(Exercicio original) aoTrocar;
+  final void Function(String exercicioOriginalId) aoDesfazerTroca;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(exibido.nome),
+      subtitle: Text(
+        trocado
+            ? '${exibido.grupoMuscularPrincipal.label} · en lugar de ${original.nome}'
+            : exibido.grupoMuscularPrincipal.label,
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (trocado)
+            IconButton(
+              key: Key('desfazer-troca-${original.id}'),
+              tooltip: 'Volver al ejercicio original',
+              icon: const Icon(Icons.undo),
+              onPressed: () => aoDesfazerTroca(original.id),
+            )
+          else
+            IconButton(
+              key: Key('trocar-exercicio-${original.id}'),
+              tooltip: 'Cambiar este ejercicio',
+              icon: const Icon(Icons.swap_horiz),
+              onPressed: () => aoTrocar(original),
+            ),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => ExercicioDetalheScreen(exercicio: exibido),
         ),
       ),
     );

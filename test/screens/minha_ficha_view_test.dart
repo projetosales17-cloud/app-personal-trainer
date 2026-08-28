@@ -12,6 +12,7 @@ import 'package:app_personal_trainer/services/anamnese_repository.dart';
 import 'package:app_personal_trainer/services/checkin_treino_repository.dart';
 import 'package:app_personal_trainer/services/notificador_conquistas.dart';
 import 'package:app_personal_trainer/services/preferencias_repository.dart';
+import 'package:app_personal_trainer/services/trocas_exercicio_repository.dart';
 
 class _NotificadorFake implements NotificadorConquistas {
   final chamadas = <String>[];
@@ -371,5 +372,48 @@ void main() {
     await _tocar(tester, find.byKey(chaveHoje));
 
     expect(notificador.chamadas, ['¡Racha de 3 días!']);
+  });
+
+  testWidgets('Trocar um exercício na hora aplica e persiste a troca; desfazer volta', (
+    tester,
+  ) async {
+    final anamneseRepositorio = AnamneseRepository();
+    await anamneseRepositorio.salvar(
+      const Anamnese(
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+    final trocasRepositorio = TrocasExercicioRepository();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MinhaFichaView(
+            anamneseRepositorio: anamneseRepositorio,
+            trocasRepositorio: trocasRepositorio,
+          ),
+        ),
+      ),
+    );
+    await _carregar(tester);
+
+    await _tocar(tester, find.byIcon(Icons.swap_horiz).first);
+
+    expect(find.textContaining('Cambiar "'), findsOneWidget);
+    final primeiraOpcao = find.byWidgetPredicate(
+      (w) => w is ListTile && w.key.toString().contains('opcao-troca-'),
+    ).first;
+    await _tocar(tester, primeiraOpcao);
+
+    expect(await trocasRepositorio.carregar(), isNotEmpty);
+    expect(find.textContaining('en lugar de'), findsWidgets);
+
+    await _tocar(tester, find.byIcon(Icons.undo).first);
+    expect(await trocasRepositorio.carregar(), isEmpty);
   });
 }
