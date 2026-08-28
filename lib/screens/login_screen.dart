@@ -1,15 +1,39 @@
 import 'package:flutter/material.dart';
 
 import '../services/auth_repository.dart';
+import '../services/primeiro_acesso_repository.dart';
 import '../services/sessao_unica_service.dart';
+import 'primeiro_acesso_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  LoginScreen({super.key, AuthRepository? authRepositorio, SessaoUnicaService? sessaoUnicaService})
-    : authRepositorio = authRepositorio ?? AuthRepository(),
-      sessaoUnicaService = sessaoUnicaService ?? SessaoUnicaService();
+  LoginScreen({
+    super.key,
+    AuthRepository? authRepositorio,
+    SessaoUnicaService? sessaoUnicaService,
+    PrimeiroAcessoRepository? primeiroAcessoRepositorio,
+    Uri? uriInicial,
+  }) : authRepositorio = authRepositorio ?? AuthRepository(),
+       sessaoUnicaService = sessaoUnicaService ?? SessaoUnicaService(),
+       primeiroAcessoRepositorio = primeiroAcessoRepositorio ?? PrimeiroAcessoRepository(),
+       uriInicial = uriInicial ?? Uri.base;
 
   final AuthRepository authRepositorio;
   final SessaoUnicaService sessaoUnicaService;
+  final PrimeiroAcessoRepository primeiroAcessoRepositorio;
+
+  /// URL de abertura do app. Se vier `?acesso=1` (link do e-mail de
+  /// boas-vindas), a tela já abre o "Primeiro acesso" com e-mail e código
+  /// preenchidos.
+  final Uri uriInicial;
+
+  // O AutenticacaoGate reconstrói a LoginScreen a cada emissão do stream
+  // de auth. Sem esta trava, o `?acesso=1` reabriria a tela de primeiro
+  // acesso a cada rebuild, empilhando rotas. Uma vez por sessão do app
+  // basta — depois disso a pessoa usa o botão.
+  static bool _primeiroAcessoAutoAberto = false;
+
+  @visibleForTesting
+  static void resetarAutoAberturaPrimeiroAcesso() => _primeiroAcessoAutoAberto = false;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -21,6 +45,23 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _carregando = false;
   bool _senhaVisivel = false;
   String? _erro;
+
+  @override
+  void initState() {
+    super.initState();
+    final params = widget.uriInicial.queryParameters;
+    if (params['acesso'] == '1' && !LoginScreen._primeiroAcessoAutoAberto) {
+      LoginScreen._primeiroAcessoAutoAberto = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _abrirPrimeiroAcesso(
+            emailInicial: params['email'],
+            codigoInicial: params['tx'],
+          );
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -65,6 +106,23 @@ class _LoginScreenState extends State<LoginScreen> {
     } on AuthException catch (e) {
       setState(() => _erro = e.mensagem);
     }
+  }
+
+  void _abrirPrimeiroAcesso({String? emailInicial, String? codigoInicial}) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => PrimeiroAcessoScreen(
+          authRepositorio: widget.authRepositorio,
+          sessaoUnicaService: widget.sessaoUnicaService,
+          primeiroAcessoRepositorio: widget.primeiroAcessoRepositorio,
+          emailInicial:
+              (emailInicial != null && emailInicial.isNotEmpty)
+                  ? emailInicial
+                  : _emailController.text.trim(),
+          codigoInicial: codigoInicial,
+        ),
+      ),
+    );
   }
 
   @override
@@ -120,6 +178,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 key: const Key('botao-esqueci-senha'),
                 onPressed: _carregando ? null : _esqueciSenha,
                 child: const Text('Esqueci minha senha'),
+              ),
+              TextButton(
+                key: const Key('botao-primeiro-acesso'),
+                onPressed: _carregando ? null : () => _abrirPrimeiroAcesso(),
+                child: const Text('Primeiro acesso (comprei e não tenho senha)'),
               ),
             ],
           ),
