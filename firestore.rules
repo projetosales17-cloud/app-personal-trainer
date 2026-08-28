@@ -23,6 +23,13 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Registro/trava por e-mail que serializa a criação de conta no
+    // webhook (evita 2 contas pro mesmo comprador quando eventos da
+    // Hotmart chegam juntos). Só o Admin SDK do webhook toca aqui.
+    match /registro_contas/{chave} {
+      allow read, write: if false;
+    }
+
     // Dados da usuária sincronizados entre aparelhos (anamnese, programa,
     // progresso, check-ins, cargas, diário, preferências) — ver
     // SincronizadorDados. Cada conta lê/escreve só o próprio documento.
