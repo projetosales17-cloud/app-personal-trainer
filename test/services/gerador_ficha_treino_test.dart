@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:app_personal_trainer/models/anamnese.dart';
+import 'package:app_personal_trainer/models/checkin_progresso.dart';
+import 'package:app_personal_trainer/models/estrategia_bloco.dart';
 import 'package:app_personal_trainer/models/exercicio.dart';
 import 'package:app_personal_trainer/services/gerador_ficha_treino.dart';
 
@@ -447,5 +449,81 @@ void main() {
         expect(exercicio.nivel, isNot(NivelExercicio.avancado));
       }
     }
+  });
+
+  group('estrategiaBloco (programa de longo prazo)', () {
+    test('bloco de adaptação: só nível iniciante e volume menor que o base', () {
+      final adaptacao = gerador.gerar(
+        _anamneseBase,
+        estrategiaBloco: calcularEstrategiaBloco(
+          bloco: 1,
+          nivelLiberado: NivelExercicio.iniciante,
+        ),
+      );
+      final base = gerador.gerar(_anamneseBase);
+
+      for (final dia in adaptacao.dias) {
+        for (final ex in dia.exercicios) {
+          expect(ex.nivel, NivelExercicio.iniciante, reason: ex.nome);
+        }
+      }
+      final totalAdaptacao = adaptacao.dias.expand((d) => d.exercicios).length;
+      final totalBase = base.dias.expand((d) => d.exercicios).length;
+      expect(totalAdaptacao, lessThan(totalBase));
+    });
+
+    test('bloco de acúmulo com nível avançado liberado usa mais volume', () {
+      final acumulo = gerador.gerar(
+        _anamneseBase,
+        estrategiaBloco: calcularEstrategiaBloco(
+          bloco: 2,
+          nivelLiberado: NivelExercicio.avancado,
+        ),
+      );
+      final base = gerador.gerar(_anamneseBase);
+      final totalAcumulo = acumulo.dias.expand((d) => d.exercicios).length;
+      final totalBase = base.dias.expand((d) => d.exercicios).length;
+      expect(totalAcumulo, greaterThanOrEqualTo(totalBase));
+    });
+
+    test('dor relatada no check-in exclui o grupo da ficha', () {
+      final ficha = gerador.gerar(
+        _anamneseBase,
+        estrategiaBloco: calcularEstrategiaBloco(
+          bloco: 2,
+          nivelLiberado: NivelExercicio.intermediario,
+          ultimoCheckin: CheckinProgresso(
+            data: DateTime.now(),
+            blocoConcluido: 1,
+            aderencia: AderenciaPercebida.maisOuMenos,
+            dificuldade: DificuldadeTreino.naMedida,
+            recuperacao: Recuperacao.umPoucoCansada,
+            dorNova: true,
+            regiaoDorNova: 'Joelho',
+            notaDiferenca: false,
+            objetivoMudou: false,
+          ),
+        ),
+      );
+      final grupos = ficha.dias.expand((d) => d.gruposMusculares).toSet();
+      expect(grupos.contains(GrupoMuscular.perna), isFalse);
+    });
+
+    test('a rotação troca exercícios entre blocos diferentes', () {
+      List<String> idsDoBloco(int bloco) => gerador
+          .gerar(
+            _anamneseBase,
+            estrategiaBloco: calcularEstrategiaBloco(
+              bloco: bloco,
+              nivelLiberado: NivelExercicio.avancado,
+            ),
+          )
+          .dias
+          .expand((d) => d.exercicios)
+          .map((e) => e.id)
+          .toList();
+
+      expect(idsDoBloco(2), isNot(equals(idsDoBloco(3))));
+    });
   });
 }

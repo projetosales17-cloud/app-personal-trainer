@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app_personal_trainer/models/anamnese.dart';
+import 'package:app_personal_trainer/models/exercicio.dart';
+import 'package:app_personal_trainer/models/programa_treino.dart';
 import 'package:app_personal_trainer/screens/minha_ficha_view.dart';
 import 'package:app_personal_trainer/services/anamnese_repository.dart';
 import 'package:app_personal_trainer/services/checkin_treino_repository.dart';
@@ -18,6 +22,21 @@ class _NotificadorFake implements NotificadorConquistas {
   }
 }
 
+/// A tela encadeia vários FutureBuilders (anamnese → dias → programa →
+/// check-ins). Bombeia frames suficientes para todos resolverem.
+Future<void> _carregar(WidgetTester tester) async {
+  for (var i = 0; i < 10; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+  }
+}
+
+Future<void> _tocar(WidgetTester tester, Finder alvo) async {
+  await tester.ensureVisible(alvo);
+  await tester.pumpAndSettle();
+  await tester.tap(alvo);
+  await _carregar(tester);
+}
+
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
@@ -27,9 +46,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: MinhaFichaView()));
     // Não usamos pumpAndSettle: o estado de carregamento mostra um
     // CircularProgressIndicator (animação indeterminada) que nunca "assenta".
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    await _carregar(tester);
 
     expect(find.textContaining('Complete a anamnese'), findsOneWidget);
   });
@@ -50,9 +67,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(home: MinhaFichaView(anamneseRepositorio: repositorio)),
     );
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    await _carregar(tester);
 
     expect(find.textContaining('Válida até'), findsOneWidget);
     expect(find.text('Dia 1'), findsOneWidget);
@@ -83,9 +98,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(home: MinhaFichaView(anamneseRepositorio: repositorio)),
     );
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    await _carregar(tester);
 
     expect(find.textContaining('min sugeridos'), findsWidgets);
   });
@@ -108,9 +121,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(home: MinhaFichaView(anamneseRepositorio: repositorio)),
       );
-      await tester.pump();
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+      await _carregar(tester);
 
       final botaoSalvar = find.byKey(const Key('botao-salvar-dias-treino'));
       expect(tester.widget<ElevatedButton>(botaoSalvar).onPressed, isNull);
@@ -149,9 +160,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    await _carregar(tester);
 
     await tester.tap(find.byKey(const Key('dia-semana-2'))); // terça
     await tester.pump();
@@ -159,9 +168,7 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.byKey(const Key('botao-salvar-dias-treino')));
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    await _carregar(tester);
 
     expect(await preferenciasRepositorio.diasDaSemanaEscolhidos(), [2, 5]);
   });
@@ -192,17 +199,12 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    await _carregar(tester);
 
     expect(tester.widget<CheckboxListTile>(find.byKey(chaveHoje)).value, isFalse);
     expect(await checkinRepositorio.foiConcluido(hoje, 1), isFalse);
 
-    await tester.tap(find.byKey(chaveHoje));
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    await _tocar(tester, find.byKey(chaveHoje));
 
     expect(tester.widget<CheckboxListTile>(find.byKey(chaveHoje)).value, isTrue);
     expect(await checkinRepositorio.foiConcluido(hoje, 1), isTrue);
@@ -233,9 +235,7 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+      await _carregar(tester);
 
       expect(find.textContaining('pulou os últimos treinos'), findsOneWidget);
     },
@@ -270,9 +270,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    await _carregar(tester);
 
     expect(find.textContaining('pulou os últimos treinos'), findsNothing);
   });
@@ -293,9 +291,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(home: MinhaFichaView(anamneseRepositorio: anamneseRepositorio)),
     );
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    await _carregar(tester);
 
     expect(find.textContaining('Streak: 0 dia(s)'), findsOneWidget);
     expect(find.textContaining('0 pontos'), findsOneWidget);
@@ -334,17 +330,45 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    await _carregar(tester);
 
     expect(notificador.chamadas, isEmpty);
 
-    await tester.tap(find.byKey(chaveHoje));
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    await _tocar(tester, find.byKey(chaveHoje));
 
     expect(notificador.chamadas, ['Sequência de 3 dias!']);
+  });
+
+  testWidgets('Bloco vencido mostra o cartão de check-in de progresso', (tester) async {
+    final agora = DateTime.now();
+    final programa = ProgramaTreino(
+      iniciadoEm: agora.subtract(const Duration(days: 50)),
+      blocoAtual: 1,
+      blocoIniciadoEm: agora.subtract(const Duration(days: 45)),
+      nivelLiberado: NivelExercicio.iniciante,
+    );
+    SharedPreferences.setMockInitialValues({
+      'programa_treino': jsonEncode(programa.toJson()),
+    });
+
+    final anamneseRepositorio = AnamneseRepository();
+    await anamneseRepositorio.salvar(
+      const Anamnese(
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(home: MinhaFichaView(anamneseRepositorio: anamneseRepositorio)),
+    );
+    await _carregar(tester);
+
+    expect(find.byKey(const Key('cartao-checkin-disponivel')), findsOneWidget);
+    expect(find.byKey(const Key('botao-abrir-checkin')), findsOneWidget);
   });
 }
