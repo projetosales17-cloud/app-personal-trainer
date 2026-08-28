@@ -62,4 +62,60 @@ void main() {
     expect(FaseCiclo.ovulacao.label, 'Ovulación');
     expect(FaseCiclo.lutea.label, 'Lútea');
   });
+
+  test('duração padrão (28) reproduz as janelas originais', () {
+    expect(calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 4))),
+        FaseCiclo.menstrual);
+    expect(calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 12))),
+        FaseCiclo.folicular);
+    expect(calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 14))),
+        FaseCiclo.ovulacao);
+    expect(calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 20))),
+        FaseCiclo.lutea);
+  });
+
+  test('ciclo curto (24 dias) antecipa a ovulação e encurta a folicular', () {
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 7)), duracaoCiclo: 24),
+      FaseCiclo.folicular,
+    );
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 10)), duracaoCiclo: 24),
+      FaseCiclo.ovulacao,
+    );
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 14)), duracaoCiclo: 24),
+      FaseCiclo.lutea,
+    );
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 24)), duracaoCiclo: 24),
+      FaseCiclo.menstrual,
+    );
+  });
+
+  test('ciclo longo (35 dias) estende a folicular e mantém a lútea ~14 dias', () {
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 14)), duracaoCiclo: 35),
+      FaseCiclo.folicular,
+    );
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 21)), duracaoCiclo: 35),
+      FaseCiclo.ovulacao,
+    );
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 28)), duracaoCiclo: 35),
+      FaseCiclo.lutea,
+    );
+  });
+
+  test('duração fora da faixa é ajustada para o limite mais próximo', () {
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio, duracaoCiclo: 10),
+      FaseCiclo.menstrual,
+    );
+    expect(
+      calcularFaseCiclo(inicio, referencia: inicio.add(const Duration(days: 100)), duracaoCiclo: 99),
+      isA<FaseCiclo>(),
+    );
+  });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/anamnese.dart';
+import '../../saude/ciclo_hormonal.dart';
 import '../../saude/imc.dart';
 import '../../saude/metabolismo.dart';
 import '../../services/anamnese_repository.dart';
@@ -91,6 +92,11 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   String _condicaoHormonal = _condicoesHormonais.first;
   bool _cicloMenstrualRegular = true;
   DateTime? _dataUltimaMenstruacao;
+  // Duração média do ciclo escolhida nos chips. `null` + _duracaoCicloNaoSei
+  // false = nada escolhido (usa 28 dias). _duracaoCicloNaoSei = true quando
+  // a usuária marcou "não sei" de propósito.
+  int? _duracaoCicloDias;
+  bool _duracaoCicloNaoSei = false;
   final Set<String> _restricoes = {};
   final Set<String> _lesoes = {};
   bool _teveParto = false;
@@ -150,6 +156,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     _dataParto = inicial.dataParto;
     _cicloMenstrualRegular = inicial.cicloMenstrualRegular;
     _dataUltimaMenstruacao = inicial.dataUltimaMenstruacao;
+    _duracaoCicloDias = inicial.duracaoCicloDias;
   }
 
   static String _formatarNumero(double valor) =>
@@ -300,6 +307,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       cicloMenstrualRegular: _semCicloMenstrual ? false : _cicloMenstrualRegular,
       dataUltimaMenstruacao:
           (!_semCicloMenstrual && _cicloMenstrualRegular) ? _dataUltimaMenstruacao : null,
+      duracaoCicloDias:
+          (!_semCicloMenstrual && _cicloMenstrualRegular) ? _duracaoCicloDias : null,
     );
 
     await widget.repositorio.salvar(anamnese);
@@ -621,10 +630,79 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               }
             },
           ),
+          const SizedBox(height: 12),
+          Text(
+            'Duración promedio de tu ciclo',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          Text(
+            'Del 1er día de una menstruación al 1er día de la siguiente. '
+            'Ayuda a que la estimación quede más exacta para ti.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 8),
+          Builder(
+            builder: (context) {
+              Widget chip(String rotulo, {required bool selecionado, required int? dias, required bool naoSei}) {
+                return ChoiceChip(
+                  label: Text(rotulo),
+                  selected: selecionado,
+                  onSelected: (_) => setState(() {
+                    _duracaoCicloDias = dias;
+                    _duracaoCicloNaoSei = naoSei;
+                  }),
+                );
+              }
+
+              return Wrap(
+                spacing: 8,
+                children: [
+                  chip('~24 días', selecionado: _duracaoCicloDias == 24, dias: 24, naoSei: false),
+                  chip('~28 días', selecionado: _duracaoCicloDias == 28, dias: 28, naoSei: false),
+                  chip('~32 días', selecionado: _duracaoCicloDias == 32, dias: 32, naoSei: false),
+                  chip('No sé', selecionado: _duracaoCicloNaoSei, dias: null, naoSei: true),
+                ],
+              );
+            },
+          ),
+          if (_dataUltimaMenstruacao != null) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Según lo que indicaste, hoy estás en la fase '
+                    '${_faseEstimada().label.toLowerCase()}.',
+                    key: const Key('preview-fase-ciclo'),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '¿No parece correcto? Ajusta la fecha de arriba al primer '
+                    'día de tu última menstruación.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ],
     );
   }
+
+  /// Fase estimada com os dados preenchidos até agora nesta etapa — usada
+  /// só no preview da própria etapa. Assume que a data já foi informada.
+  FaseCiclo _faseEstimada() => calcularFaseCiclo(
+    _dataUltimaMenstruacao!,
+    duracaoCiclo: _duracaoCicloDias ?? duracaoCicloDiasPadrao,
+  );
 
   Widget _passoPosParto() {
     return Column(

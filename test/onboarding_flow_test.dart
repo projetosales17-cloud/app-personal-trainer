@@ -418,4 +418,50 @@ void main() {
     expect(salvo.dataUltimaMenstruacao, isNull);
     expect(salvo.faseCiclo, isNull);
   });
+
+  testWidgets('Etapa de ciclo mostra a fase estimada e salva a duração escolhida', (tester) async {
+    final repositorio = AnamneseRepository();
+    final base = Anamnese(
+      nome: 'Ana',
+      idade: 30,
+      alturaCm: 165,
+      pesoAtualKg: 62,
+      objetivoPrincipal: Objetivo.saudeGeral,
+      condicaoHormonal: 'Ninguna',
+      nivelAtividade: NivelAtividade.leve,
+      frequenciaSemanalDias: 3,
+      dataUltimaMenstruacao: DateTime.now().subtract(const Duration(days: 3)),
+    );
+    await repositorio.salvar(base);
+
+    await tester.pumpWidget(MaterialApp(
+      home: OnboardingFlow(onConcluido: () {}, repositorio: repositorio, anamneseInicial: base),
+    ));
+    await tester.pumpAndSettle();
+
+    // Modo de edição começa no passo 0 (nome); 5 avanços chegam na etapa de
+    // ciclo: nome -> dados -> objetivo -> bariátrica -> condição hormonal -> ciclo.
+    for (var i = 0; i < 5; i++) {
+      await tester.tap(find.widgetWithText(FilledButton, 'Siguiente'));
+      await tester.pumpAndSettle();
+    }
+
+    expect(find.byKey(const Key('preview-fase-ciclo')), findsOneWidget);
+    expect(find.textContaining('fase menstrual'), findsOneWidget);
+
+    await tester.tap(find.text('~32 días'));
+    await tester.pumpAndSettle();
+
+    for (var i = 0; i < 8; i++) {
+      await tester.tap(find.widgetWithText(FilledButton, 'Siguiente'));
+      await tester.pumpAndSettle();
+    }
+    expect(find.text('Resumen'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Guardar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final salvo = await repositorio.carregar();
+    expect(salvo!.duracaoCicloDias, 32);
+  });
 }
