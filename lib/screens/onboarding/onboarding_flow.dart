@@ -8,10 +8,17 @@ import '../../services/anamnese_repository.dart';
 const _condicoesHormonais = [
   'Nenhuma',
   'Menopausa',
+  'Histerectomia (não tenho útero)',
   'TPM / ciclo irregular',
   'SOP (Síndrome do Ovário Policístico)',
   'Outra',
 ];
+
+/// Condições em que não faz sentido perguntar sobre fase do ciclo
+/// menstrual — a etapa de ciclo se auto-pula nesses casos. Reportado no
+/// QA: mulher sem útero (histerectomia) era forçada ao switch "meu ciclo
+/// é regular" sem ter resposta honesta.
+const _condicoesSemCiclo = {'Menopausa', 'Histerectomia (não tenho útero)'};
 
 const _restricoesComuns = [
   'Lactose',
@@ -41,12 +48,23 @@ const _regioesComuns = [
 /// foi criada antes disso, nas telas de login/cadastro — ver
 /// AutenticacaoGate. Ao concluir, salva a anamnese localmente e chama
 /// [onConcluido].
+///
+/// Quando [anamneseInicial] é informada, o fluxo entra em **modo de
+/// edição**: pré-preenche todos os campos com os dados já salvos, pula a
+/// tela de boas-vindas, mostra uma AppBar com botão de voltar (cancela sem
+/// salvar) e o botão final passa a ser "Salvar". Usado pela tela de Perfil
+/// para deixar a usuária corrigir a anamnese depois do onboarding.
 class OnboardingFlow extends StatefulWidget {
-  OnboardingFlow({super.key, required this.onConcluido, AnamneseRepository? repositorio})
-    : repositorio = repositorio ?? AnamneseRepository();
+  OnboardingFlow({
+    super.key,
+    required this.onConcluido,
+    AnamneseRepository? repositorio,
+    this.anamneseInicial,
+  }) : repositorio = repositorio ?? AnamneseRepository();
 
   final VoidCallback onConcluido;
   final AnamneseRepository repositorio;
+  final Anamnese? anamneseInicial;
 
   @override
   State<OnboardingFlow> createState() => _OnboardingFlowState();
@@ -82,6 +100,75 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   final Set<String> _regioes = {};
 
   bool _salvando = false;
+
+  bool get _editando => widget.anamneseInicial != null;
+
+  bool get _semCicloMenstrual => _condicoesSemCiclo.contains(_condicaoHormonal);
+
+  @override
+  void initState() {
+    super.initState();
+    final inicial = widget.anamneseInicial;
+    if (inicial == null) return;
+
+    // Modo de edição: começa depois da tela de boas-vindas e pré-preenche
+    // tudo com o que já estava salvo.
+    _passo = 1;
+    _idadeController.text = inicial.idade.toString();
+    _alturaController.text = _formatarNumero(inicial.alturaCm);
+    _pesoAtualController.text = _formatarNumero(inicial.pesoAtualKg);
+    if (inicial.pesoDesejadoKg != null) {
+      _pesoDesejadoController.text = _formatarNumero(inicial.pesoDesejadoKg!);
+    }
+    _objetivo = inicial.objetivoPrincipal;
+    _cirurgiaBariatrica = inicial.cirurgiaBariatrica;
+    _tipoCirurgiaController.text = inicial.tipoCirurgiaBariatrica ?? '';
+    _mesesCirurgiaController.text = inicial.mesesDesdeCirurgia?.toString() ?? '';
+    if (_condicoesHormonais.contains(inicial.condicaoHormonal)) {
+      _condicaoHormonal = inicial.condicaoHormonal;
+    } else {
+      _condicaoHormonal = 'Outra';
+      _condicaoOutraController.text = inicial.condicaoHormonal;
+    }
+    _preencherSelecao(
+      inicial.restricoesAlimentares,
+      _restricoesComuns,
+      _restricoes,
+      _restricaoOutraController,
+    );
+    _preencherSelecao(inicial.lesoesLimitacoes, _lesoesComuns, _lesoes, _lesaoOutraController);
+    _regioes.addAll(inicial.regioesPriorizadas.where(_regioesComuns.contains));
+    _nivelAtividade = inicial.nivelAtividade;
+    _frequenciaSemanalDias = inicial.frequenciaSemanalDias;
+    _localTreino = inicial.localTreino;
+    _preferenciaTreino = inicial.preferenciaTreino;
+    _teveParto = inicial.dataParto != null;
+    _dataParto = inicial.dataParto;
+    _cicloMenstrualRegular = inicial.cicloMenstrualRegular;
+    _dataUltimaMenstruacao = inicial.dataUltimaMenstruacao;
+  }
+
+  static String _formatarNumero(double valor) =>
+      valor == valor.roundToDouble() ? valor.toStringAsFixed(0) : valor.toString();
+
+  /// Divide uma lista salva (presets + textos livres) de volta nos chips
+  /// pré-definidos e no campo "Outra".
+  static void _preencherSelecao(
+    List<String> valores,
+    List<String> presets,
+    Set<String> destino,
+    TextEditingController outroController,
+  ) {
+    final extras = <String>[];
+    for (final valor in valores) {
+      if (presets.contains(valor)) {
+        destino.add(valor);
+      } else {
+        extras.add(valor);
+      }
+    }
+    if (extras.isNotEmpty) outroController.text = extras.join(', ');
+  }
 
   @override
   void dispose() {
@@ -172,8 +259,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       localTreino: _localTreino!,
       preferenciaTreino: _preferenciaTreino!,
       dataParto: _teveParto ? _dataParto : null,
-      cicloMenstrualRegular: _cicloMenstrualRegular,
-      dataUltimaMenstruacao: _cicloMenstrualRegular ? _dataUltimaMenstruacao : null,
+      cicloMenstrualRegular: _semCicloMenstrual ? false : _cicloMenstrualRegular,
+      dataUltimaMenstruacao:
+          (!_semCicloMenstrual && _cicloMenstrualRegular) ? _dataUltimaMenstruacao : null,
     );
 
     await widget.repositorio.salvar(anamnese);
@@ -184,6 +272,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: _editando ? AppBar(title: const Text('Editar meus dados')) : null,
       body: SafeArea(
         child: Column(
           children: [
@@ -203,7 +292,11 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                   const Spacer(),
                   FilledButton(
                     onPressed: _salvando || !_podeAvancar ? null : _avancar,
-                    child: Text(_passo == _totalPassos - 1 ? 'Concluir' : 'Avançar'),
+                    child: Text(
+                      _passo == _totalPassos - 1
+                          ? (_editando ? 'Salvar' : 'Concluir')
+                          : 'Avançar',
+                    ),
                   ),
                 ],
               ),
@@ -384,6 +477,21 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   }
 
   Widget _passoCicloMenstrual() {
+    if (_semCicloMenstrual) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Ciclo menstrual', style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 8),
+          Text(
+            'Como você marcou "$_condicaoHormonal" na etapa anterior, esta '
+            'parte não se aplica ao seu perfil. Pode avançar — seu plano de '
+            'treino e alimentação não vai depender da fase do ciclo.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -413,11 +521,16 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             ),
             trailing: const Icon(Icons.calendar_today_outlined),
             onTap: () async {
+              final agora = DateTime.now();
+              final primeiraData = agora.subtract(const Duration(days: 60));
               final selecionada = await showDatePicker(
                 context: context,
-                initialDate: _dataUltimaMenstruacao ?? DateTime.now(),
-                firstDate: DateTime.now().subtract(const Duration(days: 60)),
-                lastDate: DateTime.now(),
+                initialDate:
+                    (_dataUltimaMenstruacao != null && _dataUltimaMenstruacao!.isAfter(primeiraData))
+                    ? _dataUltimaMenstruacao!
+                    : agora,
+                firstDate: primeiraData,
+                lastDate: agora,
               );
               if (selecionada != null) {
                 setState(() => _dataUltimaMenstruacao = selecionada);
@@ -456,11 +569,15 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             ),
             trailing: const Icon(Icons.calendar_today_outlined),
             onTap: () async {
+              final agora = DateTime.now();
+              final primeiraData = agora.subtract(const Duration(days: 365));
               final selecionada = await showDatePicker(
                 context: context,
-                initialDate: _dataParto ?? DateTime.now(),
-                firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                lastDate: DateTime.now(),
+                initialDate: (_dataParto != null && _dataParto!.isAfter(primeiraData))
+                    ? _dataParto!
+                    : agora,
+                firstDate: primeiraData,
+                lastDate: agora,
               );
               if (selecionada != null) {
                 setState(() => _dataParto = selecionada);
@@ -644,7 +761,11 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           ),
         ],
         const SizedBox(height: 16),
-        const Text('Confirme para gerar seu plano inicial.'),
+        Text(
+          _editando
+              ? 'Salve para atualizar seu plano com esses dados.'
+              : 'Confirme para gerar seu plano inicial.',
+        ),
       ],
     );
   }

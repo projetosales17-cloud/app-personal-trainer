@@ -24,7 +24,12 @@ class _ControleSessaoFake implements ControleSessao {
   }
 
   @override
-  Stream<String?> observarTokenSessao(String uid) => _controllerPara(uid).stream;
+  Stream<String?> observarTokenSessao(String uid) async* {
+    // Como o Firestore: quem se inscreve recebe o valor atual do documento
+    // na hora, e depois as mudanças.
+    if (_tokensSalvos.containsKey(uid)) yield _tokensSalvos[uid];
+    yield* _controllerPara(uid).stream;
+  }
 }
 
 void main() {
@@ -81,4 +86,31 @@ void main() {
 
     expect(emitiuAlgumEvento, isFalse);
   });
+
+  test(
+    'observarEncerramento não derruba a sessão recém-registrada quando a vigilância '
+    'já está ativa ao registrar (regressão do auto-logout)',
+    () async {
+      final controleSessao = _ControleSessaoFake();
+      final service = SessaoUnicaService(controleSessao: controleSessao);
+
+      // Login anterior nesta mesma instalação: já existe um token local
+      // salvo e o Firestore ainda aponta pra ele.
+      SharedPreferences.setMockInitialValues({'token_sessao_local': 'token-antigo'});
+      await controleSessao.registrarSessao('uid-1', 'token-antigo');
+
+      // A vigilância começa (o gate reage ao authStateChanges do login)
+      // ANTES de registrarNovaSessao concluir.
+      final emitiuAlgumEvento = service
+          .observarEncerramento('uid-1')
+          .any((_) => true)
+          .timeout(const Duration(milliseconds: 400), onTimeout: () => false);
+
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      // Só agora o login registra a sessão nova, com a vigilância já rodando.
+      await service.registrarNovaSessao('uid-1');
+
+      expect(await emitiuAlgumEvento, isFalse); // não pode ter se desconectado sozinho
+    },
+  );
 }
