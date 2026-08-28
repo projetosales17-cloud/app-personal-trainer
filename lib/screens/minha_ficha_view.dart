@@ -75,13 +75,33 @@ String _formatarData(DateTime data) {
 }
 
 class _MinhaFichaViewState extends State<MinhaFichaView> {
-  late final Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
+  late Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
   late Future<List<int>?> _diasDaSemanaFuture =
       widget.preferenciasRepositorio.diasDaSemanaEscolhidos();
   late Future<List<CheckinTreino>> _checkinsFuture = widget.checkinRepositorio.listar();
   late Future<ProgramaTreino> _programaFuture =
       widget.programaRepositorio.iniciarSeNecessario();
   late Future<Map<String, String>> _trocasFuture = widget.trocasRepositorio.carregar();
+
+  @override
+  void initState() {
+    super.initState();
+    AnamneseRepository.revisao.addListener(_recarregarAnamnese);
+  }
+
+  @override
+  void dispose() {
+    AnamneseRepository.revisao.removeListener(_recarregarAnamnese);
+    super.dispose();
+  }
+
+  /// A usuária editou a anamnese pelo Perfil — regera a ficha na hora.
+  void _recarregarAnamnese() {
+    if (!mounted) return;
+    setState(() {
+      _anamneseFuture = widget.anamneseRepositorio.carregar();
+    });
+  }
 
   /// Abre a folha de alternativas do mesmo grupo muscular para [original]
   /// e persiste a troca escolhida. [jaNaFicha] são os ids de exercícios

@@ -115,6 +115,18 @@ void main() {
     expect(cardapio.observacoesFoco, isEmpty);
   });
 
+  test('merienda nunca traz azeite/sementes soltas como item', () {
+    final cardapio = gerador.gerar(_anamneseBase);
+    for (final dia in cardapio.dias) {
+      final lanche = dia.refeicoes.firstWhere((r) => r.nome == 'Merienda');
+      final ids = lanche.alimentos.map((a) => a.id);
+      expect(ids, isNot(contains('azeite-de-oliva')), reason: 'dia ${dia.dia}');
+      expect(ids, isNot(contains('linhaca-triturada')), reason: 'dia ${dia.dia}');
+      expect(ids, isNot(contains('chia')), reason: 'dia ${dia.dia}');
+      expect(lanche.alimentos, isNotEmpty, reason: 'dia ${dia.dia}');
+    }
+  });
+
   test('condição SOP gera dica nutricional específica', () {
     const anamnese = Anamnese(
       idade: 30,

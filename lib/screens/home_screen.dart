@@ -38,8 +38,27 @@ const _mensagensMotivacionais = [
 ];
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
+  late Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
   late final Future<RegistroPeso?> _ultimoPesoFuture = widget.progressoRepositorio.ultimoPeso();
+
+  @override
+  void initState() {
+    super.initState();
+    AnamneseRepository.revisao.addListener(_recarregarAnamnese);
+  }
+
+  @override
+  void dispose() {
+    AnamneseRepository.revisao.removeListener(_recarregarAnamnese);
+    super.dispose();
+  }
+
+  void _recarregarAnamnese() {
+    if (!mounted) return;
+    setState(() {
+      _anamneseFuture = widget.anamneseRepositorio.carregar();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
