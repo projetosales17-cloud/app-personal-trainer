@@ -110,7 +110,7 @@ class GeradorCardapio {
             _montarRefeicao('Lanche da tarde', indiceDia, restricoes, const [
               CategoriaAlimento.fruta,
               CategoriaAlimento.gordura,
-            ]),
+            ], idsExcluidos: _gordurasQueNaoSaoLanche),
             _montarRefeicao('Jantar', indiceDia, restricoes, const [
               CategoriaAlimento.proteina,
               CategoriaAlimento.vegetal,
@@ -135,20 +135,39 @@ class GeradorCardapio {
     );
   }
 
+  /// Itens da categoria "gordura" que são tempero/semente pra polvilhar, não
+  /// um lanche que se come sozinho — ficam fora do lanche da tarde pra não
+  /// gerar "Merienda: maçã + azeite de oliva". Continuam entrando no almoço.
+  static const _gordurasQueNaoSaoLanche = {
+    'azeite-de-oliva',
+    'linhaca-triturada',
+    'chia',
+  };
+
   RefeicaoDoDia _montarRefeicao(
     String nome,
     int indiceDia,
     List<String> restricoes,
-    List<CategoriaAlimento> categorias,
-  ) {
+    List<CategoriaAlimento> categorias, {
+    Set<String> idsExcluidos = const {},
+  }) {
     final alimentos = [
-      for (final categoria in categorias) _escolherAlimento(categoria, indiceDia, restricoes),
+      for (final categoria in categorias)
+        _escolherAlimento(categoria, indiceDia, restricoes, idsExcluidos),
     ].whereType<Alimento>().toList();
     return RefeicaoDoDia(nome: nome, alimentos: alimentos);
   }
 
-  Alimento? _escolherAlimento(CategoriaAlimento categoria, int indiceDia, List<String> restricoes) {
-    final candidatos = repositorio.filtrar(categoria: categoria, restricoesUsuaria: restricoes);
+  Alimento? _escolherAlimento(
+    CategoriaAlimento categoria,
+    int indiceDia,
+    List<String> restricoes,
+    Set<String> idsExcluidos,
+  ) {
+    final candidatos = repositorio
+        .filtrar(categoria: categoria, restricoesUsuaria: restricoes)
+        .where((alimento) => !idsExcluidos.contains(alimento.id))
+        .toList();
     if (candidatos.isEmpty) return null;
     return candidatos[indiceDia % candidatos.length];
   }

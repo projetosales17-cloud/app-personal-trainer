@@ -50,4 +50,41 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('Editar a anamnese (mesma sessão) atualiza a saudação da Home', (tester) async {
+    final repositorio = AnamneseRepository();
+    await repositorio.salvar(
+      const Anamnese(
+        nome: 'Maria',
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(home: HomeScreen(anamneseRepositorio: repositorio)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Olá, Maria!'), findsOneWidget);
+
+    await repositorio.salvar(
+      const Anamnese(
+        nome: 'Ana',
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Olá, Ana!'), findsOneWidget);
+    expect(find.text('Olá, Maria!'), findsNothing);
+  });
 }
