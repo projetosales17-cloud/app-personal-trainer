@@ -7,6 +7,14 @@ import 'package:app_personal_trainer/screens/onboarding/onboarding_flow.dart';
 import 'package:app_personal_trainer/services/anamnese_repository.dart';
 
 Future<void> _avancar(WidgetTester tester) async {
+  // A etapa de boas-vindas agora pede o nome — preenche na primeira vez
+  // para o resto do fluxo poder avançar.
+  final campoNome = find.byKey(const Key('campo-nome-onboarding'));
+  if (campoNome.evaluate().isNotEmpty &&
+      tester.widget<TextField>(campoNome).controller!.text.isEmpty) {
+    await tester.enterText(campoNome, 'Maria');
+    await tester.pump();
+  }
   await tester.tap(find.widgetWithText(FilledButton, 'Avançar'));
   await tester.pumpAndSettle();
 }

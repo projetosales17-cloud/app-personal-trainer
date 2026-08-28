@@ -11,14 +11,15 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('Sem anamnese salva, pede para completar o onboarding', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: HidratacaoView()));
-    await tester.pump();
+  testWidgets('Sem anamnese salva, mostra a calculadora vazia', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: HidratacaoView())));
+    await tester.pumpAndSettle();
 
-    expect(find.textContaining('Complete a anamnese'), findsOneWidget);
+    expect(find.textContaining('Informe seu peso'), findsOneWidget);
+    expect(find.byKey(const Key('campo-peso-hidratacion')), findsOneWidget);
   });
 
-  testWidgets('Com anamnese salva, mostra a meta de hidratação calculada', (tester) async {
+  testWidgets('Vem pré-preenchida com o peso da anamnese e calcula a meta', (tester) async {
     final repositorio = AnamneseRepository();
     await repositorio.salvar(
       const Anamnese(
@@ -31,9 +32,17 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(MaterialApp(home: HidratacaoView(repositorio: repositorio)));
-    await tester.pump();
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: HidratacaoView(repositorio: repositorio))),
+    );
+    await tester.pumpAndSettle();
 
+    // 60 kg * 35 ml + 0 (sedentária) = 2100 ml.
     expect(find.text('2.1 L por dia'), findsOneWidget);
+
+    // Marcar "dia quente" soma 500 ml -> 2.6 L.
+    await tester.tap(find.byKey(const Key('switch-dia-quente')));
+    await tester.pumpAndSettle();
+    expect(find.text('2.6 L por dia'), findsOneWidget);
   });
 }

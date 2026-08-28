@@ -19,4 +19,10 @@ void main() {
   test('calcularHidratacaoDiaria com peso inválido lança ArgumentError', () {
     expect(() => calcularHidratacaoDiaria(0, NivelAtividade.sedentario), throwsArgumentError);
   });
+
+  test('dia quente soma meio litro', () {
+    final normal = calcularHidratacaoDiaria(70, NivelAtividade.moderado);
+    final quente = calcularHidratacaoDiaria(70, NivelAtividade.moderado, diaQuente: true);
+    expect(quente - normal, 500);
+  });
 }

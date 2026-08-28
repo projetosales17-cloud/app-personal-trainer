@@ -71,7 +71,12 @@ class _HomeScreenState extends State<HomeScreen> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Text('Olá!', style: Theme.of(context).textTheme.headlineMedium),
+              Text(
+                anamnese.nomeExibicao.isEmpty
+                    ? 'Olá!'
+                    : 'Olá, ${anamnese.nomeExibicao}!',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
               const SizedBox(height: 4),
               Text(
                 _mensagensMotivacionais[DateTime.now().day % _mensagensMotivacionais.length],
