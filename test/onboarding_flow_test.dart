@@ -337,8 +337,7 @@ void main() {
     await tester.pump();
     await _avancar(tester); // dados básicos -> objetivo
 
-    await tester.tap(find.text('Saúde geral (ex: menopausa)'));
-    await tester.pump();
+    await _escolherObjetivo(tester, 'Saúde na menopausa');
     await _avancar(tester); // objetivo -> cirurgia bariátrica
 
     await _avancar(tester); // bariátrica (não) -> condição hormonal
