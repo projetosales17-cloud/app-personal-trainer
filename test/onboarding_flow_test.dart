@@ -315,4 +315,62 @@ void main() {
     expect(salvo.dataUltimaMenstruacao, isNull);
     expect(salvo.faseCiclo, isNull);
   });
+
+  testWidgets('Histerectomia pula a etapa de ciclo menstrual e salva sem fase', (tester) async {
+    final repositorio = AnamneseRepository();
+
+    await tester.pumpWidget(MaterialApp(
+      home: OnboardingFlow(onConcluido: () {}, repositorio: repositorio),
+    ));
+
+    await _avancar(tester); // boas-vindas -> dados básicos
+
+    await tester.enterText(find.byType(TextField).at(0), '52');
+    await tester.enterText(find.byType(TextField).at(1), '160');
+    await tester.enterText(find.byType(TextField).at(2), '72');
+    await tester.pump();
+    await _avancar(tester); // dados básicos -> objetivo
+
+    await tester.tap(find.text('Saúde geral (ex: menopausa)'));
+    await tester.pump();
+    await _avancar(tester); // objetivo -> cirurgia bariátrica
+
+    await _avancar(tester); // bariátrica (não) -> condição hormonal
+
+    await tester.tap(find.text('Histerectomia (não tenho útero)'));
+    await tester.pump();
+    await _avancar(tester); // condição hormonal -> ciclo menstrual
+
+    // A etapa não mostra mais o switch nem o seletor de data.
+    expect(find.text('Data da última menstruação'), findsNothing);
+    expect(find.widgetWithText(SwitchListTile, 'Meu ciclo é regular'), findsNothing);
+    expect(find.textContaining('não se aplica ao seu perfil'), findsOneWidget);
+
+    await _avancar(tester); // ciclo menstrual -> restrições
+    await _avancar(tester); // restrições -> lesões
+    await _avancar(tester); // lesões -> pós-parto
+    await _avancar(tester); // pós-parto (não) -> atividade
+
+    await tester.tap(find.text('Leve'));
+    await tester.pump();
+    await _avancar(tester); // atividade -> local de treino
+
+    await tester.tap(find.text('Academia'));
+    await tester.pump();
+    await _avancar(tester); // local de treino -> preferência de treino
+
+    await _avancar(tester); // preferência de treino -> priorização de região
+    await _avancar(tester); // priorização de região -> resumo
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Concluir'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final salvo = await repositorio.carregar();
+    expect(salvo, isNotNull);
+    expect(salvo!.condicaoHormonal, 'Histerectomia (não tenho útero)');
+    expect(salvo.cicloMenstrualRegular, isFalse);
+    expect(salvo.dataUltimaMenstruacao, isNull);
+    expect(salvo.faseCiclo, isNull);
+  });
 }

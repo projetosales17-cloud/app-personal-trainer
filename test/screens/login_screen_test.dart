@@ -54,6 +54,29 @@ void main() {
     expect(controleSessaoFake.ultimoUidRegistrado, 'uid-1');
   });
 
+  testWidgets('Botão de ver senha alterna a visibilidade do campo', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LoginScreen(
+          authRepositorio: AuthRepository(auth: MockFirebaseAuth()),
+          sessaoUnicaService: SessaoUnicaService(controleSessao: _ControleSessaoFake()),
+        ),
+      ),
+    );
+
+    TextField campoSenha() => tester.widget<TextField>(find.byKey(const Key('campo-senha-login')));
+
+    expect(campoSenha().obscureText, isTrue);
+
+    await tester.tap(find.byKey(const Key('botao-ver-senha-login')));
+    await tester.pump();
+    expect(campoSenha().obscureText, isFalse);
+
+    await tester.tap(find.byKey(const Key('botao-ver-senha-login')));
+    await tester.pump();
+    expect(campoSenha().obscureText, isTrue);
+  });
+
   testWidgets('Erro de login mostra a mensagem traduzida', (tester) async {
     final mockAuth = MockFirebaseAuth();
     whenCalling(Invocation.method(#signInWithEmailAndPassword, null))

@@ -12,18 +12,32 @@ import 'package:app_personal_trainer/services/controle_sessao.dart';
 import 'package:app_personal_trainer/services/sessao_unica_service.dart';
 
 class _ControleSessaoFake implements ControleSessao {
+  _ControleSessaoFake({String? tokenInicial}) : _tokenAtual = tokenInicial;
+
   final _controller = StreamController<String?>.broadcast();
+  String? _tokenAtual;
 
   @override
   String gerarTokenSessao() => 'token-gerado';
 
   @override
-  Future<void> registrarSessao(String uid, String tokenSessao) async {}
+  Future<void> registrarSessao(String uid, String tokenSessao) async {
+    _tokenAtual = tokenSessao;
+    _controller.add(tokenSessao);
+  }
 
   @override
-  Stream<String?> observarTokenSessao(String uid) => _controller.stream;
+  Stream<String?> observarTokenSessao(String uid) async* {
+    // Como o Firestore: entrega o valor atual do documento ao se inscrever
+    // e depois as mudanças.
+    yield _tokenAtual;
+    yield* _controller.stream;
+  }
 
-  void emitir(String? token) => _controller.add(token);
+  void emitir(String? token) {
+    _tokenAtual = token;
+    _controller.add(token);
+  }
 }
 
 class _AssinaturaSempreAtiva implements AssinaturaRepository {
@@ -153,7 +167,10 @@ void main() {
         signedIn: true,
         mockUser: MockUser(uid: 'uid-1', email: 'usuaria@example.com'),
       );
-      final controleSessaoFake = _ControleSessaoFake();
+      // O Firestore já tem o token desta instalação (sessão registrada no
+      // login anterior) — é o que a vigilância precisa ver antes de
+      // considerar uma troca como "outro aparelho".
+      final controleSessaoFake = _ControleSessaoFake(tokenInicial: 'token-deste-aparelho');
 
       await tester.pumpWidget(
         MaterialApp(
