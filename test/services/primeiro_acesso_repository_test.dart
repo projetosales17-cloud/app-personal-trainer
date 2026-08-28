@@ -51,6 +51,27 @@ void main() {
     );
   });
 
+  test('chave "codigo" conhecida é traduzida (ignora o texto do backend)', () async {
+    final client = MockClient((req) async {
+      return http.Response('{"codigo":"ja_usado","erro":"qualquer texto"}', 409);
+    });
+
+    await expectLater(
+      PrimeiroAcessoRepository(client: client, endpoint: endpoint).definirSenha(
+        email: 'a@a.com',
+        codigo: 'HP1',
+        senha: 'senhaBoa1',
+      ),
+      throwsA(
+        isA<PrimeiroAcessoException>().having(
+          (e) => e.mensagem,
+          'mensagem',
+          contains('Esqueci minha senha'),
+        ),
+      ),
+    );
+  });
+
   test('falha de rede vira PrimeiroAcessoException amigável', () async {
     final client = MockClient((req) async {
       throw http.ClientException('sem rede');

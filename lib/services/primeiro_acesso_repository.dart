@@ -12,6 +12,24 @@ class PrimeiroAcessoException implements Exception {
   String toString() => mensagem;
 }
 
+/// Mensagens por chave de erro do backend. O backend já responde em
+/// português, mas mapear pela chave deixa a mensagem consistente e
+/// independente de mudança de texto no servidor.
+const _mensagensPorCodigo = {
+  'dados_invalidos':
+      'Não encontramos uma compra com esses dados. Confira o e-mail e o código da compra (do seu recibo da Hotmart, começa com HP).',
+  'nao_encontrado':
+      'Não encontramos uma compra com esses dados. Confira o e-mail e o código da compra (do seu recibo da Hotmart, começa com HP).',
+  'senha_curta': 'A senha precisa ter pelo menos 6 caracteres.',
+  'conta_antiga':
+      'Essa conta já foi ativada antes. Use a opção "Esqueci minha senha" para entrar.',
+  'ja_usado':
+      'Esse código de primeiro acesso já foi usado. Use "Esqueci minha senha" para trocar a senha.',
+  'muitas_tentativas':
+      'Muitas tentativas com dados incorretos. Aguarde um pouco e use "Esqueci minha senha", ou fale com o suporte.',
+  'interno': 'Erro no servidor. Tente novamente em instantes.',
+};
+
 /// Fala com o endpoint `/api/primeiro-acesso` da Vercel (mesmo projeto do
 /// webhook da Hotmart). A compradora prova a compra com o par
 /// (e-mail, código da transação) e o backend define a senha da conta que
@@ -54,17 +72,21 @@ class PrimeiroAcessoRepository {
 
     if (resposta.statusCode == 200) return;
 
-    String? mensagem;
+    String? codigoErro;
+    String? erroBackend;
     try {
       final corpo = jsonDecode(resposta.body);
-      if (corpo is Map && corpo['erro'] is String) {
-        mensagem = corpo['erro'] as String;
+      if (corpo is Map) {
+        if (corpo['codigo'] is String) codigoErro = corpo['codigo'] as String;
+        if (corpo['erro'] is String) erroBackend = corpo['erro'] as String;
       }
     } catch (_) {
       // corpo não-JSON — cai na mensagem genérica abaixo
     }
     throw PrimeiroAcessoException(
-      mensagem ?? 'Não foi possível concluir o primeiro acesso. Tente de novo.',
+      _mensagensPorCodigo[codigoErro] ??
+          erroBackend ??
+          'Não foi possível concluir o primeiro acesso. Tente de novo.',
     );
   }
 }
