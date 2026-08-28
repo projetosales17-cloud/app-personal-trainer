@@ -188,11 +188,39 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     super.dispose();
   }
 
+  /// Faixas de sanidade para os dados básicos — barram erros de digitação
+  /// (ex: 7070 kg) que gerariam IMC/hidratação/calorias sem sentido no
+  /// resto do app.
+  static const _faixaIdade = (min: 12.0, max: 100.0);
+  static const _faixaAltura = (min: 100.0, max: 250.0);
+  static const _faixaPeso = (min: 30.0, max: 300.0);
+
+  /// Devolve o número digitado só se estiver dentro da faixa; senão `null`.
+  static double? _numeroNaFaixa(String texto, ({double min, double max}) faixa) {
+    final valor = double.tryParse(texto.trim().replaceAll(',', '.'));
+    if (valor == null || valor < faixa.min || valor > faixa.max) return null;
+    return valor;
+  }
+
+  /// Mensagem de erro para um campo dos dados básicos: `null` quando vazio
+  /// (ainda não preenchido) ou válido; texto quando fora da faixa.
+  String? _erroCampo(String texto, ({double min, double max}) faixa, String unidade) {
+    if (texto.trim().isEmpty) return null;
+    if (_numeroNaFaixa(texto, faixa) != null) return null;
+    return 'Informe um valor entre ${faixa.min.toStringAsFixed(0)} e '
+        '${faixa.max.toStringAsFixed(0)} $unidade.';
+  }
+
+  int get _idadeInformada =>
+      double.parse(_idadeController.text.trim().replaceAll(',', '.')).round();
+
   bool get _podeAvancar => switch (_passo) {
     1 =>
-      double.tryParse(_idadeController.text.replaceAll(',', '.')) != null &&
-          double.tryParse(_alturaController.text.replaceAll(',', '.')) != null &&
-          double.tryParse(_pesoAtualController.text.replaceAll(',', '.')) != null,
+      _numeroNaFaixa(_idadeController.text, _faixaIdade) != null &&
+          _numeroNaFaixa(_alturaController.text, _faixaAltura) != null &&
+          _numeroNaFaixa(_pesoAtualController.text, _faixaPeso) != null &&
+          (_pesoDesejadoController.text.trim().isEmpty ||
+              _numeroNaFaixa(_pesoDesejadoController.text, _faixaPeso) != null),
     2 => _objetivo != null,
     3 =>
       !_cirurgiaBariatrica ||
@@ -234,7 +262,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     setState(() => _salvando = true);
 
     final anamnese = Anamnese(
-      idade: int.parse(_idadeController.text),
+      idade: _idadeInformada,
       alturaCm: double.parse(_alturaController.text.replaceAll(',', '.')),
       pesoAtualKg: double.parse(_pesoAtualController.text.replaceAll(',', '.')),
       pesoDesejadoKg: double.tryParse(_pesoDesejadoController.text.replaceAll(',', '.')),
@@ -370,29 +398,42 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         const SizedBox(height: 16),
         TextField(
           controller: _idadeController,
-          decoration: const InputDecoration(labelText: 'Idade (anos)'),
+          decoration: InputDecoration(
+            labelText: 'Idade (anos)',
+            errorText: _erroCampo(_idadeController.text, _faixaIdade, 'anos'),
+          ),
           keyboardType: TextInputType.number,
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _alturaController,
-          decoration: const InputDecoration(labelText: 'Altura (cm)'),
+          decoration: InputDecoration(
+            labelText: 'Altura (cm)',
+            errorText: _erroCampo(_alturaController.text, _faixaAltura, 'cm'),
+          ),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _pesoAtualController,
-          decoration: const InputDecoration(labelText: 'Peso atual (kg)'),
+          decoration: InputDecoration(
+            labelText: 'Peso atual (kg)',
+            errorText: _erroCampo(_pesoAtualController.text, _faixaPeso, 'kg'),
+          ),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _pesoDesejadoController,
-          decoration: const InputDecoration(labelText: 'Peso desejado (kg) — opcional'),
+          decoration: InputDecoration(
+            labelText: 'Peso desejado (kg) — opcional',
+            errorText: _erroCampo(_pesoDesejadoController.text, _faixaPeso, 'kg'),
+          ),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          onChanged: (_) => setState(() {}),
         ),
       ],
     );
@@ -719,7 +760,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       );
     }
 
-    final idade = int.parse(_idadeController.text);
+    final idade = _idadeInformada;
     final alturaCm = double.parse(_alturaController.text.replaceAll(',', '.'));
     final pesoAtualKg = double.parse(_pesoAtualController.text.replaceAll(',', '.'));
 
