@@ -85,23 +85,27 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
 
   /// Abre a folha de alternativas do mesmo grupo muscular para [original]
   /// e persiste a troca escolhida. [jaNaFicha] são os ids de exercícios
-  /// que já estão no dia, para não oferecer repetição.
+  /// que já estão no dia, para não oferecer repetição. Quando o treino é
+  /// em casa, os exercícios sem equipamento de academia aparecem primeiro
+  /// — mas os de academia ainda são oferecidos (com o equipamento à
+  /// mostra), pra nunca deixar a usuária sem alternativa.
   Future<void> _trocarExercicio(
     Exercicio original,
     Set<String> jaNaFicha, {
-    required bool somenteEmCasa,
+    required bool priorizarEmCasa,
   }) async {
-    var alternativas = widget.bibliotecaRepositorio
+    final alternativas = widget.bibliotecaRepositorio
         .filtrar(grupoMuscular: original.grupoMuscularPrincipal)
         .where((e) => e.id != original.id && !jaNaFicha.contains(e.id))
         .toList();
-    if (somenteEmCasa) {
-      alternativas = alternativas
-          .where((e) => equipamentosCasa.contains(e.equipamento))
-          .toList();
-    }
-    // Mais leves primeiro — a troca costuma ser pra facilitar o dia.
-    alternativas.sort((a, b) => a.nivel.index.compareTo(b.nivel.index));
+
+    int prioridadeCasa(Exercicio e) =>
+        (priorizarEmCasa && !equipamentosCasa.contains(e.equipamento)) ? 1 : 0;
+    // Em casa primeiro (quando for o caso), depois os mais leves.
+    alternativas.sort((a, b) {
+      final porCasa = prioridadeCasa(a).compareTo(prioridadeCasa(b));
+      return porCasa != 0 ? porCasa : a.nivel.index.compareTo(b.nivel.index);
+    });
 
     if (!mounted) return;
     if (alternativas.isEmpty) {
@@ -312,7 +316,7 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                       return widget.bibliotecaRepositorio.porId(substitutoId) ?? original;
                     }
 
-                    final somenteEmCasa = anamnese.localTreino == LocalTreino.casa;
+                    final treinoEmCasa = anamnese.localTreino == LocalTreino.casa;
 
                     return ListView(
                   padding: const EdgeInsets.all(16),
@@ -402,7 +406,7 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                         aoTrocar: (original) => _trocarExercicio(
                           original,
                           {for (final ex in dia.exercicios) comTroca(ex).id},
-                          somenteEmCasa: somenteEmCasa,
+                          priorizarEmCasa: treinoEmCasa,
                         ),
                         aoDesfazerTroca: _desfazerTroca,
                       ),

@@ -416,4 +416,40 @@ void main() {
     await _tocar(tester, find.byIcon(Icons.undo).first);
     expect(await trocasRepositorio.carregar(), isEmpty);
   });
+
+  testWidgets('Treino em casa ainda oferece alternativas de troca (não fica sem opção)', (
+    tester,
+  ) async {
+    final anamneseRepositorio = AnamneseRepository();
+    await anamneseRepositorio.salvar(
+      const Anamnese(
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+        localTreino: LocalTreino.casa,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MinhaFichaView(anamneseRepositorio: anamneseRepositorio),
+        ),
+      ),
+    );
+    await _carregar(tester);
+
+    await _tocar(tester, find.byIcon(Icons.swap_horiz).first);
+
+    expect(find.textContaining('Trocar "'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is ListTile && w.key.toString().contains('opcao-troca-'),
+      ),
+      findsWidgets,
+    );
+  });
 }
