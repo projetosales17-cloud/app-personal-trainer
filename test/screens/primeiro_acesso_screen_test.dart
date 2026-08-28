@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mock_exceptions/mock_exceptions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app_personal_trainer/screens/primeiro_acesso_screen.dart';
@@ -118,6 +120,49 @@ void main() {
 
     expect(find.text('As duas senhas não são iguais.'), findsOneWidget);
     expect(repo.chamada, isNull);
+  });
+
+  testWidgets('senha criada mas login automático falha: volta pro login sem prender', (tester) async {
+    final repo = _FakePrimeiroAcessoRepo(); // definirSenha OK
+    final auth = MockFirebaseAuth();
+    whenCalling(Invocation.method(#signInWithEmailAndPassword, null))
+        .on(auth)
+        .thenThrow(FirebaseAuthException(code: 'network-request-failed'));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => PrimeiroAcessoScreen(
+                    authRepositorio: AuthRepository(auth: auth),
+                    sessaoUnicaService: SessaoUnicaService(controleSessao: _ControleSessaoFake()),
+                    primeiroAcessoRepositorio: repo,
+                    emailInicial: 'nova@hotmail.com',
+                    codigoInicial: 'HP99',
+                  ),
+                ),
+              ),
+              child: const Text('abrir'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('abrir'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('campo-senha-primeiro-acesso')), 'senhaBoa1');
+    await tester.enterText(find.byKey(const Key('campo-confirma-primeiro-acesso')), 'senhaBoa1');
+    await tester.tap(find.byKey(const Key('botao-criar-senha-primeiro-acesso')));
+    await tester.pumpAndSettle();
+
+    // Voltou pro login (a tela de primeiro acesso saiu) e avisou.
+    expect(find.byType(PrimeiroAcessoScreen), findsNothing);
+    expect(find.textContaining('Senha criada'), findsOneWidget);
+    expect(repo.chamada, isNotNull);
   });
 
   testWidgets('erro do backend aparece na tela', (tester) async {

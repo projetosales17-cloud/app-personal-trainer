@@ -79,12 +79,14 @@ class _PrimeiroAcessoScreenState extends State<PrimeiroAcessoScreen> {
       _erro = null;
     });
 
+    var senhaDefinida = false;
     try {
       await widget.primeiroAcessoRepositorio.definirSenha(
         email: _emailController.text.trim(),
         codigo: _codigoController.text.trim(),
         senha: _senhaController.text,
       );
+      senhaDefinida = true;
       await widget.authRepositorio.entrar(
         email: _emailController.text.trim(),
         senha: _senhaController.text,
@@ -99,7 +101,22 @@ class _PrimeiroAcessoScreenState extends State<PrimeiroAcessoScreen> {
     } on PrimeiroAcessoException catch (e) {
       setState(() => _erro = e.mensagem);
     } on AuthException catch (e) {
-      setState(() => _erro = e.mensagem);
+      // A senha JÁ foi criada; só o login automático falhou (rede, etc.).
+      // Não deixo a pessoa presa aqui — mando de volta pro login, onde a
+      // senha nova funciona.
+      if (senhaDefinida) {
+        if (mounted) {
+          final messenger = ScaffoldMessenger.of(context);
+          Navigator.of(context).pop();
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text('Senha criada! Agora entre com seu e-mail e a nova senha.'),
+            ),
+          );
+        }
+      } else {
+        setState(() => _erro = e.mensagem);
+      }
     } finally {
       if (mounted) setState(() => _carregando = false);
     }
