@@ -8,6 +8,7 @@ class BibliotecaExerciciosRepository {
     GrupoMuscular? grupoMuscular,
     NivelExercicio? nivel,
     ObjetivoExercicio? objetivo,
+    Set<Equipamento>? equipamentos,
   }) {
     return bibliotecaExercicios.where((exercicio) {
       if (grupoMuscular != null && exercicio.grupoMuscularPrincipal != grupoMuscular) {
@@ -17,6 +18,9 @@ class BibliotecaExerciciosRepository {
         return false;
       }
       if (objetivo != null && !exercicio.objetivos.contains(objetivo)) {
+        return false;
+      }
+      if (equipamentos != null && !equipamentos.contains(exercicio.equipamento)) {
         return false;
       }
       return true;
