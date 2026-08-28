@@ -45,6 +45,48 @@ class GeradorCardapio {
         'fontes de fibra e proteína pode ajudar a manter a saciedade.',
   };
 
+  /// Janela em que um parto recente ainda gera uma dica nutricional de
+  /// recuperação/amamentação (~6 meses). Regra prática, não médica.
+  static const _diasPosParto = 180;
+
+  /// Dicas nutricionais gerais e não-prescritivas por condição hormonal
+  /// informada na anamnese (ver briefing do produto: "sem dietas, sem
+  /// culpa"). Não mudam a seleção de alimentos — são orientações de
+  /// equilíbrio mostradas junto ao cardápio.
+  static const _observacoesPorCondicao = {
+    'SOP (Síndrome do Ovário Policístico)':
+        'Com SOP, incluir proteína e fibras em todas as refeições e reduzir '
+        'açúcar e ultraprocessados costuma ajudar no controle da glicemia e '
+        'na saciedade. Gorduras boas (azeite, abacate, castanhas) também são '
+        'boas aliadas.',
+    'Menopausa':
+        'Na menopausa, capriche em cálcio (laticínios ou substitutos '
+        'fortificados, folhas verde-escuras, gergelim) e em proteína bem '
+        'distribuída ao longo do dia para preservar massa óssea e muscular.',
+    'TPM / ciclo irregular':
+        'Na semana da TPM, alimentos ricos em magnésio (castanhas, cacau '
+        '70%+, folhas verdes) e em cálcio podem aliviar inchaço e '
+        'irritabilidade. Reduzir sal, cafeína e álcool nesses dias também '
+        'costuma ajudar.',
+  };
+
+  static const _observacaoPosParto =
+      'No pós-parto — e especialmente se você amamenta — a necessidade de '
+      'líquidos, ferro, cálcio e proteína aumenta. Faça refeições regulares, '
+      'mantenha água por perto e evite dietas restritivas nessa fase.';
+
+  List<String> _observacoesFoco(Anamnese anamnese) {
+    final observacoes = <String>[];
+    final porCondicao = _observacoesPorCondicao[anamnese.condicaoHormonal];
+    if (porCondicao != null) observacoes.add(porCondicao);
+
+    final parto = anamnese.dataParto;
+    if (parto != null && DateTime.now().difference(parto).inDays < _diasPosParto) {
+      observacoes.add(_observacaoPosParto);
+    }
+    return observacoes;
+  }
+
   Cardapio gerar(Anamnese anamnese) {
     final restricoes = anamnese.restricoesAlimentares;
     final incluirCeia = _objetivosComCeia.contains(anamnese.objetivoPrincipal);
@@ -89,6 +131,7 @@ class GeradorCardapio {
       geradaEm: geradaEm,
       validaAte: geradaEm.add(const Duration(days: duracaoValidadeDias)),
       observacaoCiclo: _observacoesPorFase[anamnese.faseCiclo],
+      observacoesFoco: _observacoesFoco(anamnese),
     );
   }
 
