@@ -109,4 +109,69 @@ void main() {
     final cardapio = gerador.gerar(anamneseMenstrual);
     expect(cardapio.observacaoCiclo, contains('Fase menstrual'));
   });
+
+  test('sem condição hormonal nem parto recente, não há observação de foco', () {
+    final cardapio = gerador.gerar(_anamneseBase);
+    expect(cardapio.observacoesFoco, isEmpty);
+  });
+
+  test('condição SOP gera dica nutricional específica', () {
+    const anamnese = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.emagrecimento,
+      condicaoHormonal: 'SOP (Síndrome de Ovario Poliquístico)',
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+    );
+    final cardapio = gerador.gerar(anamnese);
+    expect(cardapio.observacoesFoco, hasLength(1));
+    expect(cardapio.observacoesFoco.single, contains('SOP'));
+  });
+
+  test('menopausa gera dica de cálcio e proteína', () {
+    const anamnese = Anamnese(
+      idade: 52,
+      alturaCm: 165,
+      pesoAtualKg: 68,
+      objetivoPrincipal: Objetivo.menopausa,
+      condicaoHormonal: 'Menopausia',
+      nivelAtividade: NivelAtividade.leve,
+      frequenciaSemanalDias: 3,
+    );
+    final cardapio = gerador.gerar(anamnese);
+    expect(cardapio.observacoesFoco.single, contains('calcio'));
+  });
+
+  test('parto recente acrescenta dica de pós-parto, junto da condição', () {
+    final anamnese = Anamnese(
+      idade: 32,
+      alturaCm: 168,
+      pesoAtualKg: 70,
+      objetivoPrincipal: Objetivo.emagrecimento,
+      condicaoHormonal: 'SPM / ciclo irregular',
+      nivelAtividade: NivelAtividade.leve,
+      frequenciaSemanalDias: 3,
+      dataParto: DateTime.now().subtract(const Duration(days: 40)),
+    );
+    final cardapio = gerador.gerar(anamnese);
+    expect(cardapio.observacoesFoco, hasLength(2));
+    expect(cardapio.observacoesFoco.any((o) => o.contains('SPM')), isTrue);
+    expect(cardapio.observacoesFoco.any((o) => o.contains('posparto')), isTrue);
+  });
+
+  test('parto antigo (mais de 6 meses) não gera dica de pós-parto', () {
+    final anamnese = Anamnese(
+      idade: 32,
+      alturaCm: 168,
+      pesoAtualKg: 70,
+      objetivoPrincipal: Objetivo.emagrecimento,
+      nivelAtividade: NivelAtividade.leve,
+      frequenciaSemanalDias: 3,
+      dataParto: DateTime.now().subtract(const Duration(days: 300)),
+    );
+    final cardapio = gerador.gerar(anamnese);
+    expect(cardapio.observacoesFoco, isEmpty);
+  });
 }

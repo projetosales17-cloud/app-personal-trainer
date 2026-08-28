@@ -88,6 +88,19 @@ class _MeuCardapioViewState extends State<MeuCardapioView> {
                 ),
               ),
             ],
+            for (final observacao in cardapio.observacoesFoco) ...[
+              const SizedBox(height: 8),
+              Card(
+                color: Theme.of(context).colorScheme.secondaryContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Text(
+                    observacao,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             for (final dia in cardapio.dias) _DiaDeCardapioCard(dia: dia),
           ],
