@@ -71,4 +71,26 @@ void main() {
 
     expect(find.textContaining('não substitui a orientação de um(a) nutricionista'), findsOneWidget);
   });
+
+  testWidgets('Condição hormonal mostra a dica nutricional de foco', (tester) async {
+    final repositorio = AnamneseRepository();
+    await repositorio.salvar(
+      const Anamnese(
+        idade: 52,
+        alturaCm: 165,
+        pesoAtualKg: 68,
+        objetivoPrincipal: Objetivo.menopausa,
+        condicaoHormonal: 'Menopausa',
+        nivelAtividade: NivelAtividade.leve,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(home: MeuCardapioView(anamneseRepositorio: repositorio)),
+    );
+    await tester.pump();
+
+    expect(find.textContaining('cálcio'), findsOneWidget);
+  });
 }

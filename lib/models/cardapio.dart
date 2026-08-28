@@ -23,6 +23,7 @@ class Cardapio {
     required this.geradaEm,
     required this.validaAte,
     this.observacaoCiclo,
+    this.observacoesFoco = const [],
   });
 
   final List<DiaDeCardapio> dias;
@@ -33,6 +34,12 @@ class Cardapio {
   /// informada na anamnese (ver briefing do produto). `null` quando a
   /// usuária não informou ciclo regular.
   final String? observacaoCiclo;
+
+  /// Dicas nutricionais não-prescritivas conforme a condição hormonal
+  /// (SOP, menopausa, TPM) e o momento de vida (pós-parto) informados na
+  /// anamnese. Lista vazia quando nada se aplica. São orientações gerais
+  /// de equilíbrio, sem prescrição nem contagem (ver briefing do produto).
+  final List<String> observacoesFoco;
 
   bool get expirada => DateTime.now().isAfter(validaAte);
 }
