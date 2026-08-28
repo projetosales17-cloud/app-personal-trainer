@@ -9,10 +9,11 @@ import '../models/registro_medidas.dart';
 import '../models/registro_peso.dart';
 import '../models/registro_video.dart';
 import 'gerador_miniatura_video.dart';
+import 'sincronizador_dados.dart';
 
-/// Persiste os registros de peso, medidas, fotos e vídeos localmente no
-/// aparelho (sem backend por enquanto, sem custo de nuvem), como a
-/// anamnese.
+/// Persiste os registros de peso, medidas, fotos e vídeos localmente.
+/// Peso e medidas sincronizam com o Firestore por conta (ver
+/// [SincronizadorDados]); fotos/vídeos ficam só no aparelho (são arquivos).
 class ProgressoRepository {
   ProgressoRepository({
     Future<Directory> Function()? resolverDiretorioBase,
@@ -38,6 +39,7 @@ class ProgressoRepository {
       _chave,
       jsonEncode([for (final registro in registros) registro.toJson()]),
     );
+    await SincronizadorDados.instancia.aposEscrita(_chave);
   }
 
   Future<List<RegistroPeso>> listarPesos() async {
@@ -67,6 +69,7 @@ class ProgressoRepository {
       _chaveMedidas,
       jsonEncode([for (final registro in registros) registro.toJson()]),
     );
+    await SincronizadorDados.instancia.aposEscrita(_chaveMedidas);
   }
 
   Future<List<RegistroMedidas>> listarMedidas() async {

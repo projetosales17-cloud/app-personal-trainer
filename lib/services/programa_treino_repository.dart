@@ -8,6 +8,7 @@ import '../models/exercicio.dart';
 import '../models/programa_treino.dart';
 import '../models/registro_medidas.dart';
 import 'progresso_repository.dart';
+import 'sincronizador_dados.dart';
 
 /// Persiste o estado do programa de treino de longo prazo e aplica as
 /// regras de progressão a cada check-in (ver `CheckinProgresso` /
@@ -30,6 +31,7 @@ class ProgramaTreinoRepository {
   Future<void> _salvar(ProgramaTreino programa) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_chave, jsonEncode(programa.toJson()));
+    await SincronizadorDados.instancia.aposEscrita(_chave);
   }
 
   /// Cria o programa na primeira vez que a usuária vê a ficha; nas
