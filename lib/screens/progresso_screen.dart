@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'antes_depois_view.dart';
+import 'evolucao_carga_view.dart';
 import 'registro_fotos_view.dart';
 import 'registro_medidas_view.dart';
 import 'registro_peso_view.dart';
@@ -12,15 +13,16 @@ class ProgressoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 5,
+      length: 6,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Progreso'),
-          bottom: const TabBar(
+          bottom: TabBar(
             isScrollable: true,
-            tabs: [
+            tabs: const [
               Tab(text: 'Peso'),
               Tab(text: 'Medidas'),
+              Tab(text: 'Carga'),
               Tab(text: 'Fotos'),
               Tab(text: 'Videos'),
               Tab(text: 'Antes/Después'),
@@ -31,6 +33,7 @@ class ProgressoScreen extends StatelessWidget {
           children: [
             RegistroPesoView(),
             RegistroMedidasView(),
+            EvolucaoCargaView(),
             RegistroFotosView(),
             RegistroVideosView(),
             AntesDepoisView(),

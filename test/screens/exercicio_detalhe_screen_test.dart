@@ -142,6 +142,64 @@ void main() {
     expect(find.text('0.0 kg · 3x20'), findsOneWidget);
   });
 
+  testWidgets('Com 2+ registros, mostra o resumo de evolução de carga', (tester) async {
+    final repositorio = TreinoRepository();
+    await repositorio.registrarCarga(RegistroCarga(
+      exercicioId: _flexao.id,
+      data: DateTime.now().subtract(const Duration(days: 21)),
+      pesoKg: 10,
+      series: 3,
+      repeticoes: 10,
+    ));
+    await repositorio.registrarCarga(RegistroCarga(
+      exercicioId: _flexao.id,
+      data: DateTime.now(),
+      pesoKg: 16,
+      series: 3,
+      repeticoes: 10,
+    ));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExercicioDetalheScreen(exercicio: _flexao, repositorio: repositorio),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    await _rolarAte(tester, find.textContaining('De 10 kg a 16 kg'));
+
+    expect(find.textContaining('De 10 kg a 16 kg'), findsOneWidget);
+    expect(find.byKey(const Key('grafico-linha-simples')), findsOneWidget);
+  });
+
+  testWidgets('Registrar um novo recorde de carga mostra o aviso de destaque', (tester) async {
+    final repositorio = TreinoRepository();
+    await repositorio.registrarCarga(RegistroCarga(
+      exercicioId: _flexao.id,
+      data: DateTime.now().subtract(const Duration(days: 7)),
+      pesoKg: 12,
+      series: 3,
+      repeticoes: 10,
+    ));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExercicioDetalheScreen(exercicio: _flexao, repositorio: repositorio),
+      ),
+    );
+    await tester.pump();
+    await _rolarAte(tester, find.byKey(const Key('botao-registrar-carga')));
+
+    await tester.enterText(find.byKey(const Key('campo-peso-carga')), '15');
+    await tester.enterText(find.byKey(const Key('campo-series')), '3');
+    await tester.enterText(find.byKey(const Key('campo-repeticoes')), '10');
+    await tester.tap(find.byKey(const Key('botao-registrar-carga')));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.textContaining('Nuevo récord en este ejercicio'), findsOneWidget);
+  });
+
   testWidgets('Mostra o cronômetro de descanso', (tester) async {
     await tester.pumpWidget(MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao)));
     await tester.pump();

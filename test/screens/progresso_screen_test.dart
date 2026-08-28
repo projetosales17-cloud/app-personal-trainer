@@ -27,6 +27,16 @@ void main() {
     expect(find.byKey(const Key('campo-cintura')), findsOneWidget);
   });
 
+  testWidgets('Trocar para a aba "Carga" mostra o estado vazio de evolução', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: ProgressoScreen()));
+    await tester.pump();
+
+    await tester.tap(find.text('Carga'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Registra la carga de tus ejercicios'), findsOneWidget);
+  });
+
   testWidgets('Trocar para a aba "Fotos" mostra o estado vazio', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: ProgressoScreen()));
     await tester.pump();
