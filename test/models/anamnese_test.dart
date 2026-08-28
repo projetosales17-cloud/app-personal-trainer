@@ -27,6 +27,7 @@ void main() {
       dataParto: DateTime(2026, 1, 1),
       cicloMenstrualRegular: true,
       dataUltimaMenstruacao: DateTime(2026, 1, 1),
+      duracaoCicloDias: 32,
     );
 
     final reconstruido = Anamnese.fromJson(original.toJson());
@@ -54,6 +55,7 @@ void main() {
     expect(reconstruido.dataParto, original.dataParto);
     expect(reconstruido.cicloMenstrualRegular, original.cicloMenstrualRegular);
     expect(reconstruido.dataUltimaMenstruacao, original.dataUltimaMenstruacao);
+    expect(reconstruido.duracaoCicloDias, 32);
   });
 
   test('fromJson usa valores padrão para campos opcionais ausentes', () {
@@ -78,6 +80,26 @@ void main() {
     expect(anamnese.dataParto, isNull);
     expect(anamnese.cicloMenstrualRegular, isTrue);
     expect(anamnese.dataUltimaMenstruacao, isNull);
+    expect(anamnese.duracaoCicloDias, isNull);
+  });
+
+  test('faseCiclo usa a duração de ciclo informada', () {
+    // 18 dias depois da menstruação: já é lútea num ciclo de 28, mas ainda
+    // folicular num ciclo de 35 (fase folicular mais longa).
+    Anamnese comDuracao(int? dias) => Anamnese(
+      idade: 30,
+      alturaCm: 165,
+      pesoAtualKg: 62,
+      objetivoPrincipal: Objetivo.saudeGeral,
+      nivelAtividade: NivelAtividade.leve,
+      frequenciaSemanalDias: 3,
+      dataUltimaMenstruacao: DateTime.now().subtract(const Duration(days: 18)),
+      duracaoCicloDias: dias,
+    );
+
+    expect(comDuracao(null).faseCiclo, FaseCiclo.lutea);
+    expect(comDuracao(28).faseCiclo, FaseCiclo.lutea);
+    expect(comDuracao(35).faseCiclo, FaseCiclo.folicular);
   });
 
   test('faseCiclo é null sem data da última menstruação ou com ciclo irregular', () {

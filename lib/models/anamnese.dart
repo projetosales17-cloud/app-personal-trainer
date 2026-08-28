@@ -159,6 +159,11 @@ class Anamnese {
     // em false e pular esse ajuste sem penalidade.
     this.cicloMenstrualRegular = true,
     this.dataUltimaMenstruacao,
+    // Duração média do ciclo (1º dia de uma menstruação até o 1º dia da
+    // próxima). `null` usa o padrão de 28 dias — comportamento de anamneses
+    // salvas antes desse campo existir. Deixa a estimativa de fase mais
+    // precisa para quem tem ciclo regular mas diferente de 28 dias.
+    this.duracaoCicloDias,
   });
 
   final String nome;
@@ -192,12 +197,17 @@ class Anamnese {
   final DateTime? dataParto;
   final bool cicloMenstrualRegular;
   final DateTime? dataUltimaMenstruacao;
+  final int? duracaoCicloDias;
 
   /// Fase aproximada do ciclo no momento em que for consultada (não fica
   /// congelada na anamnese — muda conforme os dias passam). `null` quando
-  /// a usuária não tem ciclo regular ou não informou a data.
+  /// a usuária não tem ciclo regular ou não informou a data. Usa a duração
+  /// de ciclo informada, ou 28 dias quando não informada.
   FaseCiclo? get faseCiclo => (cicloMenstrualRegular && dataUltimaMenstruacao != null)
-      ? calcularFaseCiclo(dataUltimaMenstruacao!)
+      ? calcularFaseCiclo(
+          dataUltimaMenstruacao!,
+          duracaoCiclo: duracaoCicloDias ?? duracaoCicloDiasPadrao,
+        )
       : null;
 
   Map<String, dynamic> toJson() => {
@@ -223,6 +233,7 @@ class Anamnese {
     'dataParto': dataParto?.toIso8601String(),
     'cicloMenstrualRegular': cicloMenstrualRegular,
     'dataUltimaMenstruacao': dataUltimaMenstruacao?.toIso8601String(),
+    'duracaoCicloDias': duracaoCicloDias,
   };
 
   factory Anamnese.fromJson(Map<String, dynamic> json) => Anamnese(
@@ -255,5 +266,6 @@ class Anamnese {
     dataUltimaMenstruacao: json['dataUltimaMenstruacao'] != null
         ? DateTime.parse(json['dataUltimaMenstruacao'] as String)
         : null,
+    duracaoCicloDias: (json['duracaoCicloDias'] as num?)?.toInt(),
   );
 }
