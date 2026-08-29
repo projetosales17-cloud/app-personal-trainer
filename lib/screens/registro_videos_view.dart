@@ -57,7 +57,9 @@ class _RegistroVideosViewState extends State<RegistroVideosView> {
   Widget build(BuildContext context) {
     if (kIsWeb) {
       return const IndisponivelNaWeb(
-        mensagem: 'Los videos de progreso aún no están disponibles en la versión web.',
+        mensagem:
+            'Los videos de progreso se graban desde la app en el celular. Las fotos y '
+            'la comparación antes/después ya funcionan aquí en la web.',
       );
     }
     return Padding(

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,62 +13,66 @@ const _pngBase64 =
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
 
 void main() {
-  late Directory diretorioAppTemp;
-  late Directory diretorioOrigemTemp;
-  late File arquivoOrigem;
+  late Uint8List bytesFoto;
 
-  setUp(() async {
+  setUp(() {
     SharedPreferences.setMockInitialValues({});
-    diretorioAppTemp = await Directory.systemTemp.createTemp('fotos_app_test_');
-    diretorioOrigemTemp = await Directory.systemTemp.createTemp('fotos_origem_test_');
-    arquivoOrigem = File('${diretorioOrigemTemp.path}/foto_selecionada.png');
-    await arquivoOrigem.writeAsBytes(base64Decode(_pngBase64));
+    bytesFoto = base64Decode(_pngBase64);
   });
 
-  tearDown(() async {
-    for (final dir in [diretorioAppTemp, diretorioOrigemTemp]) {
-      if (await dir.exists()) {
-        await dir.delete(recursive: true);
-      }
-    }
-  });
+  ProgressoRepository criarRepositorio() => ProgressoRepository(uidAtual: () => null);
 
   testWidgets('Sem fotos, mostra estado vazio', (tester) async {
-    final repositorio = ProgressoRepository(resolverDiretorioBase: () async => diretorioAppTemp);
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(body: RegistroFotosView(repositorio: repositorio))),
+      MaterialApp(home: Scaffold(body: RegistroFotosView(repositorio: criarRepositorio()))),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.textContaining('Aún no hay fotos'), findsOneWidget);
   });
 
   testWidgets('Com uma foto já registrada, mostra a grade', (tester) async {
-    final repositorio = ProgressoRepository(resolverDiretorioBase: () async => diretorioAppTemp);
-    // registrarFoto faz E/S real de arquivo (File.copy) — dentro de um
-    // testWidgets isso precisa de runAsync(), mesmo antes do pumpWidget,
-    // senão trava para sempre (o binding de teste não libera callbacks de
-    // E/S real fora desse escopo).
-    await tester.runAsync(() => repositorio.registrarFoto(arquivoOrigem));
+    final repositorio = criarRepositorio();
+    await repositorio.registrarFoto(bytesFoto);
 
     await tester.pumpWidget(
       MaterialApp(home: Scaffold(body: RegistroFotosView(repositorio: repositorio))),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.textContaining('Aún no hay fotos'), findsNothing);
     expect(find.byType(GridView), findsOneWidget);
     expect(find.byType(Image), findsOneWidget);
   });
 
-  testWidgets('Tocar em "Câmera" aciona o seletor com a fonte câmera', (tester) async {
-    ImageSource? fonteRecebida;
-    final repositorio = ProgressoRepository(resolverDiretorioBase: () async => diretorioAppTemp);
+  testWidgets('Selecionar uma imagem adiciona a foto à grade', (tester) async {
+    final repositorio = criarRepositorio();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: RegistroFotosView(
             repositorio: repositorio,
+            selecionarImagem: (_) async => bytesFoto,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('botao-galeria')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Aún no hay fotos'), findsNothing);
+    expect(find.byType(Image), findsOneWidget);
+  });
+
+  testWidgets('Tocar em "Câmera" aciona o seletor com a fonte câmera', (tester) async {
+    ImageSource? fonteRecebida;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RegistroFotosView(
+            repositorio: criarRepositorio(),
             selecionarImagem: (fonte) async {
               fonteRecebida = fonte;
               return null;
@@ -77,7 +81,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('botao-camera')));
     await tester.pumpAndSettle();
@@ -88,12 +92,11 @@ void main() {
 
   testWidgets('Tocar em "Galeria" aciona o seletor com a fonte galeria', (tester) async {
     ImageSource? fonteRecebida;
-    final repositorio = ProgressoRepository(resolverDiretorioBase: () async => diretorioAppTemp);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: RegistroFotosView(
-            repositorio: repositorio,
+            repositorio: criarRepositorio(),
             selecionarImagem: (fonte) async {
               fonteRecebida = fonte;
               return null;
@@ -102,7 +105,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('botao-galeria')));
     await tester.pumpAndSettle();
@@ -111,18 +114,17 @@ void main() {
   });
 
   testWidgets('Cancelar a seleção (retorna null) não adiciona nada', (tester) async {
-    final repositorio = ProgressoRepository(resolverDiretorioBase: () async => diretorioAppTemp);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: RegistroFotosView(
-            repositorio: repositorio,
+            repositorio: criarRepositorio(),
             selecionarImagem: (_) async => null,
           ),
         ),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('botao-camera')));
     await tester.pumpAndSettle();

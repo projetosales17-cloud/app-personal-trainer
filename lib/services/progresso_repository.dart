@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,18 +14,46 @@ import '../models/registro_video.dart';
 import 'gerador_miniatura_video.dart';
 import 'sincronizador_dados.dart';
 
-/// Persiste os registros de peso, medidas, fotos e vídeos localmente no
-/// aparelho (sem backend por enquanto, sem custo de nuvem), como a
-/// anamnese.
+/// Persiste os registros de peso, medidas, fotos e vídeos da usuária.
+///
+/// Peso e medidas ficam no SharedPreferences local e sobem no blob de
+/// `usuarios/{uid}` via [SincronizadorDados]. As **fotos de progresso** vão
+/// para a subcoleção `usuarios/{uid}/fotos_progresso/{id}` como data URI
+/// base64 (uma por documento, longe do limite de 1 MB do blob) — assim
+/// funcionam na web e no celular e seguem a usuária entre aparelhos, sem
+/// depender do Firebase Storage (plano pago). Os **vídeos** seguem só
+/// locais no aparelho (arquivos grandes demais para o Firestore).
 class ProgressoRepository {
   ProgressoRepository({
     Future<Directory> Function()? resolverDiretorioBase,
     GerarMiniaturaVideo? gerarMiniaturaVideo,
+    FirebaseFirestore? firestore,
+    String? Function()? uidAtual,
   }) : _resolverDiretorioBase = resolverDiretorioBase ?? getApplicationDocumentsDirectory,
-       _gerarMiniaturaVideo = gerarMiniaturaVideo ?? gerarMiniaturaVideoPadrao;
+       _gerarMiniaturaVideo = gerarMiniaturaVideo ?? gerarMiniaturaVideoPadrao,
+       _firestoreInjetado = firestore,
+       _uidAtual = uidAtual ?? _uidLogado;
+
+  /// Resolve o uid da usuária logada. Protegido para não estourar quando
+  /// o Firebase não foi inicializado (testes de peso/medidas, etc.).
+  static String? _uidLogado() {
+    try {
+      return FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      return null;
+    }
+  }
 
   final Future<Directory> Function() _resolverDiretorioBase;
   final GerarMiniaturaVideo _gerarMiniaturaVideo;
+
+  /// `null` em produção — o Firestore real só é tocado quando há uma
+  /// usuária logada e uma operação de foto, então os testes de peso/medidas
+  /// não precisam do Firebase.
+  final FirebaseFirestore? _firestoreInjetado;
+  final String? Function() _uidAtual;
+
+  FirebaseFirestore get _firestore => _firestoreInjetado ?? FirebaseFirestore.instance;
 
   static const _chave = 'registros_peso';
   static const _chaveMedidas = 'registros_medidas';
@@ -83,42 +114,98 @@ class ProgressoRepository {
     ];
   }
 
-  /// Copia o arquivo de origem para uma pasta própria do app (fora da
-  /// cache temporária de onde o seletor de imagem costuma entregar o
-  /// arquivo) e registra a foto de progresso.
-  Future<RegistroFoto> registrarFoto(File arquivoOrigem) async {
-    final pasta = await _pastaFotos();
-    final registrosExistentes = await listarFotos();
+  CollectionReference<Map<String, dynamic>>? _colecaoFotos() {
+    final uid = _uidAtual();
+    if (uid == null) return null;
+    return _firestore.collection('usuarios').doc(uid).collection('fotos_progresso');
+  }
 
-    final pontoExtensao = arquivoOrigem.path.lastIndexOf('.');
-    final extensao = pontoExtensao == -1 ? '' : arquivoOrigem.path.substring(pontoExtensao);
-    final nomeArquivo =
-        '${DateTime.now().microsecondsSinceEpoch}_${registrosExistentes.length}$extensao';
-    final destino = await arquivoOrigem.copy('${pasta.path}/$nomeArquivo');
-
-    final registro = RegistroFoto(data: DateTime.now(), caminhoArquivo: destino.path);
-    final registros = registrosExistentes..add(registro);
-
+  Future<void> _salvarCacheFotos(List<RegistroFoto> fotos) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
       _chaveFotos,
-      jsonEncode([for (final item in registros) item.toJson()]),
+      jsonEncode([for (final f in fotos) f.toJson()]),
     );
-    return registro;
   }
 
-  Future<List<RegistroFoto>> listarFotos() async {
+  Future<List<RegistroFoto>> _cacheFotos() async {
     final prefs = await SharedPreferences.getInstance();
     final bruto = prefs.getString(_chaveFotos);
     if (bruto == null) return [];
-
     final lista = jsonDecode(bruto) as List;
     return [
-      for (final item in lista) RegistroFoto.fromJson(item as Map<String, dynamic>),
-    ];
+      for (final item in lista)
+        if ((item as Map)['dataUri'] != null)
+          RegistroFoto.fromJson(item.cast<String, dynamic>()),
+    ]..sort((a, b) => a.data.compareTo(b.data));
   }
 
-  Future<Directory> _pastaFotos() => _pasta('fotos_progresso');
+  /// Registra uma foto de progresso a partir dos bytes da imagem (já
+  /// redimensionada/comprimida pelo seletor). Guarda como data URI base64
+  /// no Firestore (`usuarios/{uid}/fotos_progresso`) quando há usuária
+  /// logada, e sempre no cache local. Offline, fica só no cache com id
+  /// `local_...` até a próxima listagem online.
+  Future<RegistroFoto> registrarFoto(Uint8List bytes, {String mime = 'image/jpeg'}) async {
+    final agora = DateTime.now();
+    final dataUri = 'data:$mime;base64,${base64Encode(bytes)}';
+
+    var id = 'local_${agora.microsecondsSinceEpoch}';
+    final colecao = _colecaoFotos();
+    if (colecao != null) {
+      try {
+        final ref = await colecao.add({
+          'data': Timestamp.fromDate(agora),
+          'dataUri': dataUri,
+        });
+        id = ref.id;
+      } catch (_) {
+        // offline — sobe na próxima listagem online
+      }
+    }
+
+    final registro = RegistroFoto(id: id, data: agora, dataUri: dataUri);
+    await _salvarCacheFotos([...await _cacheFotos(), registro]);
+    return registro;
+  }
+
+  /// Lista as fotos de progresso ordenadas da mais antiga para a mais
+  /// recente. Com usuária logada, lê do Firestore e atualiza o cache
+  /// local; offline (ou deslogada), devolve o cache.
+  Future<List<RegistroFoto>> listarFotos() async {
+    final colecao = _colecaoFotos();
+    if (colecao != null) {
+      try {
+        final snap = await colecao.orderBy('data').get();
+        final fotos = [
+          for (final doc in snap.docs)
+            RegistroFoto(
+              id: doc.id,
+              data: (doc.data()['data'] as Timestamp).toDate(),
+              dataUri: doc.data()['dataUri'] as String,
+            ),
+        ];
+        await _salvarCacheFotos(fotos);
+        return fotos;
+      } catch (_) {
+        // offline — cai no cache
+      }
+    }
+    return _cacheFotos();
+  }
+
+  /// Remove uma foto de progresso (documento do Firestore + cache local).
+  Future<void> removerFoto(String id) async {
+    final colecao = _colecaoFotos();
+    if (colecao != null && !id.startsWith('local_')) {
+      try {
+        await colecao.doc(id).delete();
+      } catch (_) {
+        // offline — a foto volta a aparecer até conseguir apagar de novo
+      }
+    }
+    final restantes = (await _cacheFotos()).where((f) => f.id != id).toList();
+    await _salvarCacheFotos(restantes);
+  }
 
   /// Copia o arquivo de origem para uma pasta própria do app, gera uma
   /// miniatura (quando suportado pela plataforma, ver
