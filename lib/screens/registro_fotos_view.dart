@@ -1,20 +1,27 @@
-import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models/registro_foto.dart';
 import '../services/progresso_repository.dart';
-import '../widgets/indisponivel_na_web.dart';
 import 'foto_detalhe_screen.dart';
 
-typedef SelecionarImagem = Future<String?> Function(ImageSource fonte);
+typedef SelecionarImagem = Future<Uint8List?> Function(ImageSource fonte);
 
-Future<String?> _selecionarImagemPadrao(ImageSource fonte) async {
-  final arquivo = await ImagePicker().pickImage(source: fonte, imageQuality: 85);
-  return arquivo?.path;
+Future<Uint8List?> _selecionarImagemPadrao(ImageSource fonte) async {
+  final arquivo = await ImagePicker().pickImage(
+    source: fonte,
+    maxWidth: 1280,
+    maxHeight: 1280,
+    imageQuality: 55,
+  );
+  return arquivo?.readAsBytes();
 }
+
+/// Acima deste tamanho a foto não cabe com folga num documento do
+/// Firestore (limite de 1 MB; base64 infla ~33%).
+const _limiteBytesFoto = 700 * 1024;
 
 class RegistroFotosView extends StatefulWidget {
   RegistroFotosView({
@@ -33,15 +40,44 @@ class RegistroFotosView extends StatefulWidget {
 
 class _RegistroFotosViewState extends State<RegistroFotosView> {
   late Future<List<RegistroFoto>> _fotosFuture = widget.repositorio.listarFotos();
+  bool _enviando = false;
 
   Future<void> _adicionar(ImageSource fonte) async {
-    final caminho = await widget.selecionarImagem(fonte);
-    if (caminho == null) return;
+    if (_enviando) return;
+    final bytes = await widget.selecionarImagem(fonte);
+    if (bytes == null || !mounted) return;
 
-    await widget.repositorio.registrarFoto(File(caminho));
-    setState(() {
-      _fotosFuture = widget.repositorio.listarFotos();
-    });
+    if (bytes.lengthInBytes > _limiteBytesFoto) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Foto muito pesada. Tente outra ou uma de menor resolução.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _enviando = true);
+    try {
+      await widget.repositorio.registrarFoto(bytes);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _enviando = false;
+          _fotosFuture = widget.repositorio.listarFotos();
+        });
+      }
+    }
+  }
+
+  Future<void> _abrir(RegistroFoto foto) async {
+    final removida = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => FotoDetalheScreen(foto: foto, repositorio: widget.repositorio),
+      ),
+    );
+    if (removida == true && mounted) {
+      setState(() => _fotosFuture = widget.repositorio.listarFotos());
+    }
   }
 
   String _formatarData(DateTime data) {
@@ -52,11 +88,6 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb) {
-      return const IndisponivelNaWeb(
-        mensagem: 'Fotos de progresso ainda não estão disponíveis na versão web.',
-      );
-    }
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -66,7 +97,7 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
               Expanded(
                 child: OutlinedButton.icon(
                   key: const Key('botao-camera'),
-                  onPressed: () => _adicionar(ImageSource.camera),
+                  onPressed: _enviando ? null : () => _adicionar(ImageSource.camera),
                   icon: const Icon(Icons.camera_alt_outlined),
                   label: const Text('Câmera'),
                 ),
@@ -75,13 +106,17 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
               Expanded(
                 child: OutlinedButton.icon(
                   key: const Key('botao-galeria'),
-                  onPressed: () => _adicionar(ImageSource.gallery),
+                  onPressed: _enviando ? null : () => _adicionar(ImageSource.gallery),
                   icon: const Icon(Icons.photo_library_outlined),
                   label: const Text('Galeria'),
                 ),
               ),
             ],
           ),
+          if (_enviando) ...[
+            const SizedBox(height: 12),
+            const LinearProgressIndicator(),
+          ],
           const SizedBox(height: 16),
           Expanded(
             child: FutureBuilder<List<RegistroFoto>>(
@@ -109,13 +144,11 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
                   itemBuilder: (context, indice) {
                     final foto = fotos[indice];
                     return GestureDetector(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => FotoDetalheScreen(foto: foto)),
-                      ),
+                      onTap: () => _abrir(foto),
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          Image.file(File(foto.caminhoArquivo), fit: BoxFit.cover),
+                          Image.memory(foto.bytes, fit: BoxFit.cover, gaplessPlayback: true),
                           Positioned(
                             bottom: 0,
                             left: 0,

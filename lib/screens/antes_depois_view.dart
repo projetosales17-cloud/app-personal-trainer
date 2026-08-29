@@ -1,11 +1,7 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../models/registro_foto.dart';
 import '../services/progresso_repository.dart';
-import '../widgets/indisponivel_na_web.dart';
 import 'foto_detalhe_screen.dart';
 
 /// Comparação entre a foto mais antiga e a mais recente registradas, mais
@@ -32,11 +28,6 @@ class _AntesDepoisViewState extends State<AntesDepoisView> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb) {
-      return const IndisponivelNaWeb(
-        mensagem: 'A comparação antes/depois ainda não está disponível na versão web.',
-      );
-    }
     return FutureBuilder<List<RegistroFoto>>(
       future: _fotosFuture,
       builder: (context, snapshot) {
@@ -104,7 +95,8 @@ class _AntesDepoisViewState extends State<AntesDepoisView> {
                     return GestureDetector(
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => FotoDetalheScreen(foto: foto),
+                          builder: (_) =>
+                              FotoDetalheScreen(foto: foto, repositorio: widget.repositorio),
                         ),
                       ),
                       child: SizedBox(
@@ -114,9 +106,10 @@ class _AntesDepoisViewState extends State<AntesDepoisView> {
                             Expanded(
                               child: AspectRatio(
                                 aspectRatio: 3 / 4,
-                                child: Image.file(
-                                  File(foto.caminhoArquivo),
+                                child: Image.memory(
+                                  foto.bytes,
                                   fit: BoxFit.cover,
+                                  gaplessPlayback: true,
                                 ),
                               ),
                             ),
@@ -159,7 +152,7 @@ class _CartaoFoto extends StatelessWidget {
         const SizedBox(height: 8),
         AspectRatio(
           aspectRatio: 3 / 4,
-          child: Image.file(File(foto.caminhoArquivo), fit: BoxFit.cover),
+          child: Image.memory(foto.bytes, fit: BoxFit.cover, gaplessPlayback: true),
         ),
         const SizedBox(height: 4),
         Text(

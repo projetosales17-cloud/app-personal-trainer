@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,12 +15,14 @@ const _pngBase64 =
 void main() {
   late Directory diretorioTemp;
   late File arquivoOrigem;
+  late Uint8List bytesFoto;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     diretorioTemp = await Directory.systemTemp.createTemp('progresso_repo_test_');
     arquivoOrigem = File('${diretorioTemp.path}/origem.png');
-    await arquivoOrigem.writeAsBytes(base64Decode(_pngBase64));
+    bytesFoto = base64Decode(_pngBase64);
+    await arquivoOrigem.writeAsBytes(bytesFoto);
   });
 
   tearDown(() async {
@@ -28,14 +32,13 @@ void main() {
   });
 
   // gerarMiniaturaVideo real faz chamada de platform channel — sem
-  // implementação nativa disponível no ambiente de teste (mesmo em
-  // testWidgets, sem handler registrado; em test() puro, nem o binding
-  // existe). Injetamos um fake que não faz nada, como já é feito para
-  // image_picker/notificações/Firebase — os testes que exercitam a
-  // geração de fato injetam seu próprio fake.
+  // implementação nativa disponível no ambiente de teste. Injetamos um fake
+  // que não faz nada. `uidAtual: null` mantém as fotos no cache local (sem
+  // Firestore); os testes de sync injetam um FakeFirebaseFirestore + uid.
   ProgressoRepository criarRepositorio() => ProgressoRepository(
     resolverDiretorioBase: () async => diretorioTemp,
     gerarMiniaturaVideo: (_, _) async => null,
+    uidAtual: () => null,
   );
 
   test('listarPesos e ultimoPeso retornam vazio/nulo quando nada foi registrado', () async {
@@ -99,34 +102,95 @@ void main() {
     expect(registros.map((r) => r.bracoCm), [30, 32]);
   });
 
-  test('listarFotos retorna vazio quando nada foi registrado', () async {
-    expect(await criarRepositorio().listarFotos(), isEmpty);
+  group('fotos — sem usuária logada (cache local)', () {
+    test('listarFotos retorna vazio quando nada foi registrado', () async {
+      expect(await criarRepositorio().listarFotos(), isEmpty);
+    });
+
+    test('registrarFoto guarda a imagem como data URI base64 e lê de volta', () async {
+      final repositorio = criarRepositorio();
+      final registro = await repositorio.registrarFoto(bytesFoto);
+
+      expect(registro.dataUri, startsWith('data:image/jpeg;base64,'));
+      expect(registro.bytes, bytesFoto);
+      expect(registro.id, startsWith('local_'));
+
+      final registros = await repositorio.listarFotos();
+      expect(registros, hasLength(1));
+      expect(registros.first.dataUri, registro.dataUri);
+    });
+
+    test('registrarFoto duas vezes mantém os dois registros, em ordem de data', () async {
+      final repositorio = criarRepositorio();
+      await repositorio.registrarFoto(bytesFoto);
+      await repositorio.registrarFoto(bytesFoto);
+
+      final registros = await repositorio.listarFotos();
+      expect(registros, hasLength(2));
+      expect(registros.first.data.isBefore(registros.last.data), isTrue);
+    });
+
+    test('removerFoto tira do cache local', () async {
+      final repositorio = criarRepositorio();
+      final foto = await repositorio.registrarFoto(bytesFoto);
+      await repositorio.removerFoto(foto.id);
+      expect(await repositorio.listarFotos(), isEmpty);
+    });
   });
 
-  test('registrarFoto copia o arquivo para a pasta do app e registra a foto', () async {
-    final repositorio = criarRepositorio();
-    final registro = await repositorio.registrarFoto(arquivoOrigem);
+  group('fotos — com usuária logada (Firestore)', () {
+    late FakeFirebaseFirestore firestore;
+    ProgressoRepository criarRepositorioFs() => ProgressoRepository(
+      resolverDiretorioBase: () async => diretorioTemp,
+      gerarMiniaturaVideo: (_, _) async => null,
+      firestore: firestore,
+      uidAtual: () => 'u1',
+    );
 
-    expect(await File(registro.caminhoArquivo).exists(), isTrue);
-    expect(registro.caminhoArquivo, isNot(arquivoOrigem.path));
+    setUp(() => firestore = FakeFirebaseFirestore());
 
-    final registros = await repositorio.listarFotos();
-    expect(registros, hasLength(1));
-    expect(registros.first.caminhoArquivo, registro.caminhoArquivo);
-  });
+    test('registrarFoto grava um documento em usuarios/{uid}/fotos_progresso', () async {
+      final repositorio = criarRepositorioFs();
+      await repositorio.registrarFoto(bytesFoto);
 
-  test('registrarFoto preserva a extensão do arquivo original', () async {
-    final registro = await criarRepositorio().registrarFoto(arquivoOrigem);
-    expect(registro.caminhoArquivo.endsWith('.png'), isTrue);
-  });
+      final snap =
+          await firestore.collection('usuarios').doc('u1').collection('fotos_progresso').get();
+      expect(snap.docs, hasLength(1));
+      expect(snap.docs.first.data()['dataUri'], startsWith('data:image/jpeg;base64,'));
+    });
 
-  test('registrarFoto duas vezes mantém os dois arquivos e registros', () async {
-    final repositorio = criarRepositorio();
-    final primeiro = await repositorio.registrarFoto(arquivoOrigem);
-    final segundo = await repositorio.registrarFoto(arquivoOrigem);
+    test('listarFotos lê do Firestore ordenado por data', () async {
+      final repositorio = criarRepositorioFs();
+      await repositorio.registrarFoto(bytesFoto);
+      await repositorio.registrarFoto(bytesFoto);
 
-    expect(primeiro.caminhoArquivo, isNot(segundo.caminhoArquivo));
-    expect(await repositorio.listarFotos(), hasLength(2));
+      final registros = await repositorio.listarFotos();
+      expect(registros, hasLength(2));
+      expect(registros.first.id, isNot(startsWith('local_')));
+    });
+
+    test('removerFoto apaga o documento do Firestore', () async {
+      final repositorio = criarRepositorioFs();
+      final foto = await repositorio.registrarFoto(bytesFoto);
+      await repositorio.removerFoto(foto.id);
+
+      final snap =
+          await firestore.collection('usuarios').doc('u1').collection('fotos_progresso').get();
+      expect(snap.docs, isEmpty);
+      expect(await repositorio.listarFotos(), isEmpty);
+    });
+
+    test('outra usuária não enxerga as fotos (subcoleção por uid)', () async {
+      await criarRepositorioFs().registrarFoto(bytesFoto);
+
+      final outra = ProgressoRepository(
+        resolverDiretorioBase: () async => diretorioTemp,
+        gerarMiniaturaVideo: (_, _) async => null,
+        firestore: firestore,
+        uidAtual: () => 'u2',
+      );
+      expect(await outra.listarFotos(), isEmpty);
+    });
   });
 
   test('listarVideos retorna vazio quando nada foi registrado', () async {
@@ -149,6 +213,7 @@ void main() {
     final repositorio = ProgressoRepository(
       resolverDiretorioBase: () async => diretorioTemp,
       gerarMiniaturaVideo: (caminhoVideo, pastaDestino) async => '$pastaDestino/miniatura.jpg',
+      uidAtual: () => null,
     );
 
     final registro = await repositorio.registrarVideo(arquivoOrigem);
@@ -160,9 +225,9 @@ void main() {
     expect(registros.first.caminhoMiniatura, registro.caminhoMiniatura);
   });
 
-  test('fotos e vídeos ficam em pastas separadas e listas independentes', () async {
+  test('fotos e vídeos ficam em listas independentes', () async {
     final repositorio = criarRepositorio();
-    await repositorio.registrarFoto(arquivoOrigem);
+    await repositorio.registrarFoto(bytesFoto);
     await repositorio.registrarVideo(arquivoOrigem);
 
     expect(await repositorio.listarFotos(), hasLength(1));
