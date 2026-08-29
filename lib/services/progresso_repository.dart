@@ -145,7 +145,11 @@ class ProgressoRepository {
   /// no Firestore (`usuarios/{uid}/fotos_progresso`) quando há usuária
   /// logada, e sempre no cache local. Offline, fica só no cache com id
   /// `local_...` até a próxima listagem online.
-  Future<RegistroFoto> registrarFoto(Uint8List bytes, {String mime = 'image/jpeg'}) async {
+  Future<RegistroFoto> registrarFoto(
+    Uint8List bytes, {
+    String mime = 'image/jpeg',
+    PoseFoto pose = PoseFoto.livre,
+  }) async {
     final agora = DateTime.now();
     final dataUri = 'data:$mime;base64,${base64Encode(bytes)}';
 
@@ -156,6 +160,7 @@ class ProgressoRepository {
         final ref = await colecao.add({
           'data': Timestamp.fromDate(agora),
           'dataUri': dataUri,
+          'pose': pose.name,
         });
         id = ref.id;
       } catch (_) {
@@ -163,7 +168,7 @@ class ProgressoRepository {
       }
     }
 
-    final registro = RegistroFoto(id: id, data: agora, dataUri: dataUri);
+    final registro = RegistroFoto(id: id, data: agora, dataUri: dataUri, pose: pose);
     await _salvarCacheFotos([...await _cacheFotos(), registro]);
     return registro;
   }
@@ -178,11 +183,12 @@ class ProgressoRepository {
         final snap = await colecao.orderBy('data').get();
         final fotos = [
           for (final doc in snap.docs)
-            RegistroFoto(
-              id: doc.id,
-              data: (doc.data()['data'] as Timestamp).toDate(),
-              dataUri: doc.data()['dataUri'] as String,
-            ),
+            RegistroFoto.fromJson({
+              'id': doc.id,
+              'data': (doc.data()['data'] as Timestamp).toDate().toIso8601String(),
+              'dataUri': doc.data()['dataUri'],
+              'pose': doc.data()['pose'],
+            }),
         ];
         await _salvarCacheFotos(fotos);
         return fotos;
