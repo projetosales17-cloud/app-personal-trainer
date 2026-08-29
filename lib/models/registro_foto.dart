@@ -3,14 +3,16 @@ import 'dart:typed_data';
 
 /// Ângulo sugerido da foto de progresso. Marcar o ângulo deixa a
 /// comparação antes/depois honesta (frente vs frente, e não frente vs
-/// costas). `livre` é o padrão e não tem limite de quantidade.
-enum PoseFoto { frente, lado, costas, livre }
+/// costas). `livre` não tem limite de quantidade. A ordem é a que aparece
+/// nos chips e nas seções do antes/depois.
+enum PoseFoto { frente, costas, ladoEsquerdo, ladoDireito, livre }
 
 extension PoseFotoLabel on PoseFoto {
   String get label => switch (this) {
     PoseFoto.frente => 'Frente',
-    PoseFoto.lado => 'Lateral',
     PoseFoto.costas => 'Espalda',
+    PoseFoto.ladoEsquerdo => 'Lado izq.',
+    PoseFoto.ladoDireito => 'Lado der.',
     PoseFoto.livre => 'Libre',
   };
 }

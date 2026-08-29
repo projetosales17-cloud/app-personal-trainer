@@ -72,9 +72,9 @@ void main() {
 
   testWidgets('A linha do tempo do ângulo mostra todas as fotos dele', (tester) async {
     final repositorio = criarRepositorio();
-    await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.lado);
-    await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.lado);
-    await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.lado);
+    await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.ladoEsquerdo);
+    await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.ladoEsquerdo);
+    await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.ladoEsquerdo);
 
     await tester.pumpWidget(
       MaterialApp(home: Scaffold(body: AntesDepoisView(repositorio: repositorio))),
@@ -83,7 +83,7 @@ void main() {
 
     expect(
       find.descendant(
-        of: find.byKey(const Key('linha-do-tempo-lado')),
+        of: find.byKey(const Key('linha-do-tempo-ladoEsquerdo')),
         matching: find.byType(Image),
       ),
       findsNWidgets(3),

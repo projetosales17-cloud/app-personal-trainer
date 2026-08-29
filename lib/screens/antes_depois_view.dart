@@ -47,9 +47,8 @@ class _AntesDepoisViewState extends State<AntesDepoisView> {
             child: Padding(
               padding: EdgeInsets.all(24),
               child: Text(
-                'Registra al menos dos fotos del mismo ángulo (Frente, Lateral, '
-                'Espalda o Libre) en la pestaña Fotos para ver la comparación '
-                'antes/después.',
+                'Registra al menos dos fotos del mismo ángulo en la pestaña '
+                'Fotos para ver la comparación antes/después.',
                 textAlign: TextAlign.center,
               ),
             ),

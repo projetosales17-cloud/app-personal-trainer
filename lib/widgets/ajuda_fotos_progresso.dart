@@ -50,9 +50,9 @@ class BotaoAjudaFotosProgresso extends StatelessWidget {
                   ),
                   _Item(
                     titulo: 'Siempre el mismo ángulo',
-                    corpo: 'Marca cada foto como Frente, Lateral o Espalda. El '
-                        'antes/después compara frente con frente, no frente con '
-                        'espalda. Libre es para enfocar un punto específico.',
+                    corpo: 'Marca cada foto como Frente, Espalda, Lado izq. o '
+                        'Lado der. El antes/después compara cada ángulo consigo '
+                        'mismo. Libre es para enfocar un punto específico.',
                   ),
                   _Item(
                     titulo: 'Misma luz y mismo lugar',
