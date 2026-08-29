@@ -195,6 +195,25 @@ void main() {
       expect(await repositorio.listarFotos(), isEmpty);
     });
 
+    test('paginaFotos traz as mais recentes primeiro e pagina pelo cursor', () async {
+      final repositorio = criarRepositorioFs();
+      for (var i = 0; i < 5; i++) {
+        await repositorio.registrarFoto(bytesFoto);
+        await Future<void>.delayed(const Duration(milliseconds: 2));
+      }
+
+      final primeira = await repositorio.paginaFotos(limite: 2);
+      expect(primeira, hasLength(2));
+      expect(primeira.first.data.isAfter(primeira.last.data), isTrue);
+
+      final segunda = await repositorio.paginaFotos(limite: 2, antesDe: primeira.last.data);
+      expect(segunda, hasLength(2));
+      expect(segunda.first.data.isBefore(primeira.last.data), isTrue);
+
+      final terceira = await repositorio.paginaFotos(limite: 2, antesDe: segunda.last.data);
+      expect(terceira, hasLength(1));
+    });
+
     test('outra usuária não enxerga as fotos (subcoleção por uid)', () async {
       await criarRepositorioFs().registrarFoto(bytesFoto);
 
