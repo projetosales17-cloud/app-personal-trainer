@@ -137,6 +137,27 @@ void main() {
     expect(fotos.single.pose, PoseFoto.costas);
   });
 
+  testWidgets('Apagar a foto some da grade na hora, sem trocar de aba', (tester) async {
+    final repositorio = criarRepositorio();
+    await repositorio.registrarFoto(bytesFoto);
+
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: RegistroFotosView(repositorio: repositorio))),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(Image), findsOneWidget);
+
+    await tester.tap(find.byType(Image));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('botao-apagar-foto')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apagar'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Image), findsNothing);
+    expect(find.textContaining('Nenhuma foto ainda'), findsOneWidget);
+  });
+
   testWidgets('O "?" abre a folha de ajuda com orientação de roupa', (tester) async {
     await tester.pumpWidget(
       MaterialApp(home: Scaffold(body: RegistroFotosView(repositorio: criarRepositorio()))),

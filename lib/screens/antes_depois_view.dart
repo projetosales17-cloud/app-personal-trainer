@@ -18,7 +18,15 @@ class AntesDepoisView extends StatefulWidget {
 }
 
 class _AntesDepoisViewState extends State<AntesDepoisView> {
-  late final Future<List<RegistroFoto>> _fotosFuture = widget.repositorio.listarFotos();
+  List<RegistroFoto>? _fotos;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.repositorio.listarFotos().then((fotos) {
+      if (mounted) setState(() => _fotos = fotos);
+    });
+  }
 
   String _formatarData(DateTime data) {
     final dia = data.day.toString().padLeft(2, '0');
@@ -26,53 +34,59 @@ class _AntesDepoisViewState extends State<AntesDepoisView> {
     return '$dia/$mes/${data.year}';
   }
 
+  Future<void> _abrir(RegistroFoto foto) async {
+    final removida = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => FotoDetalheScreen(foto: foto, repositorio: widget.repositorio),
+      ),
+    );
+    if (removida == true && mounted) {
+      setState(() => _fotos?.removeWhere((f) => f.id == foto.id));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<RegistroFoto>>(
-      future: _fotosFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    final fotos = _fotos;
+    if (fotos == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        final fotos = snapshot.data ?? const <RegistroFoto>[];
-        final porPose = <PoseFoto, List<RegistroFoto>>{
-          for (final pose in PoseFoto.values)
-            if (fotos.where((f) => f.pose == pose).length >= 2)
-              pose: fotos.where((f) => f.pose == pose).toList(),
-        };
+    final porPose = <PoseFoto, List<RegistroFoto>>{
+      for (final pose in PoseFoto.values)
+        if (fotos.where((f) => f.pose == pose).length >= 2)
+          pose: fotos.where((f) => f.pose == pose).toList(),
+    };
 
-        if (porPose.isEmpty) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(24),
-              child: Text(
-                'Registre pelo menos duas fotos do mesmo ângulo na aba Fotos '
-                'para ver a comparação antes/depois.',
-                textAlign: TextAlign.center,
-              ),
-            ),
-          );
-        }
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final entrada in porPose.entries) ...[
-                _SecaoPose(
-                  pose: entrada.key,
-                  fotos: entrada.value,
-                  formatarData: _formatarData,
-                  repositorio: widget.repositorio,
-                ),
-                const SizedBox(height: 24),
-              ],
-            ],
+    if (porPose.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'Registre pelo menos duas fotos do mesmo ângulo na aba Fotos '
+            'para ver a comparação antes/depois.',
+            textAlign: TextAlign.center,
           ),
-        );
-      },
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final entrada in porPose.entries) ...[
+            _SecaoPose(
+              pose: entrada.key,
+              fotos: entrada.value,
+              formatarData: _formatarData,
+              aoTocar: _abrir,
+            ),
+            const SizedBox(height: 24),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -82,13 +96,13 @@ class _SecaoPose extends StatelessWidget {
     required this.pose,
     required this.fotos,
     required this.formatarData,
-    required this.repositorio,
+    required this.aoTocar,
   });
 
   final PoseFoto pose;
   final List<RegistroFoto> fotos;
   final String Function(DateTime) formatarData;
-  final ProgressoRepository repositorio;
+  final void Function(RegistroFoto) aoTocar;
 
   @override
   Widget build(BuildContext context) {
@@ -120,11 +134,7 @@ class _SecaoPose extends StatelessWidget {
             itemBuilder: (context, indice) {
               final foto = fotos[indice];
               return GestureDetector(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => FotoDetalheScreen(foto: foto, repositorio: repositorio),
-                  ),
-                ),
+                onTap: () => aoTocar(foto),
                 child: SizedBox(
                   width: 80,
                   child: Column(

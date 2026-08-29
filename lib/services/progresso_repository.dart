@@ -181,15 +181,7 @@ class ProgressoRepository {
     if (colecao != null) {
       try {
         final snap = await colecao.orderBy('data').get();
-        final fotos = [
-          for (final doc in snap.docs)
-            RegistroFoto.fromJson({
-              'id': doc.id,
-              'data': (doc.data()['data'] as Timestamp).toDate().toIso8601String(),
-              'dataUri': doc.data()['dataUri'],
-              'pose': doc.data()['pose'],
-            }),
-        ];
+        final fotos = [for (final doc in snap.docs) _fotoDeDoc(doc)];
         await _salvarCacheFotos(fotos);
         return fotos;
       } catch (_) {
@@ -197,6 +189,36 @@ class ProgressoRepository {
       }
     }
     return _cacheFotos();
+  }
+
+  RegistroFoto _fotoDeDoc(QueryDocumentSnapshot<Map<String, dynamic>> doc) =>
+      RegistroFoto.fromJson({
+        'id': doc.id,
+        'data': (doc.data()['data'] as Timestamp).toDate().toIso8601String(),
+        'dataUri': doc.data()['dataUri'],
+        'pose': doc.data()['pose'],
+      });
+
+  /// Uma página da grade, da foto mais recente para a mais antiga.
+  /// [antesDe] é a data da última foto já carregada (cursor). Paginação de
+  /// verdade só com o Firestore; deslogada/offline (ou regras ainda não
+  /// deployadas) devolve o cache local inteiro na primeira página.
+  Future<List<RegistroFoto>> paginaFotos({required int limite, DateTime? antesDe}) async {
+    final colecao = _colecaoFotos();
+    if (colecao != null) {
+      try {
+        var consulta = colecao.orderBy('data', descending: true);
+        if (antesDe != null) {
+          consulta = consulta.where('data', isLessThan: Timestamp.fromDate(antesDe));
+        }
+        final snap = await consulta.limit(limite).get();
+        return [for (final doc in snap.docs) _fotoDeDoc(doc)];
+      } catch (_) {
+        // offline / regras não deployadas — cai no cache
+      }
+    }
+    if (antesDe != null) return const <RegistroFoto>[];
+    return (await _cacheFotos()).reversed.toList();
   }
 
   /// Remove uma foto de progresso (documento do Firestore + cache local).

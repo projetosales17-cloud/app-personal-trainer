@@ -24,6 +24,10 @@ Future<Uint8List?> _selecionarImagemPadrao(ImageSource fonte) async {
 /// Firestore (limite de 1 MB; base64 infla ~33%).
 const _limiteBytesFoto = 700 * 1024;
 
+/// Quantas fotos a grade carrega por vez. Mantém a tela leve mesmo com
+/// centenas de fotos na jornada.
+const _tamanhoPagina = 24;
+
 class RegistroFotosView extends StatefulWidget {
   RegistroFotosView({
     super.key,
@@ -40,9 +44,44 @@ class RegistroFotosView extends StatefulWidget {
 }
 
 class _RegistroFotosViewState extends State<RegistroFotosView> {
-  late Future<List<RegistroFoto>> _fotosFuture = widget.repositorio.listarFotos();
+  final List<RegistroFoto> _fotos = [];
+  bool _carregandoPagina = false;
+  bool _primeiraCargaFeita = false;
+  bool _temMais = true;
   bool _enviando = false;
   PoseFoto _pose = PoseFoto.frente;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarMais();
+  }
+
+  Future<void> _carregarMais() async {
+    if (_carregandoPagina || !_temMais) return;
+    _carregandoPagina = true;
+    final novas = await widget.repositorio.paginaFotos(
+      limite: _tamanhoPagina,
+      antesDe: _fotos.isEmpty ? null : _fotos.last.data,
+    );
+    if (!mounted) return;
+    setState(() {
+      _fotos.addAll(novas);
+      _temMais = novas.length == _tamanhoPagina;
+      _carregandoPagina = false;
+      _primeiraCargaFeita = true;
+    });
+  }
+
+  Future<void> _recarregarDoInicio() async {
+    setState(() {
+      _fotos.clear();
+      _temMais = true;
+      _primeiraCargaFeita = false;
+      _carregandoPagina = false;
+    });
+    await _carregarMais();
+  }
 
   Future<void> _adicionar(ImageSource fonte) async {
     if (_enviando) return;
@@ -63,10 +102,8 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
       await widget.repositorio.registrarFoto(bytes, pose: _pose);
     } finally {
       if (mounted) {
-        setState(() {
-          _enviando = false;
-          _fotosFuture = widget.repositorio.listarFotos();
-        });
+        setState(() => _enviando = false);
+        await _recarregarDoInicio();
       }
     }
   }
@@ -77,8 +114,13 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
         builder: (_) => FotoDetalheScreen(foto: foto, repositorio: widget.repositorio),
       ),
     );
+    // A foto já foi apagada no repositório — some da grade na hora, sem
+    // reler do Firestore (que ainda pode devolver a foto por um instante).
     if (removida == true && mounted) {
-      setState(() => _fotosFuture = widget.repositorio.listarFotos());
+      setState(() => _fotos.removeWhere((f) => f.id == foto.id));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Foto apagada.')),
+      );
     }
   }
 
@@ -150,63 +192,64 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
             const LinearProgressIndicator(),
           ],
           const SizedBox(height: 16),
-          Expanded(
-            child: FutureBuilder<List<RegistroFoto>>(
-              future: _fotosFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final fotos = (snapshot.data ?? const <RegistroFoto>[]).reversed.toList();
-                if (fotos.isEmpty) {
-                  return const Center(
-                    child: Text('Nenhuma foto ainda. Adicione a primeira acima.'),
-                  );
-                }
-
-                return GridView.builder(
-                  key: const Key('grade-fotos'),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                  ),
-                  itemCount: fotos.length,
-                  itemBuilder: (context, indice) {
-                    final foto = fotos[indice];
-                    return GestureDetector(
-                      onTap: () => _abrir(foto),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.memory(foto.bytes, fit: BoxFit.cover, gaplessPlayback: true),
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            child: ColoredBox(
-                              color: const Color(0x99000000),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 2),
-                                child: Text(
-                                  _legenda(foto),
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(color: Colors.white, fontSize: 10),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
+          Expanded(child: _grade(context)),
         ],
       ),
+    );
+  }
+
+  Widget _grade(BuildContext context) {
+    if (!_primeiraCargaFeita) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_fotos.isEmpty) {
+      return const Center(
+        child: Text('Nenhuma foto ainda. Adicione a primeira acima.'),
+      );
+    }
+
+    return GridView.builder(
+      key: const Key('grade-fotos'),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemCount: _fotos.length + (_temMais ? 1 : 0),
+      itemBuilder: (context, indice) {
+        if (indice >= _fotos.length) {
+          WidgetsBinding.instance.addPostFrameCallback((_) => _carregarMais());
+          return const Center(
+            child: Padding(padding: EdgeInsets.all(8), child: CircularProgressIndicator()),
+          );
+        }
+        final foto = _fotos[indice];
+        return GestureDetector(
+          onTap: () => _abrir(foto),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.memory(foto.bytes, fit: BoxFit.cover, gaplessPlayback: true),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: ColoredBox(
+                  color: const Color(0x99000000),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Text(
+                      _legenda(foto),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
