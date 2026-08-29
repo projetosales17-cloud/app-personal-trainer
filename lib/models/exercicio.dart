@@ -77,13 +77,12 @@ extension EquipamentoLabel on Equipamento {
 /// quanto pelo filtro "em casa" da biblioteca de exercícios.
 const equipamentosCasa = {Equipamento.nenhum, Equipamento.elastico};
 
-/// Um exercício da biblioteca. `caminhoImagem` fica nulo por enquanto para
-/// todos os exercícios — a demonstração visual foi decidida como imagem
-/// gerada por IA (personagem consistente), não vídeo/GIF nem banco de
-/// imagens licenciado (ver briefing do produto), mas a produção real
-/// dessas imagens é um passo externo que ainda não aconteceu. Quando
-/// existir, é um asset local do app (conteúdo pré-gravado, sem custo
-/// recorrente de geração por usuária).
+/// Um exercício da biblioteca. `caminhoImagem` aponta para a imagem de
+/// demonstração — asset local do app (`assets/personagem/<id>.jpg`),
+/// ilustração da personagem consistente gerada por IA (personagem
+/// consistente, não vídeo/GIF nem banco de imagens licenciado — ver
+/// briefing do produto). Fica nulo só para exercícios ainda sem imagem
+/// própria, e aí a tela cai na ilustração genérica do grupo muscular.
 class Exercicio {
   const Exercicio({
     required this.id,
