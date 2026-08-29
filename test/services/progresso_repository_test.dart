@@ -176,12 +176,12 @@ void main() {
     test('listarFotos lê do Firestore ordenado por data, com o ângulo', () async {
       final repositorio = criarRepositorioFs();
       await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.frente);
-      await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.lado);
+      await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.ladoEsquerdo);
 
       final registros = await repositorio.listarFotos();
       expect(registros, hasLength(2));
       expect(registros.first.id, isNot(startsWith('local_')));
-      expect(registros.map((f) => f.pose), [PoseFoto.frente, PoseFoto.lado]);
+      expect(registros.map((f) => f.pose), [PoseFoto.frente, PoseFoto.ladoEsquerdo]);
     });
 
     test('removerFoto apaga o documento do Firestore', () async {
