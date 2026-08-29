@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:app_personal_trainer/models/registro_foto.dart';
 import 'package:app_personal_trainer/screens/registro_fotos_view.dart';
 import 'package:app_personal_trainer/services/progresso_repository.dart';
 
@@ -111,6 +112,42 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(fonteRecebida, ImageSource.gallery);
+  });
+
+  testWidgets('Escolher o ângulo "Costas" grava a foto com esse ângulo', (tester) async {
+    final repositorio = criarRepositorio();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RegistroFotosView(
+            repositorio: repositorio,
+            selecionarImagem: (_) async => bytesFoto,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('chip-pose-costas')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('botao-galeria')));
+    await tester.pumpAndSettle();
+
+    final fotos = await repositorio.listarFotos();
+    expect(fotos.single.pose, PoseFoto.costas);
+  });
+
+  testWidgets('O "?" abre a folha de ajuda com orientação de roupa', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: RegistroFotosView(repositorio: criarRepositorio()))),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('botao-ajuda-fotos-progresso')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ropa ajustada o bikini'), findsOneWidget);
+    expect(find.textContaining('Siempre el mismo ángulo'), findsOneWidget);
   });
 
   testWidgets('Cancelar a seleção (retorna null) não adiciona nada', (tester) async {

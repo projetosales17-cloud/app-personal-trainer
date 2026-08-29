@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../models/registro_foto.dart';
 import '../services/progresso_repository.dart';
+import '../widgets/ajuda_fotos_progresso.dart';
 import 'foto_detalhe_screen.dart';
 
 typedef SelecionarImagem = Future<Uint8List?> Function(ImageSource fonte);
@@ -41,6 +42,7 @@ class RegistroFotosView extends StatefulWidget {
 class _RegistroFotosViewState extends State<RegistroFotosView> {
   late Future<List<RegistroFoto>> _fotosFuture = widget.repositorio.listarFotos();
   bool _enviando = false;
+  PoseFoto _pose = PoseFoto.frente;
 
   Future<void> _adicionar(ImageSource fonte) async {
     if (_enviando) return;
@@ -58,7 +60,7 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
 
     setState(() => _enviando = true);
     try {
-      await widget.repositorio.registrarFoto(bytes);
+      await widget.repositorio.registrarFoto(bytes, pose: _pose);
     } finally {
       if (mounted) {
         setState(() {
@@ -80,6 +82,11 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
     }
   }
 
+  String _legenda(RegistroFoto foto) {
+    final data = _formatarData(foto.data);
+    return foto.pose == PoseFoto.livre ? data : '${foto.pose.label} · $data';
+  }
+
   String _formatarData(DateTime data) {
     final dia = data.day.toString().padLeft(2, '0');
     final mes = data.month.toString().padLeft(2, '0');
@@ -92,6 +99,31 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text('Ángulo de la foto', style: Theme.of(context).textTheme.titleSmall),
+              ),
+              const BotaoAjudaFotosProgresso(),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Wrap(
+              spacing: 8,
+              children: [
+                for (final pose in PoseFoto.values)
+                  ChoiceChip(
+                    key: Key('chip-pose-${pose.name}'),
+                    label: Text(pose.label),
+                    selected: _pose == pose,
+                    onSelected: (_) => setState(() => _pose = pose),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -158,7 +190,7 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 2),
                                 child: Text(
-                                  _formatarData(foto.data),
+                                  _legenda(foto),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(color: Colors.white, fontSize: 10),
                                 ),

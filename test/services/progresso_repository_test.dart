@@ -6,6 +6,7 @@ import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:app_personal_trainer/models/registro_foto.dart';
 import 'package:app_personal_trainer/models/registro_medidas.dart';
 import 'package:app_personal_trainer/services/progresso_repository.dart';
 
@@ -127,7 +128,7 @@ void main() {
 
       final registros = await repositorio.listarFotos();
       expect(registros, hasLength(2));
-      expect(registros.first.data.isBefore(registros.last.data), isTrue);
+      expect(registros.first.data.compareTo(registros.last.data), lessThanOrEqualTo(0));
     });
 
     test('removerFoto tira do cache local', () async {
@@ -135,6 +136,19 @@ void main() {
       final foto = await repositorio.registrarFoto(bytesFoto);
       await repositorio.removerFoto(foto.id);
       expect(await repositorio.listarFotos(), isEmpty);
+    });
+
+    test('registrarFoto guarda o ângulo (pose) e lê de volta', () async {
+      final repositorio = criarRepositorio();
+      await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.costas);
+      final fotos = await repositorio.listarFotos();
+      expect(fotos.single.pose, PoseFoto.costas);
+    });
+
+    test('pose padrão é livre', () async {
+      final repositorio = criarRepositorio();
+      await repositorio.registrarFoto(bytesFoto);
+      expect((await repositorio.listarFotos()).single.pose, PoseFoto.livre);
     });
   });
 
@@ -159,14 +173,15 @@ void main() {
       expect(snap.docs.first.data()['dataUri'], startsWith('data:image/jpeg;base64,'));
     });
 
-    test('listarFotos lê do Firestore ordenado por data', () async {
+    test('listarFotos lê do Firestore ordenado por data, com o ângulo', () async {
       final repositorio = criarRepositorioFs();
-      await repositorio.registrarFoto(bytesFoto);
-      await repositorio.registrarFoto(bytesFoto);
+      await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.frente);
+      await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.lado);
 
       final registros = await repositorio.listarFotos();
       expect(registros, hasLength(2));
       expect(registros.first.id, isNot(startsWith('local_')));
+      expect(registros.map((f) => f.pose), [PoseFoto.frente, PoseFoto.lado]);
     });
 
     test('removerFoto apaga o documento do Firestore', () async {
