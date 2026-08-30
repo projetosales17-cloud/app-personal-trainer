@@ -81,29 +81,31 @@ class _HomeScreenState extends State<HomeScreen> {
   late final Future<RegistroPeso?> _ultimoPesoFuture = widget.progressoRepositorio.ultimoPeso();
   late final Future<_ContextoPrograma> _contextoFuture = _carregarContexto();
 
+  // Foto de perfil da saudação. Escutada no nível da tela (o State da Home
+  // vive enquanto a aba existe) — um ValueListenableBuilder dentro da
+  // ListView era descartado junto com ela e parava de reagir.
+  String? _fotoPerfil = FotoPerfilRepository.atual.value;
+
   Future<_ContextoPrograma> _carregarContexto() async {
     final programa = await widget.programaRepositorio.iniciarSeNecessario();
     final checkins = await widget.checkinRepositorio.listar();
     final diasDaSemana = await widget.preferenciasRepositorio.diasDaSemanaEscolhidos();
-    return _ContextoPrograma(
-      programa: programa,
-      checkins: checkins,
-      diasDaSemana: diasDaSemana,
-    );
+    return _ContextoPrograma(programa: programa, checkins: checkins, diasDaSemana: diasDaSemana);
   }
 
   @override
   void initState() {
     super.initState();
     AnamneseRepository.revisao.addListener(_recarregarAnamnese);
-    // Preenche FotoPerfilRepository.atual; o avatar escuta esse notifier e
-    // se atualiza sozinho quando a usuária troca a foto pelo Perfil.
+    FotoPerfilRepository.atual.addListener(_aoMudarFotoPerfil);
+    // Preenche FotoPerfilRepository.atual (dispara _aoMudarFotoPerfil).
     widget.fotoPerfilRepositorio.carregar();
   }
 
   @override
   void dispose() {
     AnamneseRepository.revisao.removeListener(_recarregarAnamnese);
+    FotoPerfilRepository.atual.removeListener(_aoMudarFotoPerfil);
     super.dispose();
   }
 
@@ -112,6 +114,11 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _anamneseFuture = widget.anamneseRepositorio.carregar();
     });
+  }
+
+  void _aoMudarFotoPerfil() {
+    if (!mounted) return;
+    setState(() => _fotoPerfil = FotoPerfilRepository.atual.value);
   }
 
   @override
@@ -146,13 +153,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  ValueListenableBuilder<String?>(
-                    valueListenable: FotoPerfilRepository.atual,
-                    builder: (context, dataUri, _) => AvatarPerfil(
-                      dataUri: dataUri,
-                      nome: anamnese.nome.isEmpty ? anamnese.nomeExibicao : anamnese.nome,
-                      raio: 28,
-                    ),
+                  AvatarPerfil(
+                    dataUri: _fotoPerfil,
+                    nome: anamnese.nome.isEmpty ? anamnese.nomeExibicao : anamnese.nome,
+                    raio: 28,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -160,15 +164,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          anamnese.nomeExibicao.isEmpty
-                              ? 'Olá!'
-                              : 'Olá, ${anamnese.nomeExibicao}!',
+                          anamnese.nomeExibicao.isEmpty ? 'Olá!' : 'Olá, ${anamnese.nomeExibicao}!',
                           style: Theme.of(context).textTheme.headlineMedium,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _mensagensMotivacionais[
-                              DateTime.now().day % _mensagensMotivacionais.length],
+                          _mensagensMotivacionais[DateTime.now().day %
+                              _mensagensMotivacionais.length],
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ],
@@ -260,10 +262,7 @@ class _CardTreinoDoDia extends StatelessWidget {
           children: [
             Text('Treino do dia', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 4),
-            Text(
-              'Semana $semana · $faseNome',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            Text('Semana $semana · $faseNome', style: Theme.of(context).textTheme.bodySmall),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -343,7 +342,10 @@ class _CardProgresso extends StatelessWidget {
           children: [
             Text('Progresso', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            Text('${pesoAtual.toStringAsFixed(1)} kg', style: Theme.of(context).textTheme.bodyLarge),
+            Text(
+              '${pesoAtual.toStringAsFixed(1)} kg',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
             const SizedBox(height: 8),
             if (ultimoRegistro == null)
               const Text('Registre seu peso na aba Progresso para acompanhar a evolução.')

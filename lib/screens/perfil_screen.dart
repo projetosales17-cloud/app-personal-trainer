@@ -53,13 +53,25 @@ class _PerfilScreenState extends State<PerfilScreen> {
   late Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
   late Future<bool> _notificacoesFuture = widget.preferenciasRepositorio.notificacoesAtivadas();
   bool _salvandoFoto = false;
+  String? _fotoPerfil = FotoPerfilRepository.atual.value;
 
   @override
   void initState() {
     super.initState();
-    // Preenche FotoPerfilRepository.atual — o avatar (aqui e na Home)
-    // escuta esse notifier.
+    FotoPerfilRepository.atual.addListener(_aoMudarFotoPerfil);
+    // Preenche FotoPerfilRepository.atual (dispara _aoMudarFotoPerfil).
     widget.fotoPerfilRepositorio.carregar();
+  }
+
+  @override
+  void dispose() {
+    FotoPerfilRepository.atual.removeListener(_aoMudarFotoPerfil);
+    super.dispose();
+  }
+
+  void _aoMudarFotoPerfil() {
+    if (!mounted) return;
+    setState(() => _fotoPerfil = FotoPerfilRepository.atual.value);
   }
 
   Future<void> _trocarFotoPerfil({required bool temFoto}) async {
@@ -104,9 +116,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
     if (bytes == null || !mounted) return;
     if (bytes.lengthInBytes > FotoPerfilRepository.limiteBytes) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Foto muito pesada. Tente outra ou uma de menor resolução.'),
-        ),
+        const SnackBar(content: Text('Foto muito pesada. Tente outra ou uma de menor resolução.')),
       );
       return;
     }
@@ -160,9 +170,9 @@ class _PerfilScreenState extends State<PerfilScreen> {
     if (confirmar != true) return;
     await widget.programaRepositorio.recomecarPrograma();
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Seu programa começou de novo.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Seu programa começou de novo.')));
   }
 
   Future<void> _alterarNotificacoes(bool ativado) async {
@@ -179,9 +189,9 @@ class _PerfilScreenState extends State<PerfilScreen> {
           diasDaSemana: diasDaSemana,
         );
         if (!concedido && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Permissão de notificações negada.')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Permissão de notificações negada.')));
         }
       }
     } else {
@@ -210,6 +220,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
             padding: const EdgeInsets.all(16),
             children: [
               _CabecalhoFotoPerfil(
+                dataUri: _fotoPerfil,
                 nome: (anamnese?.nome.isNotEmpty ?? false)
                     ? anamnese!.nome
                     : (anamnese?.nomeExibicao ?? ''),
@@ -312,67 +323,64 @@ class _PerfilScreenState extends State<PerfilScreen> {
 /// Avatar grande no topo do Perfil com o botão de trocar/remover a foto.
 class _CabecalhoFotoPerfil extends StatelessWidget {
   const _CabecalhoFotoPerfil({
+    required this.dataUri,
     required this.nome,
     required this.salvando,
     required this.aoTrocar,
   });
 
+  final String? dataUri;
   final String nome;
   final bool salvando;
   final Future<void> Function({required bool temFoto}) aoTrocar;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String?>(
-      valueListenable: FotoPerfilRepository.atual,
-      builder: (context, dataUri, _) {
-        final temFoto = dataUri != null;
-        return Center(
-          child: Column(
+    final temFoto = dataUri != null;
+    return Center(
+      child: Column(
+        children: [
+          Stack(
+            alignment: Alignment.bottomRight,
             children: [
-              Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  AvatarPerfil(dataUri: dataUri, nome: nome, raio: 48),
-                  if (salvando)
-                    const Positioned.fill(
-                      child: Center(
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                    )
-                  else
-                    Material(
-                      color: Theme.of(context).colorScheme.primary,
-                      shape: const CircleBorder(),
-                      child: InkWell(
-                        key: const Key('botao-trocar-foto-perfil'),
-                        customBorder: const CircleBorder(),
-                        onTap: () => aoTrocar(temFoto: temFoto),
-                        child: Padding(
-                          padding: const EdgeInsets.all(6),
-                          child: Icon(
-                            Icons.photo_camera,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        ),
+              AvatarPerfil(dataUri: dataUri, nome: nome, raio: 48),
+              if (salvando)
+                const Positioned.fill(
+                  child: Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                )
+              else
+                Material(
+                  color: Theme.of(context).colorScheme.primary,
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    key: const Key('botao-trocar-foto-perfil'),
+                    customBorder: const CircleBorder(),
+                    onTap: () => aoTrocar(temFoto: temFoto),
+                    child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: Icon(
+                        Icons.photo_camera,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: salvando ? null : () => aoTrocar(temFoto: temFoto),
-                child: Text(temFoto ? 'Trocar foto' : 'Adicionar foto'),
-              ),
+                  ),
+                ),
             ],
           ),
-        );
-      },
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: salvando ? null : () => aoTrocar(temFoto: temFoto),
+            child: Text(temFoto ? 'Trocar foto' : 'Adicionar foto'),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -421,7 +429,10 @@ class _CardDadosAnamnese extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 160, child: Text(rotulo, style: const TextStyle(color: Colors.grey))),
+          SizedBox(
+            width: 160,
+            child: Text(rotulo, style: const TextStyle(color: Colors.grey)),
+          ),
           Expanded(child: Text(valor)),
         ],
       ),

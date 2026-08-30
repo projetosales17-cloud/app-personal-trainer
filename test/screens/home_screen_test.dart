@@ -149,12 +149,23 @@ void main() {
     expect(find.byKey(const Key('avatar-perfil-iniciais')), findsOneWidget);
 
     // PNG 1x1 válido.
-    await fotoRepositorio.salvar(base64Decode(
+    final png = base64Decode(
       'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-    ));
+    );
+    await fotoRepositorio.salvar(png);
     await tester.pumpAndSettle();
-
     expect(find.byKey(const Key('avatar-perfil-foto')), findsOneWidget);
     expect(find.byKey(const Key('avatar-perfil-iniciais')), findsNothing);
+
+    // Uma 2ª troca também dispara o listener da Home (bug: só a 1ª pegava).
+    await fotoRepositorio.salvar(png);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('avatar-perfil-foto')), findsOneWidget);
+
+    // E apagar limpa a Home na hora.
+    await fotoRepositorio.remover();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('avatar-perfil-iniciais')), findsOneWidget);
+    expect(find.byKey(const Key('avatar-perfil-foto')), findsNothing);
   });
 }

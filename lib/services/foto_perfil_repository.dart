@@ -36,6 +36,11 @@ class FotoPerfilRepository {
   /// Preenchido pelo primeiro [carregar] e atualizado por [salvar]/[remover].
   static final ValueNotifier<String?> atual = ValueNotifier<String?>(null);
 
+  /// Conta escritas locais (`salvar`/`remover`). Um [carregar] lento que
+  /// começou antes de uma troca não pode sobrescrever [atual] com o valor
+  /// antigo do Firestore — ele confere essa contagem antes de publicar.
+  static int _revisaoLocal = 0;
+
   FirebaseFirestore get _firestore => _firestoreInjetado ?? FirebaseFirestore.instance;
 
   static const _chaveCache = 'foto_perfil_data_uri';
@@ -54,6 +59,7 @@ class FotoPerfilRepository {
   /// logada, lê do Firestore e atualiza o cache; offline/deslogada, usa o
   /// cache local.
   Future<String?> carregar() async {
+    final revisao = _revisaoLocal;
     final prefs = await SharedPreferences.getInstance();
     final doc = _doc();
     if (doc != null) {
@@ -65,19 +71,21 @@ class FotoPerfilRepository {
         } else {
           await prefs.setString(_chaveCache, dataUri);
         }
-        atual.value = dataUri;
+        // Só publica se nenhuma troca local aconteceu enquanto líamos.
+        if (_revisaoLocal == revisao) atual.value = dataUri;
         return dataUri;
       } catch (_) {
         // offline / regras ainda não deployadas — cai no cache
       }
     }
     final doCache = prefs.getString(_chaveCache);
-    atual.value = doCache;
+    if (_revisaoLocal == revisao) atual.value = doCache;
     return doCache;
   }
 
   /// Salva a nova foto (bytes já redimensionados/comprimidos pelo seletor).
   Future<void> salvar(Uint8List bytes, {String mime = 'image/jpeg'}) async {
+    _revisaoLocal++;
     final dataUri = 'data:$mime;base64,${base64Encode(bytes)}';
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_chaveCache, dataUri);
@@ -85,10 +93,7 @@ class FotoPerfilRepository {
     final doc = _doc();
     if (doc != null) {
       try {
-        await doc.set({
-          'dataUri': dataUri,
-          'atualizadoEm': FieldValue.serverTimestamp(),
-        });
+        await doc.set({'dataUri': dataUri, 'atualizadoEm': FieldValue.serverTimestamp()});
       } catch (_) {
         // offline — sobe na próxima vez que salvar online
       }
@@ -97,6 +102,7 @@ class FotoPerfilRepository {
 
   /// Remove a foto de perfil (Firestore + cache).
   Future<void> remover() async {
+    _revisaoLocal++;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_chaveCache);
     atual.value = null;
