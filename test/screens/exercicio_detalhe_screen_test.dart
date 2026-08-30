@@ -200,6 +200,72 @@ void main() {
     expect(find.textContaining('Nuevo récord en este ejercicio'), findsOneWidget);
   });
 
+  testWidgets('Editar uma carga pelo menu troca os valores salvos', (tester) async {
+    final repositorio = TreinoRepository();
+    await repositorio.registrarCarga(RegistroCarga(
+      exercicioId: _flexao.id,
+      data: DateTime(2026, 1, 2),
+      pesoKg: 10,
+      series: 3,
+      repeticoes: 12,
+    ));
+
+    await tester.pumpWidget(
+      MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao, repositorio: repositorio)),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    final registro = (await repositorio.listarCargas()).single;
+    await _rolarAte(tester, find.byKey(Key('menu-carga-${registro.id}')));
+    await tester.tap(find.byKey(Key('menu-carga-${registro.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Editar').last);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('editar-campo-peso-carga')), '15');
+    await tester.enterText(find.byKey(const Key('editar-campo-series')), '4');
+    await tester.enterText(find.byKey(const Key('editar-campo-repeticoes')), '8');
+    await tester.tap(find.byKey(const Key('editar-salvar-carga')));
+    await tester.pumpAndSettle();
+
+    final atualizado = (await repositorio.listarCargas()).single;
+    expect(atualizado.id, registro.id);
+    expect(atualizado.pesoKg, 15);
+    expect(atualizado.series, 4);
+    expect(atualizado.repeticoes, 8);
+  });
+
+  testWidgets('Apagar uma carga pelo menu pede confirmação e remove do histórico', (tester) async {
+    final repositorio = TreinoRepository();
+    await repositorio.registrarCarga(RegistroCarga(
+      exercicioId: _flexao.id,
+      data: DateTime(2026, 1, 2),
+      pesoKg: 10,
+      series: 3,
+      repeticoes: 12,
+    ));
+
+    await tester.pumpWidget(
+      MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao, repositorio: repositorio)),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    final registro = (await repositorio.listarCargas()).single;
+    await _rolarAte(tester, find.byKey(Key('menu-carga-${registro.id}')));
+    await tester.tap(find.byKey(Key('menu-carga-${registro.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Borrar').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('confirmar-apagar-carga')));
+    await tester.pumpAndSettle();
+
+    expect(await repositorio.listarCargas(), isEmpty);
+    await _rolarAte(tester, find.textContaining('Aún no hay registros de carga'));
+    expect(find.textContaining('Aún no hay registros de carga'), findsOneWidget);
+  });
+
   testWidgets('Mostra o cronômetro de descanso', (tester) async {
     await tester.pumpWidget(MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao)));
     await tester.pump();

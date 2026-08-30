@@ -29,4 +29,13 @@ void main() {
     final registro = RegistroMedidas(data: DateTime.now(), bracoCm: 30);
     expect(registro.vazio, isFalse);
   });
+
+  test('id sobrevive ao round-trip e registro antigo sem id cai na data', () {
+    final registro = RegistroMedidas(data: DateTime(2026, 3, 15), cinturaCm: 80);
+    expect(RegistroMedidas.fromJson(registro.toJson()).id, registro.id);
+    expect(
+      RegistroMedidas.fromJson({'data': '2026-03-15T00:00:00.000', 'cinturaCm': 80}).id,
+      '2026-03-15T00:00:00.000',
+    );
+  });
 }

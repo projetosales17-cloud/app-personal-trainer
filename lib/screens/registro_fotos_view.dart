@@ -109,18 +109,21 @@ class _RegistroFotosViewState extends State<RegistroFotosView> {
   }
 
   Future<void> _abrir(RegistroFoto foto) async {
-    final removida = await Navigator.of(context).push<bool>(
+    final resultado = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) => FotoDetalheScreen(foto: foto, repositorio: widget.repositorio),
       ),
     );
-    // A foto já foi apagada no repositório — some da grade na hora, sem
-    // reler do Firestore (que ainda pode devolver a foto por um instante).
-    if (removida == true && mounted) {
+    if (!mounted) return;
+    if (resultado == 'removida') {
+      // A foto já foi apagada no repositório — some da grade na hora, sem
+      // reler do Firestore (que ainda pode devolver a foto por um instante).
       setState(() => _fotos.removeWhere((f) => f.id == foto.id));
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Foto eliminada.')),
       );
+    } else if (resultado == 'alterada') {
+      await _recarregarDoInicio();
     }
   }
 

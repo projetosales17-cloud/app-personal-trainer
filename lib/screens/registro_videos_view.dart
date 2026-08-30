@@ -122,9 +122,21 @@ class _RegistroVideosViewState extends State<RegistroVideosView> {
                             ),
                       title: Text(_formatarData(video.data)),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => VideoDetalheScreen(video: video)),
-                      ),
+                      onTap: () async {
+                        final removido = await Navigator.of(context).push<bool>(
+                          MaterialPageRoute(
+                            builder: (_) => VideoDetalheScreen(
+                              video: video,
+                              repositorio: widget.repositorio,
+                            ),
+                          ),
+                        );
+                        if (removido == true && mounted) {
+                          setState(() {
+                            _videosFuture = widget.repositorio.listarVideos();
+                          });
+                        }
+                      },
                     );
                   },
                 );

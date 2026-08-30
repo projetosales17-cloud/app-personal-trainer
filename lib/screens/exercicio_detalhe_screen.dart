@@ -69,6 +69,50 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
     });
   }
 
+  Future<void> _editarCarga(RegistroCarga registro) async {
+    final editado = await showDialog<RegistroCarga>(
+      context: context,
+      builder: (_) => _DialogoEditarCarga(registro: registro),
+    );
+    if (editado == null) return;
+    await widget.repositorio.atualizarCarga(editado);
+    if (!mounted) return;
+    setState(() {
+      _historicoFuture = _carregarHistorico();
+    });
+  }
+
+  Future<void> _apagarCarga(RegistroCarga registro) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('¿Borrar registro?'),
+        content: Text(
+          'El registro de ${_kg(registro.pesoKg)} · '
+          '${registro.series}x${registro.repeticoes} '
+          '(${_formatarData(registro.data)}) se eliminará.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            key: const Key('confirmar-apagar-carga'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Borrar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmar != true) return;
+    await widget.repositorio.removerCarga(registro.id);
+    if (!mounted) return;
+    setState(() {
+      _historicoFuture = _carregarHistorico();
+    });
+  }
+
   String _formatarData(DateTime data) {
     final dia = data.day.toString().padLeft(2, '0');
     final mes = data.month.toString().padLeft(2, '0');
@@ -213,6 +257,17 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
                         '${registro.series}x${registro.repeticoes}',
                       ),
                       subtitle: Text(_formatarData(registro.data)),
+                      trailing: PopupMenuButton<String>(
+                        key: Key('menu-carga-${registro.id}'),
+                        onSelected: (opcao) {
+                          if (opcao == 'editar') _editarCarga(registro);
+                          if (opcao == 'apagar') _apagarCarga(registro);
+                        },
+                        itemBuilder: (_) => const [
+                          PopupMenuItem(value: 'editar', child: Text('Editar')),
+                          PopupMenuItem(value: 'apagar', child: Text('Borrar')),
+                        ],
+                      ),
                     ),
                 ],
               );
@@ -241,6 +296,88 @@ class _ImagemExercicio extends StatelessWidget {
       caminho,
       fit: BoxFit.contain,
       errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _DialogoEditarCarga extends StatefulWidget {
+  const _DialogoEditarCarga({required this.registro});
+
+  final RegistroCarga registro;
+
+  @override
+  State<_DialogoEditarCarga> createState() => _DialogoEditarCargaState();
+}
+
+class _DialogoEditarCargaState extends State<_DialogoEditarCarga> {
+  late final _peso = TextEditingController(
+    text: widget.registro.pesoKg.toStringAsFixed(
+      widget.registro.pesoKg == widget.registro.pesoKg.roundToDouble() ? 0 : 1,
+    ),
+  );
+  late final _series = TextEditingController(text: widget.registro.series.toString());
+  late final _repeticoes =
+      TextEditingController(text: widget.registro.repeticoes.toString());
+
+  @override
+  void dispose() {
+    _peso.dispose();
+    _series.dispose();
+    _repeticoes.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Editar carga'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            key: const Key('editar-campo-peso-carga'),
+            controller: _peso,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(labelText: 'Peso (kg)'),
+          ),
+          TextField(
+            key: const Key('editar-campo-series'),
+            controller: _series,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: 'Series'),
+          ),
+          TextField(
+            key: const Key('editar-campo-repeticoes'),
+            controller: _repeticoes,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: 'Repeticiones'),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          key: const Key('editar-salvar-carga'),
+          onPressed: () {
+            final peso = double.tryParse(_peso.text.replaceAll(',', '.'));
+            final series = int.tryParse(_series.text);
+            final repeticoes = int.tryParse(_repeticoes.text);
+            if (peso == null || series == null || repeticoes == null) return;
+            if (peso < 0 || series <= 0 || repeticoes <= 0) return;
+            Navigator.of(context).pop(
+              widget.registro.copyWith(
+                pesoKg: peso,
+                series: series,
+                repeticoes: repeticoes,
+              ),
+            );
+          },
+          child: const Text('Guardar'),
+        ),
+      ],
     );
   }
 }

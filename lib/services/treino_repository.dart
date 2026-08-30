@@ -11,10 +11,27 @@ class TreinoRepository {
   static const _chave = 'registros_carga';
 
   Future<void> registrarCarga(RegistroCarga registro) async {
-    final registros = await listarCargas()
-      ..add(registro)
-      ..sort((a, b) => a.data.compareTo(b.data));
+    final registros = await listarCargas()..add(registro);
+    await _salvar(registros);
+  }
 
+  /// Substitui o registro de carga de mesmo `id` pelos novos dados.
+  Future<void> atualizarCarga(RegistroCarga registro) async {
+    final registros = await listarCargas();
+    final indice = registros.indexWhere((r) => r.id == registro.id);
+    if (indice == -1) return;
+    registros[indice] = registro;
+    await _salvar(registros);
+  }
+
+  /// Remove o registro de carga de `id`.
+  Future<void> removerCarga(String id) async {
+    final registros = await listarCargas()..removeWhere((r) => r.id == id);
+    await _salvar(registros);
+  }
+
+  Future<void> _salvar(List<RegistroCarga> registros) async {
+    registros.sort((a, b) => a.data.compareTo(b.data));
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
       _chave,

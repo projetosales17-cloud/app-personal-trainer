@@ -66,4 +66,50 @@ void main() {
 
     expect(find.textContaining('Todavía no hay registros en el diario'), findsOneWidget);
   });
+
+  Future<void> abrirMenu(WidgetTester tester, DiarioAlimentarRepository repo) async {
+    final registro = (await repo.listar()).single;
+    await tester.tap(find.byKey(Key('menu-registro-${registro.id}')));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('Editar um registro pelo menu troca a descrição salva', (tester) async {
+    final repositorio = DiarioAlimentarRepository();
+    await repositorio.registrar('Almuerzo', 'Pollo');
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: DiarioAlimentarView(repositorio: repositorio))),
+    );
+    await tester.pumpAndSettle();
+
+    await abrirMenu(tester, repositorio);
+    await tester.tap(find.text('Editar').last);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('editar-campo-descricao')), 'Pescado a la plancha');
+    await tester.tap(find.byKey(const Key('editar-salvar-diario')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pescado a la plancha'), findsOneWidget);
+    expect(find.text('Pollo'), findsNothing);
+    expect((await repositorio.listar()).single.descricao, 'Pescado a la plancha');
+  });
+
+  testWidgets('Apagar um registro pede confirmação e remove da lista', (tester) async {
+    final repositorio = DiarioAlimentarRepository();
+    await repositorio.registrar('Almuerzo', 'Pollo');
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: DiarioAlimentarView(repositorio: repositorio))),
+    );
+    await tester.pumpAndSettle();
+
+    await abrirMenu(tester, repositorio);
+    await tester.tap(find.text('Borrar').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('confirmar-apagar-diario')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Todavía no hay registros en el diario'), findsOneWidget);
+    expect(await repositorio.listar(), isEmpty);
+  });
 }

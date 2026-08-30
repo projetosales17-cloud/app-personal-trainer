@@ -49,4 +49,33 @@ void main() {
     expect(registros, hasLength(1));
     expect(registros.first.exercicioId, 'flexao-de-braco');
   });
+
+  test('atualizarCarga troca os valores mantendo o id', () async {
+    final repositorio = TreinoRepository();
+    await repositorio.registrarCarga(_registro('flexao-de-braco', DateTime(2026, 1, 1), pesoKg: 10));
+    final original = (await repositorio.listarCargas()).single;
+
+    await repositorio.atualizarCarga(
+      original.copyWith(pesoKg: 15, series: 4, repeticoes: 8),
+    );
+
+    final atualizado = (await repositorio.listarCargas()).single;
+    expect(atualizado.id, original.id);
+    expect(atualizado.pesoKg, 15);
+    expect(atualizado.series, 4);
+    expect(atualizado.repeticoes, 8);
+  });
+
+  test('removerCarga tira só o registro do id informado', () async {
+    final repositorio = TreinoRepository();
+    await repositorio.registrarCarga(_registro('flexao-de-braco', DateTime(2026, 1, 1), pesoKg: 10));
+    await repositorio.registrarCarga(_registro('flexao-de-braco', DateTime(2026, 1, 2), pesoKg: 20));
+    final primeiro =
+        (await repositorio.listarCargas()).firstWhere((r) => r.pesoKg == 10);
+
+    await repositorio.removerCarga(primeiro.id);
+
+    final restantes = await repositorio.listarCargas();
+    expect(restantes.map((r) => r.pesoKg), [20]);
+  });
 }

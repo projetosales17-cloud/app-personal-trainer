@@ -62,9 +62,27 @@ class ProgressoRepository {
 
   Future<void> registrarPeso(double pesoKg, {DateTime? data}) async {
     final registros = await listarPesos()
-      ..add(RegistroPeso(data: data ?? DateTime.now(), pesoKg: pesoKg))
-      ..sort((a, b) => a.data.compareTo(b.data));
+      ..add(RegistroPeso(data: data ?? DateTime.now(), pesoKg: pesoKg));
+    await _salvarPesos(registros);
+  }
 
+  /// Substitui o registro de peso de mesmo `id` pelos novos dados.
+  Future<void> atualizarPeso(RegistroPeso registro) async {
+    final registros = await listarPesos();
+    final indice = registros.indexWhere((r) => r.id == registro.id);
+    if (indice == -1) return;
+    registros[indice] = registro;
+    await _salvarPesos(registros);
+  }
+
+  /// Remove o registro de peso de `id`.
+  Future<void> removerPeso(String id) async {
+    final registros = await listarPesos()..removeWhere((r) => r.id == id);
+    await _salvarPesos(registros);
+  }
+
+  Future<void> _salvarPesos(List<RegistroPeso> registros) async {
+    registros.sort((a, b) => a.data.compareTo(b.data));
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
       _chave,
@@ -91,10 +109,27 @@ class ProgressoRepository {
   }
 
   Future<void> registrarMedidas(RegistroMedidas registro) async {
-    final registros = await listarMedidas()
-      ..add(registro)
-      ..sort((a, b) => a.data.compareTo(b.data));
+    final registros = await listarMedidas()..add(registro);
+    await _salvarMedidas(registros);
+  }
 
+  /// Substitui o registro de medidas de mesmo `id` pelos novos dados.
+  Future<void> atualizarMedidas(RegistroMedidas registro) async {
+    final registros = await listarMedidas();
+    final indice = registros.indexWhere((r) => r.id == registro.id);
+    if (indice == -1) return;
+    registros[indice] = registro;
+    await _salvarMedidas(registros);
+  }
+
+  /// Remove o registro de medidas de `id`.
+  Future<void> removerMedidas(String id) async {
+    final registros = await listarMedidas()..removeWhere((r) => r.id == id);
+    await _salvarMedidas(registros);
+  }
+
+  Future<void> _salvarMedidas(List<RegistroMedidas> registros) async {
+    registros.sort((a, b) => a.data.compareTo(b.data));
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
       _chaveMedidas,
@@ -221,6 +256,27 @@ class ProgressoRepository {
     return (await _cacheFotos()).reversed.toList();
   }
 
+  /// Troca o ângulo (pose) de uma foto de progresso já registrada —
+  /// documento do Firestore + cache local.
+  Future<void> atualizarPoseFoto(String id, PoseFoto pose) async {
+    final colecao = _colecaoFotos();
+    if (colecao != null && !id.startsWith('local_')) {
+      try {
+        await colecao.doc(id).update({'pose': pose.name});
+      } catch (_) {
+        // offline — a pose antiga volta na próxima listagem
+      }
+    }
+    final atualizadas = [
+      for (final f in await _cacheFotos())
+        if (f.id == id)
+          RegistroFoto(id: f.id, data: f.data, dataUri: f.dataUri, pose: pose)
+        else
+          f,
+    ];
+    await _salvarCacheFotos(atualizadas);
+  }
+
   /// Remove uma foto de progresso (documento do Firestore + cache local).
   Future<void> removerFoto(String id) async {
     final colecao = _colecaoFotos();
@@ -275,6 +331,29 @@ class ProgressoRepository {
     return [
       for (final item in lista) RegistroVideo.fromJson(item as Map<String, dynamic>),
     ];
+  }
+
+  /// Remove o vídeo de `id`: apaga o arquivo e a miniatura do disco
+  /// (best-effort) e tira o registro da lista local.
+  Future<void> removerVideo(String id) async {
+    final registros = await listarVideos();
+    for (final registro in registros.where((v) => v.id == id)) {
+      for (final caminho in [registro.caminhoArquivo, registro.caminhoMiniatura]) {
+        if (caminho == null) continue;
+        try {
+          final arquivo = File(caminho);
+          if (arquivo.existsSync()) arquivo.deleteSync();
+        } catch (_) {
+          // arquivo já sumiu ou sem permissão — o registro sai da lista mesmo assim
+        }
+      }
+    }
+    registros.removeWhere((v) => v.id == id);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _chaveVideos,
+      jsonEncode([for (final item in registros) item.toJson()]),
+    );
   }
 
   Future<Directory> _pastaVideos() => _pasta('videos_progresso');

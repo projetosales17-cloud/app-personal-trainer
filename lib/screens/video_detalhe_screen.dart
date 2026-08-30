@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../models/registro_video.dart';
+import '../services/progresso_repository.dart';
 
 class VideoDetalheScreen extends StatefulWidget {
-  const VideoDetalheScreen({super.key, required this.video});
+  VideoDetalheScreen({super.key, required this.video, ProgressoRepository? repositorio})
+    : repositorio = repositorio ?? ProgressoRepository();
 
   final RegistroVideo video;
+  final ProgressoRepository repositorio;
 
   @override
   State<VideoDetalheScreen> createState() => _VideoDetalheScreenState();
@@ -31,6 +34,30 @@ class _VideoDetalheScreenState extends State<VideoDetalheScreen> {
     super.dispose();
   }
 
+  Future<void> _remover() async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('¿Borrar video?'),
+        content: const Text('Este video de progreso se borrará del dispositivo.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            key: const Key('confirmar-apagar-video'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Borrar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmar != true || !mounted) return;
+    await widget.repositorio.removerVideo(widget.video.id);
+    if (mounted) Navigator.of(context).pop(true);
+  }
+
   String _formatarData(DateTime data) {
     final dia = data.day.toString().padLeft(2, '0');
     final mes = data.month.toString().padLeft(2, '0');
@@ -40,7 +67,17 @@ class _VideoDetalheScreenState extends State<VideoDetalheScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_formatarData(widget.video.data))),
+      appBar: AppBar(
+        title: Text(_formatarData(widget.video.data)),
+        actions: [
+          IconButton(
+            key: const Key('botao-apagar-video'),
+            tooltip: 'Borrar video',
+            icon: const Icon(Icons.delete_outline),
+            onPressed: _remover,
+          ),
+        ],
+      ),
       body: Center(
         child: FutureBuilder<void>(
           future: _inicializacao,
