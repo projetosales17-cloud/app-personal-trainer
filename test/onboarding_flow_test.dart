@@ -168,7 +168,10 @@ void main() {
     await _avancar(tester); // -> restrições
     await _avancar(tester); // -> lesões + grupos a evitar
 
+    await tester.ensureVisible(find.byKey(const Key('chip-evitar-ombro')));
     await tester.tap(find.byKey(const Key('chip-evitar-ombro')));
+    await tester.pump();
+    await tester.ensureVisible(find.byKey(const Key('chip-evitar-triceps')));
     await tester.tap(find.byKey(const Key('chip-evitar-triceps')));
     await tester.pump();
     await _avancar(tester); // -> pós-parto
@@ -505,5 +508,151 @@ void main() {
 
     final salvo = await repositorio.carregar();
     expect(salvo!.duracaoCicloDias, 32);
+  });
+
+  testWidgets('Escolher mais de um objetivo salva o principal e os secundários', (tester) async {
+    final repositorio = AnamneseRepository();
+    await tester.pumpWidget(MaterialApp(
+      home: OnboardingFlow(onConcluido: () {}, repositorio: repositorio),
+    ));
+
+    await _avancar(tester); // boas-vindas -> dados básicos
+    await tester.enterText(find.byType(TextField).at(0), '30');
+    await tester.enterText(find.byType(TextField).at(1), '170');
+    await tester.enterText(find.byType(TextField).at(2), '65');
+    await tester.pump();
+    await _avancar(tester); // -> objetivo
+
+    await _escolherObjetivo(tester, 'Bajar de peso y perder medidas');
+    await _escolherObjetivo(tester, 'Definir y tonificar el cuerpo');
+    await _avancar(tester); // -> bariátrica
+    await _avancar(tester); // -> condição hormonal
+    await _avancar(tester); // -> ciclo
+    await _avancar(tester); // -> restrições
+    await _avancar(tester); // -> lesões
+    await _avancar(tester); // -> pós-parto
+    await _avancar(tester); // -> atividade
+    await tester.tap(find.text('Moderada'));
+    await tester.pump();
+    await _avancar(tester); // -> local
+    await tester.tap(find.text('Gimnasio'));
+    await tester.pump();
+    await _avancar(tester); // -> preferência
+    await _avancar(tester); // -> priorização
+    await _avancar(tester); // -> resumo
+
+    expect(
+      find.text('Objetivos: Bajar de peso y perder medidas, Definir y tonificar el cuerpo'),
+      findsOneWidget,
+    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Finalizar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final salvo = await repositorio.carregar();
+    expect(salvo!.objetivoPrincipal, Objetivo.emagrecimento);
+    expect(salvo.objetivosSecundarios, [Objetivo.tonificacao]);
+  });
+
+  testWidgets('Cirurgia bariátrica: escolher "Sleeve" grava o tipo', (tester) async {
+    final repositorio = AnamneseRepository();
+    await tester.pumpWidget(MaterialApp(
+      home: OnboardingFlow(onConcluido: () {}, repositorio: repositorio),
+    ));
+
+    await _avancar(tester); // boas-vindas -> dados básicos
+    await tester.enterText(find.byType(TextField).at(0), '40');
+    await tester.enterText(find.byType(TextField).at(1), '165');
+    await tester.enterText(find.byType(TextField).at(2), '90');
+    await tester.pump();
+    await _avancar(tester); // -> objetivo
+    await _escolherObjetivo(tester, 'Bajar de peso y perder medidas');
+    await _avancar(tester); // -> bariátrica
+
+    await tester.tap(find.widgetWithText(SwitchListTile, 'Sí'));
+    await tester.pump();
+    expect(
+      tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Siguiente')).onPressed,
+      isNull,
+    );
+    await tester.tap(find.byKey(const Key('tipo-cirurgia-Sleeve')));
+    await tester.pump();
+    // "Sleeve" (não "Otra") não abre campo de texto livre — o único
+    // TextField na etapa é "Meses desde la cirugía".
+    await tester.enterText(find.byType(TextField), '12');
+    await tester.pump();
+
+    final botao =
+        tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Siguiente'));
+    expect(botao.onPressed, isNotNull);
+
+    // bariátrica -> hormonal -> ciclo -> restrições -> lesões -> pós-parto -> atividade
+    for (var i = 0; i < 6; i++) {
+      await _avancar(tester);
+    }
+    await tester.tap(find.text('Moderada'));
+    await tester.pump();
+    await _avancar(tester); // -> local
+    await tester.tap(find.text('Gimnasio'));
+    await tester.pump();
+    await _avancar(tester); // -> preferência
+    await _avancar(tester); // -> priorização
+    await _avancar(tester); // -> resumo
+    await tester.tap(find.widgetWithText(FilledButton, 'Finalizar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final salvo = await repositorio.carregar();
+    expect(salvo!.cirurgiaBariatrica, isTrue);
+    expect(salvo.tipoCirurgiaBariatrica, 'Sleeve');
+    expect(salvo.mesesDesdeCirurgia, 12);
+  });
+
+  testWidgets('Atalho "só membros inferiores" evita os grupos de membros superiores', (
+    tester,
+  ) async {
+    final repositorio = AnamneseRepository();
+    await tester.pumpWidget(MaterialApp(
+      home: OnboardingFlow(onConcluido: () {}, repositorio: repositorio),
+    ));
+
+    await _avancar(tester); // boas-vindas -> dados básicos
+    await tester.enterText(find.byType(TextField).at(0), '30');
+    await tester.enterText(find.byType(TextField).at(1), '170');
+    await tester.enterText(find.byType(TextField).at(2), '65');
+    await tester.pump();
+    await _avancar(tester); // -> objetivo
+    await _escolherObjetivo(tester, 'Bajar de peso y perder medidas');
+    await _avancar(tester); // -> bariátrica
+    await _avancar(tester); // -> condição hormonal
+    await _avancar(tester); // -> ciclo
+    await _avancar(tester); // -> restrições
+    await _avancar(tester); // -> lesões
+
+    await tester.ensureVisible(find.byKey(const Key('foco-so-inferiores')));
+    await tester.tap(find.byKey(const Key('foco-so-inferiores')));
+    await tester.pump();
+
+    await _avancar(tester); // -> pós-parto
+    await _avancar(tester); // -> atividade
+    await tester.tap(find.text('Moderada'));
+    await tester.pump();
+    await _avancar(tester); // -> local
+    await tester.tap(find.text('Gimnasio'));
+    await tester.pump();
+    await _avancar(tester); // -> preferência
+    await _avancar(tester); // -> priorização
+    await _avancar(tester); // -> resumo
+    await tester.tap(find.widgetWithText(FilledButton, 'Finalizar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final salvo = await repositorio.carregar();
+    expect(
+      salvo!.gruposEvitar,
+      containsAll(<String>['peito', 'costas', 'ombro', 'biceps', 'triceps']),
+    );
+    expect(salvo.gruposEvitar, isNot(contains('perna')));
+    expect(salvo.gruposEvitar, isNot(contains('gluteo')));
   });
 }

@@ -135,6 +135,11 @@ class Anamnese {
     // assumimos feminino por padrão. Necessário para a fórmula de TMB.
     this.sexo = Sexo.feminino,
     required this.objetivoPrincipal,
+    // Objetivos além do principal — a usuária pode marcar mais de um na tela
+    // de objetivos (o primeiro marcado vira o principal). Vazio em anamneses
+    // salvas antes desse campo existir. A geração de ficha e cardápio ainda
+    // usa só o principal; os secundários aparecem no resumo e no Perfil.
+    this.objetivosSecundarios = const [],
     this.cirurgiaBariatrica = false,
     this.tipoCirurgiaBariatrica,
     this.mesesDesdeCirurgia,
@@ -188,6 +193,11 @@ class Anamnese {
     return partes.isEmpty ? '' : partes.first;
   }
   final Objetivo objetivoPrincipal;
+  final List<Objetivo> objetivosSecundarios;
+
+  /// Todos os objetivos escolhidos, com o principal na frente.
+  List<Objetivo> get objetivos => [objetivoPrincipal, ...objetivosSecundarios];
+
   final bool cirurgiaBariatrica;
   final String? tipoCirurgiaBariatrica;
   final int? mesesDesdeCirurgia;
@@ -225,6 +235,7 @@ class Anamnese {
     'pesoDesejadoKg': pesoDesejadoKg,
     'sexo': sexo.name,
     'objetivoPrincipal': objetivoPrincipal.name,
+    'objetivosSecundarios': objetivosSecundarios.map((o) => o.name).toList(),
     'cirurgiaBariatrica': cirurgiaBariatrica,
     'tipoCirurgiaBariatrica': tipoCirurgiaBariatrica,
     'mesesDesdeCirurgia': mesesDesdeCirurgia,
@@ -252,6 +263,11 @@ class Anamnese {
     pesoDesejadoKg: (json['pesoDesejadoKg'] as num?)?.toDouble(),
     sexo: Sexo.values.byName(json['sexo'] as String? ?? 'feminino'),
     objetivoPrincipal: Objetivo.values.byName(json['objetivoPrincipal'] as String),
+    objetivosSecundarios:
+        (json['objetivosSecundarios'] as List?)
+            ?.map((n) => Objetivo.values.byName(n as String))
+            .toList() ??
+        const [],
     cirurgiaBariatrica: json['cirurgiaBariatrica'] as bool? ?? false,
     tipoCirurgiaBariatrica: json['tipoCirurgiaBariatrica'] as String?,
     mesesDesdeCirurgia: json['mesesDesdeCirurgia'] as int?,
