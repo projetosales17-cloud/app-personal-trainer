@@ -244,6 +244,11 @@ class _CardDadosAnamnese extends StatelessWidget {
             if (anamnese.pesoDesejadoKg != null)
               _linha('Peso desejado', '${anamnese.pesoDesejadoKg!.toStringAsFixed(1)} kg'),
             _linha('Objetivo principal', anamnese.objetivoPrincipal.label),
+            if (anamnese.objetivosSecundarios.isNotEmpty)
+              _linha(
+                'Outros objetivos',
+                anamnese.objetivosSecundarios.map((o) => o.label).join(', '),
+              ),
             _linha('Nível de atividade', anamnese.nivelAtividade.label),
             _linha('Frequência semanal', '${anamnese.frequenciaSemanalDias}x por semana'),
             if (anamnese.condicaoHormonal != 'Nenhuma')

@@ -39,6 +39,17 @@ const _lesoesComuns = [
   'Tornozelo',
 ];
 
+/// Tipos de cirurgia bariátrica oferecidos como opção rápida. "Outra"
+/// libera um campo de texto livre. O valor escolhido é gravado como string
+/// em `Anamnese.tipoCirurgiaBariatrica`.
+const _tiposCirurgiaBariatrica = ['Bypass', 'Sleeve', 'Banda gástrica', 'Outra'];
+
+/// Grupos de "membros superiores" e "inferiores" para o atalho "o que você
+/// quer treinar" na etapa de lesões. Marcar "só inferiores" evita todos os
+/// superiores (e vice-versa); depois a usuária ainda ajusta grupo a grupo.
+const _gruposMembrosSuperiores = ['peito', 'costas', 'ombro', 'biceps', 'triceps'];
+const _gruposMembrosInferiores = ['perna', 'gluteo'];
+
 const _regioesComuns = [
   'Aumentar glúteo',
   'Aumentar pernas',
@@ -89,8 +100,12 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   final _restricaoOutraController = TextEditingController();
   final _lesaoOutraController = TextEditingController();
 
-  Objetivo? _objetivo;
+  // Objetivos escolhidos, na ordem em que foram marcados — o primeiro é o
+  // principal.
+  final List<Objetivo> _objetivos = [];
   bool _cirurgiaBariatrica = false;
+  // Uma das opções de _tiposCirurgiaBariatrica; 'Outra' usa _tipoCirurgiaController.
+  String? _tipoCirurgia;
   String _condicaoHormonal = _condicoesHormonais.first;
   bool _cicloMenstrualRegular = true;
   DateTime? _dataUltimaMenstruacao;
@@ -117,6 +132,18 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
 
   bool get _semCicloMenstrual => _condicoesSemCiclo.contains(_condicaoHormonal);
 
+  // Estado do atalho "o que você quer treinar" na etapa de lesões. Derivado
+  // de _gruposEvitar: não é um campo salvo à parte.
+  bool get _focoSoSuperiores =>
+      _gruposMembrosInferiores.every(_gruposEvitar.contains) &&
+      !_gruposMembrosSuperiores.any(_gruposEvitar.contains);
+  bool get _focoSoInferiores =>
+      _gruposMembrosSuperiores.every(_gruposEvitar.contains) &&
+      !_gruposMembrosInferiores.any(_gruposEvitar.contains);
+  bool get _focoCorpoTodo =>
+      !_gruposMembrosSuperiores.any(_gruposEvitar.contains) &&
+      !_gruposMembrosInferiores.any(_gruposEvitar.contains);
+
   @override
   void initState() {
     super.initState();
@@ -132,9 +159,17 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     if (inicial.pesoDesejadoKg != null) {
       _pesoDesejadoController.text = _formatarNumero(inicial.pesoDesejadoKg!);
     }
-    _objetivo = inicial.objetivoPrincipal;
+    _objetivos.addAll(inicial.objetivos);
     _cirurgiaBariatrica = inicial.cirurgiaBariatrica;
-    _tipoCirurgiaController.text = inicial.tipoCirurgiaBariatrica ?? '';
+    final tipoSalvo = inicial.tipoCirurgiaBariatrica;
+    if (tipoSalvo != null && tipoSalvo.isNotEmpty) {
+      if (_tiposCirurgiaBariatrica.contains(tipoSalvo)) {
+        _tipoCirurgia = tipoSalvo;
+      } else {
+        _tipoCirurgia = 'Outra';
+        _tipoCirurgiaController.text = tipoSalvo;
+      }
+    }
     _mesesCirurgiaController.text = inicial.mesesDesdeCirurgia?.toString() ?? '';
     if (_condicoesHormonais.contains(inicial.condicaoHormonal)) {
       _condicaoHormonal = inicial.condicaoHormonal;
@@ -238,10 +273,11 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           _numeroNaFaixa(_pesoAtualController.text, _faixaPeso) != null &&
           (_pesoDesejadoController.text.trim().isEmpty ||
               _numeroNaFaixa(_pesoDesejadoController.text, _faixaPeso) != null),
-    2 => _objetivo != null,
+    2 => _objetivos.isNotEmpty,
     3 =>
       !_cirurgiaBariatrica ||
-          (_tipoCirurgiaController.text.trim().isNotEmpty &&
+          (_tipoCirurgia != null &&
+              (_tipoCirurgia != 'Outra' || _tipoCirurgiaController.text.trim().isNotEmpty) &&
               int.tryParse(_mesesCirurgiaController.text) != null),
     9 => _nivelAtividade != null,
     10 => _localTreino != null,
@@ -259,12 +295,12 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       // Pré-seleciona o caminho recomendado pelo app para o objetivo já
       // escolhido — a usuária pode trocar antes de confirmar (ver briefing
       // do produto: "o app sempre orienta qual seria o caminho recomendado").
-      if (_passo == 11 && _preferenciaTreino == null && _objetivo != null) {
-        _preferenciaTreino = _objetivo!.preferenciaTreinoRecomendada;
+      if (_passo == 11 && _preferenciaTreino == null && _objetivos.isNotEmpty) {
+        _preferenciaTreino = _objetivos.first.preferenciaTreinoRecomendada;
       }
       // Objetivo "glúteo e pernas" já entra com essas regiões marcadas
       // (a usuária pode mudar) — é o que dá sentido ao objetivo.
-      if (_passo == 12 && _regioes.isEmpty && _objetivo == Objetivo.gluteoPernas) {
+      if (_passo == 12 && _regioes.isEmpty && _objetivos.contains(Objetivo.gluteoPernas)) {
         _regioes.addAll(['Aumentar glúteo', 'Aumentar pernas']);
       }
     });
@@ -286,9 +322,12 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       alturaCm: double.parse(_alturaController.text.replaceAll(',', '.')),
       pesoAtualKg: double.parse(_pesoAtualController.text.replaceAll(',', '.')),
       pesoDesejadoKg: double.tryParse(_pesoDesejadoController.text.replaceAll(',', '.')),
-      objetivoPrincipal: _objetivo!,
+      objetivoPrincipal: _objetivos.first,
+      objetivosSecundarios: _objetivos.skip(1).toList(),
       cirurgiaBariatrica: _cirurgiaBariatrica,
-      tipoCirurgiaBariatrica: _cirurgiaBariatrica ? _tipoCirurgiaController.text.trim() : null,
+      tipoCirurgiaBariatrica: !_cirurgiaBariatrica
+          ? null
+          : (_tipoCirurgia == 'Outra' ? _tipoCirurgiaController.text.trim() : _tipoCirurgia),
       mesesDesdeCirurgia:
           _cirurgiaBariatrica ? int.tryParse(_mesesCirurgiaController.text) : null,
       condicaoHormonal:
@@ -490,19 +529,34 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Qual seu objetivo principal?', style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 16),
+        Text('Quais são seus objetivos?', style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 4),
+        Text(
+          'Pode escolher mais de um. O primeiro que marcar é o objetivo '
+          'principal — é ele que guia o formato do treino e do cardápio.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 12),
         for (final opcao in Objetivo.values)
-          RadioListTile<Objetivo>(
+          CheckboxListTile(
+            key: Key('objetivo-${opcao.name}'),
             contentPadding: EdgeInsets.zero,
-            title: Text(opcao.label),
+            controlAffinity: ListTileControlAffinity.leading,
+            title: Text(
+              _objetivos.isNotEmpty && _objetivos.first == opcao
+                  ? '${opcao.label} (principal)'
+                  : opcao.label,
+            ),
             subtitle: Text(opcao.descricao),
             isThreeLine: true,
-            value: opcao,
-            // ignore: deprecated_member_use
-            groupValue: _objetivo,
-            // ignore: deprecated_member_use
-            onChanged: (valor) => setState(() => _objetivo = valor),
+            value: _objetivos.contains(opcao),
+            onChanged: (marcado) => setState(() {
+              if (marcado ?? false) {
+                _objetivos.add(opcao);
+              } else {
+                _objetivos.remove(opcao);
+              }
+            }),
           ),
       ],
     );
@@ -521,12 +575,30 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           onChanged: (valor) => setState(() => _cirurgiaBariatrica = valor),
         ),
         if (_cirurgiaBariatrica) ...[
-          const SizedBox(height: 12),
-          TextField(
-            controller: _tipoCirurgiaController,
-            decoration: const InputDecoration(labelText: 'Tipo de cirurgia'),
-            onChanged: (_) => setState(() {}),
+          const SizedBox(height: 16),
+          Text('Qual procedimento?', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final tipo in _tiposCirurgiaBariatrica)
+                ChoiceChip(
+                  key: Key('tipo-cirurgia-$tipo'),
+                  label: Text(tipo),
+                  selected: _tipoCirurgia == tipo,
+                  onSelected: (_) => setState(() => _tipoCirurgia = tipo),
+                ),
+            ],
           ),
+          if (_tipoCirurgia == 'Outra') ...[
+            const SizedBox(height: 12),
+            TextField(
+              controller: _tipoCirurgiaController,
+              decoration: const InputDecoration(labelText: 'Qual cirurgia?'),
+              onChanged: (_) => setState(() {}),
+            ),
+          ],
           const SizedBox(height: 12),
           TextField(
             controller: _mesesCirurgiaController,
@@ -779,6 +851,50 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           decoration: const InputDecoration(labelText: 'Outra (opcional)'),
         ),
         const SizedBox(height: 28),
+        Text('O que você quer treinar', style: texto.titleMedium),
+        const SizedBox(height: 4),
+        Text(
+          'Nem todo mundo sabe, mas alguns exercícios de braço (tríceps, por '
+          'exemplo) exigem esforço do ombro. Se quiser, deixe o treino só '
+          'com membros superiores ou só com inferiores — dá pra ajustar '
+          'grupo a grupo logo abaixo.',
+          style: texto.bodySmall,
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ChoiceChip(
+              key: const Key('foco-corpo-todo'),
+              label: const Text('Corpo todo'),
+              selected: _focoCorpoTodo,
+              onSelected: (_) => setState(() {
+                _gruposEvitar
+                    .removeAll({..._gruposMembrosSuperiores, ..._gruposMembrosInferiores});
+              }),
+            ),
+            ChoiceChip(
+              key: const Key('foco-so-superiores'),
+              label: const Text('Só membros superiores'),
+              selected: _focoSoSuperiores,
+              onSelected: (_) => setState(() {
+                _gruposEvitar.removeAll(_gruposMembrosSuperiores);
+                _gruposEvitar.addAll(_gruposMembrosInferiores);
+              }),
+            ),
+            ChoiceChip(
+              key: const Key('foco-so-inferiores'),
+              label: const Text('Só membros inferiores'),
+              selected: _focoSoInferiores,
+              onSelected: (_) => setState(() {
+                _gruposEvitar.removeAll(_gruposMembrosInferiores);
+                _gruposEvitar.addAll(_gruposMembrosSuperiores);
+              }),
+            ),
+          ],
+        ),
+        const SizedBox(height: 28),
         Text('Grupos que você prefere não treinar', style: texto.titleMedium),
         const SizedBox(height: 4),
         Text(
@@ -912,7 +1028,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   }
 
   Widget _passoPreferenciaTreino() {
-    final recomendada = _objetivo?.preferenciaTreinoRecomendada;
+    final recomendada =
+        _objetivos.isNotEmpty ? _objetivos.first.preferenciaTreinoRecomendada : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -955,7 +1072,11 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       children: [
         Text('Resumo', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 16),
-        Text('Objetivo: ${_objetivo?.label ?? '-'}'),
+        Text(
+          _objetivos.length > 1
+              ? 'Objetivos: ${_objetivos.map((o) => o.label).join(', ')}'
+              : 'Objetivo: ${_objetivos.isNotEmpty ? _objetivos.first.label : '-'}',
+        ),
         Text('Idade: $idade anos'),
         Text('Altura: $alturaCm cm'),
         Text('Peso atual: $pesoAtualKg kg'),
