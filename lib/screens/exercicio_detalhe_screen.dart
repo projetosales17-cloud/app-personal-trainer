@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../models/exercicio.dart';
+import '../models/ficha_treino.dart';
 import '../models/registro_carga.dart';
 import '../saude/progressao_carga.dart';
 import '../services/treino_repository.dart';
@@ -10,10 +11,20 @@ import '../widgets/cronometro_descanso.dart';
 import '../widgets/grafico_linha_simples.dart';
 
 class ExercicioDetalheScreen extends StatefulWidget {
-  ExercicioDetalheScreen({super.key, required this.exercicio, TreinoRepository? repositorio})
-    : repositorio = repositorio ?? TreinoRepository();
+  ExercicioDetalheScreen({
+    super.key,
+    required this.exercicio,
+    this.prescricao,
+    TreinoRepository? repositorio,
+  }) : repositorio = repositorio ?? TreinoRepository();
 
   final Exercicio exercicio;
+
+  /// Séries/repetições/descanso da ficha — quando aberto pela Minha Ficha.
+  /// `null` quando aberto pela biblioteca de exercícios (sem contexto de
+  /// treino), e aí a seção "Seu treino de hoje" não aparece.
+  final PrescricaoTreino? prescricao;
+
   final TreinoRepository repositorio;
 
   @override
@@ -145,6 +156,13 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
               for (final objetivo in exercicio.objetivos) Chip(label: Text(objetivo.label)),
             ],
           ),
+          if (widget.prescricao != null) ...[
+            const SizedBox(height: 20),
+            _CartaoTreinoDeHoje(
+              prescricao: widget.prescricao!,
+              historicoFuture: _historicoFuture,
+            ),
+          ],
           const SizedBox(height: 24),
           Text('Como executar', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
@@ -268,6 +286,75 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
               );
             },
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Séries, repetições, descanso e indicação de peso — no topo da tela do
+/// exercício, para a usuária não precisar voltar à ficha só para conferir.
+/// A prescrição (séries/reps/descanso) vem da ficha; o peso é uma
+/// orientação simples baseada no que ela já registrou (sem IA).
+class _CartaoTreinoDeHoje extends StatelessWidget {
+  const _CartaoTreinoDeHoje({required this.prescricao, required this.historicoFuture});
+
+  final PrescricaoTreino prescricao;
+  final Future<List<RegistroCarga>> historicoFuture;
+
+  static String _kg(double v) =>
+      '${v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(1)} kg';
+
+  @override
+  Widget build(BuildContext context) {
+    final texto = Theme.of(context).textTheme;
+    return Card(
+      key: const Key('cartao-treino-de-hoje'),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Seu treino de hoje', style: texto.titleMedium),
+            const SizedBox(height: 8),
+            _linha(context, Icons.repeat, '${prescricao.series} · ${prescricao.repeticoes}'),
+            _linha(context, Icons.timer_outlined, 'Descanso: ${prescricao.descanso}'),
+            FutureBuilder<List<RegistroCarga>>(
+              future: historicoFuture,
+              builder: (context, snapshot) {
+                final registros = snapshot.data ?? const <RegistroCarga>[];
+                final String pesoTexto;
+                if (registros.isEmpty) {
+                  pesoTexto = 'Peso: escolha uma carga em que as 2 últimas repetições '
+                      'fiquem difíceis, sem perder a técnica. Registre abaixo para '
+                      'acompanhar sua evolução.';
+                } else {
+                  final ultimo = registros.last;
+                  pesoTexto = 'Peso: sua última carga foi ${_kg(ultimo.pesoKg)} '
+                      '(${ultimo.series}x${ultimo.repeticoes}). Se as últimas repetições '
+                      'saírem fáceis, suba um pouco.';
+                }
+                return _linha(context, Icons.fitness_center, pesoTexto);
+              },
+            ),
+            const SizedBox(height: 6),
+            Text(prescricao.estilo, style: texto.bodySmall),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _linha(BuildContext context, IconData icone, String texto) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icone, size: 18, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(child: Text(texto, style: Theme.of(context).textTheme.bodyMedium)),
         ],
       ),
     );
