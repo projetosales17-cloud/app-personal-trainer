@@ -6,13 +6,13 @@ import '../screens/home_screen.dart';
 import '../screens/orientacoes_screen.dart';
 import '../screens/perfil_screen.dart';
 import '../screens/progresso_screen.dart';
+import '../screens/sua_loja_screen.dart';
 import '../screens/treino_screen.dart';
-import '../screens/vitrine_produtos_screen.dart';
 import '../services/auth_repository.dart';
 
 /// Estrutura de navegação principal do app, uma aba por seção definida
 /// no briefing do produto (Home, Treino, Alimentação, Progresso,
-/// Comunidade, Orientações, Loja, Perfil).
+/// Comunidade, Orientações, Tu Tienda, Perfil).
 class MainNavigation extends StatefulWidget {
   MainNavigation({super.key, AuthRepository? authRepositorio})
     : authRepositorio = authRepositorio ?? AuthRepository();
@@ -33,7 +33,7 @@ class _MainNavigationState extends State<MainNavigation> {
     const ProgressoScreen(),
     ComunidadeScreen(),
     OrientacoesScreen(),
-    VitrineProdutosScreen(),
+    SuaLojaScreen(),
     PerfilScreen(authRepositorio: widget.authRepositorio),
   ];
 
@@ -44,7 +44,13 @@ class _MainNavigationState extends State<MainNavigation> {
     NavigationDestination(icon: Icon(Icons.show_chart_outlined), selectedIcon: Icon(Icons.show_chart), label: 'Progreso'),
     NavigationDestination(icon: Icon(Icons.groups_outlined), selectedIcon: Icon(Icons.groups), label: 'Comunidad'),
     NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: 'Guías'),
-    NavigationDestination(icon: Icon(Icons.shopping_bag_outlined), selectedIcon: Icon(Icons.shopping_bag), label: 'Tienda'),
+    // Destaque proposital: ícone preenchido + selo "Novo" para atrair
+    // as usuárias que também vendem (ver SuaLojaScreen).
+    NavigationDestination(
+      icon: Badge(label: Text('Nuevo'), child: Icon(Icons.storefront)),
+      selectedIcon: Badge(label: Text('Nuevo'), child: Icon(Icons.storefront)),
+      label: 'Tu Tienda',
+    ),
     NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Perfil'),
   ];
 

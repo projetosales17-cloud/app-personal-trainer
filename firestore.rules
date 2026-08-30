@@ -30,6 +30,14 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Lista de espera do espaço "Sua Loja" — ver SuaLojaRepository. A
+    // usuária logada só pode CRIAR o próprio interesse; ninguém lê, edita
+    // ou apaga pelo cliente (o fundador lê pelo console).
+    match /interesse_sua_loja/{id} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if false;
+    }
+
     // Dados da usuária sincronizados entre aparelhos (anamnese, programa,
     // progresso, check-ins, cargas, diário, preferências) — ver
     // SincronizadorDados. Cada conta lê/escreve só o próprio documento.
