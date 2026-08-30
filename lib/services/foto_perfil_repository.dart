@@ -29,11 +29,12 @@ class FotoPerfilRepository {
   final FirebaseFirestore? _firestoreInjetado;
   final String? Function() _uidAtual;
 
-  /// Sobe a cada `salvar`/`remover`. A Home escuta pra atualizar o avatar
-  /// quando a usuária troca a foto pelo Perfil na mesma sessão — o
-  /// `IndexedStack` da navegação mantém a Home viva. Mesmo padrão de
-  /// [AnamneseRepository.revisao].
-  static final ValueNotifier<int> revisao = ValueNotifier<int>(0);
+  /// Última foto de perfil conhecida nesta sessão (data URI, ou `null` sem
+  /// foto). É a fonte que a Home e o Perfil escutam pra mostrar o avatar
+  /// sempre igual, sem recarregar — o `IndexedStack` da navegação mantém as
+  /// telas vivas, então a Home não recarrega sozinha ao voltar do Perfil.
+  /// Preenchido pelo primeiro [carregar] e atualizado por [salvar]/[remover].
+  static final ValueNotifier<String?> atual = ValueNotifier<String?>(null);
 
   FirebaseFirestore get _firestore => _firestoreInjetado ?? FirebaseFirestore.instance;
 
@@ -53,24 +54,26 @@ class FotoPerfilRepository {
   /// logada, lê do Firestore e atualiza o cache; offline/deslogada, usa o
   /// cache local.
   Future<String?> carregar() async {
+    final prefs = await SharedPreferences.getInstance();
     final doc = _doc();
     if (doc != null) {
       try {
         final snap = await doc.get();
         final dataUri = snap.data()?['dataUri'] as String?;
-        final prefs = await SharedPreferences.getInstance();
         if (dataUri == null) {
           await prefs.remove(_chaveCache);
         } else {
           await prefs.setString(_chaveCache, dataUri);
         }
+        atual.value = dataUri;
         return dataUri;
       } catch (_) {
         // offline / regras ainda não deployadas — cai no cache
       }
     }
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_chaveCache);
+    final doCache = prefs.getString(_chaveCache);
+    atual.value = doCache;
+    return doCache;
   }
 
   /// Salva a nova foto (bytes já redimensionados/comprimidos pelo seletor).
@@ -78,6 +81,7 @@ class FotoPerfilRepository {
     final dataUri = 'data:$mime;base64,${base64Encode(bytes)}';
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_chaveCache, dataUri);
+    atual.value = dataUri;
     final doc = _doc();
     if (doc != null) {
       try {
@@ -89,13 +93,13 @@ class FotoPerfilRepository {
         // offline — sobe na próxima vez que salvar online
       }
     }
-    revisao.value++;
   }
 
   /// Remove a foto de perfil (Firestore + cache).
   Future<void> remover() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_chaveCache);
+    atual.value = null;
     final doc = _doc();
     if (doc != null) {
       try {
@@ -104,7 +108,6 @@ class FotoPerfilRepository {
         // offline — some na próxima vez que remover online
       }
     }
-    revisao.value++;
   }
 }
 

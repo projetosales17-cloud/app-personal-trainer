@@ -41,6 +41,7 @@ AuthRepository _authComUsuaria({String email = 'usuaria@example.com'}) => AuthRe
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    FotoPerfilRepository.atual.value = null;
   });
 
   testWidgets('Sem anamnese salva, pede para completar o onboarding', (tester) async {

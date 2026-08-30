@@ -13,6 +13,7 @@ import 'package:app_personal_trainer/services/foto_perfil_repository.dart';
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    FotoPerfilRepository.atual.value = null;
   });
 
   testWidgets('Sem anamnese salva, pede para completar o onboarding', (tester) async {
