@@ -308,4 +308,21 @@ void main() {
     expect(find.byType(SvgPicture), findsNothing);
     expect(find.textContaining('Ilustração genérica do grupo muscular'), findsNothing);
   });
+
+  testWidgets('Tocar na imagem abre a visualização ampliada com zoom', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: ExercicioDetalheScreen(exercicio: _semImagem)));
+    await tester.pump();
+
+    expect(find.text('Toque para ampliar'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('imagem-exercicio-tocavel')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('imagem-ampliada')), findsOneWidget);
+    expect(find.byType(InteractiveViewer), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('fechar-imagem-ampliada')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('imagem-ampliada')), findsNothing);
+  });
 }

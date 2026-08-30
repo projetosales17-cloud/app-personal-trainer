@@ -97,7 +97,13 @@ class _FotoDetalheScreenState extends State<FotoDetalheScreen> {
             ),
           ],
         ),
-        body: Center(child: Image.memory(widget.foto.bytes)),
+        // Zoom (pinça) e arrastar — para ampliar e comparar detalhes.
+        body: InteractiveViewer(
+          key: const Key('foto-ampliavel'),
+          minScale: 1,
+          maxScale: 6,
+          child: Center(child: Image.memory(widget.foto.bytes)),
+        ),
       ),
     );
   }

@@ -5,6 +5,7 @@ import '../models/exercicio.dart';
 import '../models/registro_carga.dart';
 import '../saude/progressao_carga.dart';
 import '../services/treino_repository.dart';
+import 'imagem_ampliada_screen.dart';
 import '../widgets/cronometro_descanso.dart';
 import '../widgets/grafico_linha_simples.dart';
 
@@ -147,15 +148,9 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
           const SizedBox(height: 24),
           Text('Como executar', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: SizedBox(
-              height: 160,
-              width: double.infinity,
-              child: _ImagemExercicio(
-                caminho: exercicio.caminhoImagem ?? exercicio.grupoMuscularPrincipal.ilustracaoPadrao,
-              ),
-            ),
+          _ImagemComZoom(
+            caminho: exercicio.caminhoImagem ?? exercicio.grupoMuscularPrincipal.ilustracaoPadrao,
+            titulo: exercicio.nome,
           ),
           if (exercicio.caminhoImagem == null) ...[
             const SizedBox(height: 4),
@@ -275,6 +270,55 @@ class _ExercicioDetalheScreenState extends State<ExercicioDetalheScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// A imagem do exercício na tela de detalhe: mostra pequena e, ao tocar,
+/// abre em tela cheia com zoom (pinça) — importante para quem precisa
+/// ampliar para enxergar bem o movimento.
+class _ImagemComZoom extends StatelessWidget {
+  const _ImagemComZoom({required this.caminho, required this.titulo});
+
+  final String caminho;
+  final String titulo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          key: const Key('imagem-exercicio-tocavel'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ImagemAmpliadaScreen(
+                imagem: _ImagemExercicio(caminho: caminho),
+                titulo: titulo,
+              ),
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              height: 160,
+              width: double.infinity,
+              child: _ImagemExercicio(caminho: caminho),
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Icon(Icons.zoom_in, size: 16, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 4),
+            Text(
+              'Toque para ampliar',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

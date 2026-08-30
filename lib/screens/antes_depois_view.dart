@@ -35,13 +35,17 @@ class _AntesDepoisViewState extends State<AntesDepoisView> {
   }
 
   Future<void> _abrir(RegistroFoto foto) async {
-    final removida = await Navigator.of(context).push<bool>(
+    final resultado = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) => FotoDetalheScreen(foto: foto, repositorio: widget.repositorio),
       ),
     );
-    if (removida == true && mounted) {
+    if (!mounted) return;
+    if (resultado == 'removida') {
       setState(() => _fotos?.removeWhere((f) => f.id == foto.id));
+    } else if (resultado == 'alterada') {
+      final fotos = await widget.repositorio.listarFotos();
+      if (mounted) setState(() => _fotos = fotos);
     }
   }
 
