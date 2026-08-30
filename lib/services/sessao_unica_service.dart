@@ -13,40 +13,44 @@ class SessaoUnicaService {
 
   static const _chaveTokenLocal = 'token_sessao_local';
 
+  /// `true` enquanto [registrarNovaSessao] está gravando a sessão deste
+  /// login. Nessa janela há corrida entre a escrita da nossa sessão e os
+  /// snapshots do Firestore, então [observarEncerramento] não derruba.
+  /// Fora dela, o token local é a verdade.
+  bool _aguardandoRegistro = false;
+
   Future<void> registrarNovaSessao(String uid) async {
-    final token = controleSessao.gerarTokenSessao();
-    // Grava o token local ANTES de escrever no Firestore. Assim, quando o
-    // snapshot do Firestore com esse mesmo token chegar em
-    // [observarEncerramento] (que roda em paralelo, disparado pelo
-    // authStateChanges do login), o valor local já vai bater e o aparelho
-    // não se desconecta sozinho achando que foi "assumido por outro".
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_chaveTokenLocal, token);
-    await controleSessao.registrarSessao(uid, token);
+    _aguardandoRegistro = true;
+    try {
+      final token = controleSessao.gerarTokenSessao();
+      // Grava o token local ANTES de escrever no Firestore, para o snapshot
+      // com o nosso token já bater com o local quando chegar.
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_chaveTokenLocal, token);
+      await controleSessao.registrarSessao(uid, token);
+    } finally {
+      _aguardandoRegistro = false;
+    }
   }
 
-  /// Emite `true` quando a sessão local foi substituída por outro
-  /// aparelho (o token registrado no Firestore não é mais o local).
+  /// Emite `true` quando a sessão do Firestore não é mais a local — ou
+  /// seja, outro aparelho assumiu a conta. Vale também quando a troca
+  /// aconteceu enquanto este aparelho estava fechado: ao reabrir, o
+  /// primeiro snapshot já vem com o token do outro aparelho e a sessão
+  /// local é encerrada.
   ///
-  /// Só passa a vigiar depois de ver o próprio token no Firestore pelo
-  /// menos uma vez. Um snapshot anterior ao registro desta sessão — com o
-  /// token de uma tentativa passada nesta instalação, ou de outro aparelho
-  /// que entrou antes — não conta como "assumida por outro aparelho";
-  /// senão o próprio login se derrubaria por causa da corrida entre o
-  /// registro da sessão e o início da vigilância.
+  /// Durante o login/primeiro acesso ([registrarNovaSessao] em andamento),
+  /// ignora as diferenças — senão o próprio login se derrubaria por causa
+  /// da corrida entre gravar a sessão e receber o snapshot.
   Stream<bool> observarEncerramento(String uid) async* {
-    var viuTokenProprio = false;
-
     await for (final tokenRemoto in controleSessao.observarTokenSessao(uid)) {
+      if (_aguardandoRegistro) continue;
+
       final prefs = await SharedPreferences.getInstance();
       final tokenLocal = prefs.getString(_chaveTokenLocal);
       if (tokenLocal == null || tokenRemoto == null) continue;
 
-      if (tokenRemoto == tokenLocal) {
-        viuTokenProprio = true;
-      } else if (viuTokenProprio) {
-        yield true;
-      }
+      if (tokenRemoto != tokenLocal) yield true;
     }
   }
 }

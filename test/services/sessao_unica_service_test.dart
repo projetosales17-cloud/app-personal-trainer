@@ -88,6 +88,28 @@ void main() {
   });
 
   test(
+    'observarEncerramento derruba a sessão se outro aparelho assumiu enquanto este '
+    'estava fechado (sem novo login neste app)',
+    () async {
+      final controleSessao = _ControleSessaoFake();
+      final service = SessaoUnicaService(controleSessao: controleSessao);
+
+      // Token local de um login anterior nesta instalação...
+      SharedPreferences.setMockInitialValues({'token_sessao_local': 'token-deste-aparelho'});
+      // ...mas o Firestore já aponta para outro aparelho. Nenhum
+      // registrarNovaSessao acontece aqui (o app só reabriu).
+      await controleSessao.registrarSessao('uid-1', 'token-de-outro-aparelho');
+
+      final primeiroEvento = await service
+          .observarEncerramento('uid-1')
+          .first
+          .timeout(const Duration(seconds: 2));
+
+      expect(primeiroEvento, isTrue);
+    },
+  );
+
+  test(
     'observarEncerramento não derruba a sessão recém-registrada quando a vigilância '
     'já está ativa ao registrar (regressão do auto-logout)',
     () async {
