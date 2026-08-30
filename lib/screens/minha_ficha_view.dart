@@ -83,6 +83,7 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
   late Future<ProgramaTreino> _programaFuture =
       widget.programaRepositorio.iniciarSeNecessario();
   late Future<Map<String, String>> _trocasFuture = widget.trocasRepositorio.carregar();
+  late Future<Set<String>> _removidosFuture = widget.trocasRepositorio.removidos();
 
   @override
   void initState() {
@@ -136,7 +137,7 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
       return;
     }
 
-    final escolhido = await showModalBottomSheet<Exercicio>(
+    final escolhido = await showModalBottomSheet<Object>(
       context: context,
       builder: (context) => SafeArea(
         child: ListView(
@@ -149,6 +150,14 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
+            ListTile(
+              key: Key('opcao-remover-${original.id}'),
+              leading: const Icon(Icons.not_interested),
+              title: const Text('No hacer este ejercicio'),
+              subtitle: const Text('Sale de tu rutina hasta el próximo check-in'),
+              onTap: () => Navigator.of(context).pop('__remover__'),
+            ),
+            const Divider(),
             for (final alternativa in alternativas)
               ListTile(
                 key: Key('opcao-troca-${alternativa.id}'),
@@ -161,7 +170,11 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
       ),
     );
 
-    if (escolhido == null) return;
+    if (escolhido == '__remover__') {
+      await _removerExercicio(original.id);
+      return;
+    }
+    if (escolhido is! Exercicio) return;
     await widget.trocasRepositorio.trocar(original.id, escolhido.id);
     if (!mounted) return;
     setState(() {
@@ -174,6 +187,22 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
     if (!mounted) return;
     setState(() {
       _trocasFuture = widget.trocasRepositorio.carregar();
+    });
+  }
+
+  Future<void> _removerExercicio(String exercicioId) async {
+    await widget.trocasRepositorio.remover(exercicioId);
+    if (!mounted) return;
+    setState(() {
+      _removidosFuture = widget.trocasRepositorio.removidos();
+    });
+  }
+
+  Future<void> _restaurarExercicio(String exercicioId) async {
+    await widget.trocasRepositorio.restaurar(exercicioId);
+    if (!mounted) return;
+    setState(() {
+      _removidosFuture = widget.trocasRepositorio.removidos();
     });
   }
 
@@ -197,6 +226,7 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
       setState(() {
         _programaFuture = widget.programaRepositorio.iniciarSeNecessario();
         _trocasFuture = widget.trocasRepositorio.carregar();
+        _removidosFuture = widget.trocasRepositorio.removidos();
       });
     }
   }
@@ -338,6 +368,13 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                     }
 
                     final treinoEmCasa = anamnese.localTreino == LocalTreino.casa;
+                    final gruposEvitados = GeradorFichaTreino.gruposEvitadosDe(anamnese);
+                    final semMusculacao = ficha.dias.every((d) => d.exercicios.isEmpty);
+
+                    return FutureBuilder<Set<String>>(
+                      future: _removidosFuture,
+                      builder: (context, removidosSnapshot) {
+                    final removidos = removidosSnapshot.data ?? const <String>{};
 
                     return ListView(
                   padding: const EdgeInsets.all(16),
@@ -378,6 +415,33 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                       'Válida hasta ${_formatarData(ficha.validaAte)}',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
+                    if (gruposEvitados.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Rutina sin: ${gruposEvitados.map((g) => g.label).join(', ')} '
+                        '— ajusta en Perfil › Editar mis datos.',
+                        key: const Key('aviso-grupos-evitados'),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                    if (semMusculacao &&
+                        anamnese.preferenciaTreino != PreferenciaTreino.soCardio) ...[
+                      const SizedBox(height: 8),
+                      Card(
+                        color: Theme.of(context).colorScheme.errorContainer,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Text(
+                            'Marcaste demasiados grupos para evitar: tu rutina quedó '
+                            'solo con cardio. Suelta algún grupo en Perfil › Editar mis '
+                            'datos para volver a musculación.',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onErrorContainer,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     if (ficha.prescricao != null) ...[
                       _CartaoPrescricao(
@@ -424,15 +488,19 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                           for (final ex in dia.exercicios)
                             if (trocas.containsKey(ex.id)) ex.id,
                         },
+                        idsRemovidos: removidos,
                         aoTrocar: (original) => _trocarExercicio(
                           original,
                           {for (final ex in dia.exercicios) comTroca(ex).id},
                           priorizarEmCasa: treinoEmCasa,
                         ),
                         aoDesfazerTroca: _desfazerTroca,
+                        aoRestaurar: _restaurarExercicio,
                       ),
                   ],
                 );
+                      },
+                    );
                   },
                 );
               },
@@ -623,8 +691,10 @@ class _DiaDeTreinoCard extends StatelessWidget {
     required this.exerciciosExibidos,
     required this.exerciciosOriginais,
     required this.idsTrocados,
+    required this.idsRemovidos,
     required this.aoTrocar,
     required this.aoDesfazerTroca,
+    required this.aoRestaurar,
   });
 
   final DiaDeTreino dia;
@@ -641,8 +711,12 @@ class _DiaDeTreinoCard extends StatelessWidget {
   /// Ids (dos originais) que estão trocados agora.
   final Set<String> idsTrocados;
 
+  /// Ids (dos originais) que a usuária tirou do treino ("não fazer").
+  final Set<String> idsRemovidos;
+
   final void Function(Exercicio original) aoTrocar;
   final void Function(String exercicioOriginalId) aoDesfazerTroca;
+  final void Function(String exercicioId) aoRestaurar;
 
   bool _concluido(DateTime data) {
     final dataNormalizada = DateTime(data.year, data.month, data.day);
@@ -690,12 +764,40 @@ class _DiaDeTreinoCard extends StatelessWidget {
             ),
             const Divider(height: 24),
             for (var i = 0; i < exerciciosExibidos.length; i++)
-              _ExercicioTile(
-                exibido: exerciciosExibidos[i],
-                original: exerciciosOriginais[i],
-                trocado: idsTrocados.contains(exerciciosOriginais[i].id),
-                aoTrocar: aoTrocar,
-                aoDesfazerTroca: aoDesfazerTroca,
+              if (idsRemovidos.contains(exerciciosOriginais[i].id))
+                ListTile(
+                  key: Key('removido-${exerciciosOriginais[i].id}'),
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  leading: const Icon(Icons.not_interested, size: 20),
+                  title: Text(
+                    exerciciosOriginais[i].nome,
+                    style: const TextStyle(decoration: TextDecoration.lineThrough),
+                  ),
+                  subtitle: const Text('Fuera de la rutina'),
+                  trailing: TextButton(
+                    key: Key('restaurar-${exerciciosOriginais[i].id}'),
+                    onPressed: () => aoRestaurar(exerciciosOriginais[i].id),
+                    child: const Text('Restaurar'),
+                  ),
+                )
+              else
+                _ExercicioTile(
+                  exibido: exerciciosExibidos[i],
+                  original: exerciciosOriginais[i],
+                  trocado: idsTrocados.contains(exerciciosOriginais[i].id),
+                  aoTrocar: aoTrocar,
+                  aoDesfazerTroca: aoDesfazerTroca,
+                ),
+            if (exerciciosExibidos.isNotEmpty &&
+                exerciciosOriginais.every((e) => idsRemovidos.contains(e.id)) &&
+                dia.atividadesCardio.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'Quitaste todos los ejercicios de este día.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
             for (final atividade in dia.atividadesCardio)
               ListTile(

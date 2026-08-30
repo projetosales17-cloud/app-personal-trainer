@@ -149,6 +149,48 @@ void main() {
     );
   });
 
+  testWidgets('Marcar "Hombro" en grupos a evitar salva gruposEvitar', (tester) async {
+    final repositorio = AnamneseRepository();
+    await tester.pumpWidget(MaterialApp(
+      home: OnboardingFlow(onConcluido: () {}, repositorio: repositorio),
+    ));
+
+    await _avancar(tester); // boas-vindas -> dados básicos
+    await tester.enterText(find.byType(TextField).at(0), '30');
+    await tester.enterText(find.byType(TextField).at(1), '170');
+    await tester.enterText(find.byType(TextField).at(2), '65');
+    await tester.pump();
+    await _avancar(tester); // -> objetivo
+    await _escolherObjetivo(tester, 'Bajar de peso y perder medidas');
+    await _avancar(tester); // -> bariátrica
+    await _avancar(tester); // -> condição hormonal
+    await _avancar(tester); // -> ciclo
+    await _avancar(tester); // -> restrições
+    await _avancar(tester); // -> lesões + grupos a evitar
+
+    await tester.tap(find.byKey(const Key('chip-evitar-ombro')));
+    await tester.tap(find.byKey(const Key('chip-evitar-triceps')));
+    await tester.pump();
+    await _avancar(tester); // -> pós-parto
+    await _avancar(tester); // -> atividade
+    await tester.tap(find.text('Moderada'));
+    await tester.pump();
+    await _avancar(tester); // -> local
+    await tester.tap(find.text('Gimnasio'));
+    await tester.pump();
+    await _avancar(tester); // -> preferência
+    await _avancar(tester); // -> priorização
+    await _avancar(tester); // -> resumo
+
+    expect(find.textContaining('Sin entrenar: Hombro'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Finalizar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final salvo = await repositorio.carregar();
+    expect(salvo!.gruposEvitar, containsAll(<String>['ombro', 'triceps']));
+  });
+
   testWidgets('Modo de edição pré-preenche os campos e salva as alterações', (tester) async {
     final repositorio = AnamneseRepository();
     const original = Anamnese(

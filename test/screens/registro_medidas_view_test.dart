@@ -39,6 +39,27 @@ void main() {
     expect(campoCintura.controller!.text, isEmpty);
   });
 
+  testWidgets('Registra as medidas novas (cuello, tórax, antebrazo, pantorrilla)', (tester) async {
+    final repositorio = ProgressoRepository();
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: RegistroMedidasView(repositorio: repositorio))),
+    );
+    await tester.pump();
+
+    await tester.enterText(find.byKey(const Key('campo-pescoco')), '34');
+    await tester.enterText(find.byKey(const Key('campo-torax')), '92');
+    await tester.enterText(find.byKey(const Key('campo-antebraco')), '26');
+    await tester.enterText(find.byKey(const Key('campo-panturrilha')), '37');
+    await tester.tap(find.byKey(const Key('botao-registrar-medidas')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Cuello 34cm'), findsOneWidget);
+    expect(find.textContaining('Tórax 92cm'), findsOneWidget);
+    final salvo = (await repositorio.listarMedidas()).single;
+    expect(salvo.antebracoCm, 26);
+    expect(salvo.panturrilhaCm, 37);
+  });
+
   testWidgets('Formulário vazio não registra nada', (tester) async {
     final repositorio = ProgressoRepository();
     await tester.pumpWidget(
