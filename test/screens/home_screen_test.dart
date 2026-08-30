@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app_personal_trainer/models/anamnese.dart';
 import 'package:app_personal_trainer/screens/home_screen.dart';
 import 'package:app_personal_trainer/services/anamnese_repository.dart';
+import 'package:app_personal_trainer/services/foto_perfil_repository.dart';
 
 void main() {
   setUp(() {
@@ -111,5 +115,43 @@ void main() {
 
     expect(find.byKey(const Key('avatar-perfil-iniciais')), findsOneWidget);
     expect(find.text('MS'), findsOneWidget);
+  });
+
+  testWidgets('Trocar a foto (ex: pelo Perfil) atualiza o avatar da Home na hora', (tester) async {
+    final anamneseRepositorio = AnamneseRepository();
+    await anamneseRepositorio.salvar(
+      const Anamnese(
+        nome: 'Maria',
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+    final fotoRepositorio = FotoPerfilRepository(
+      firestore: FakeFirebaseFirestore(),
+      uidAtual: () => 'uid-1',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HomeScreen(
+          anamneseRepositorio: anamneseRepositorio,
+          fotoPerfilRepositorio: fotoRepositorio,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('avatar-perfil-iniciais')), findsOneWidget);
+
+    await fotoRepositorio.salvar(base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('avatar-perfil-foto')), findsOneWidget);
+    expect(find.byKey(const Key('avatar-perfil-iniciais')), findsNothing);
   });
 }

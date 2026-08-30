@@ -78,7 +78,7 @@ const _mensagensMotivacionais = [
 
 class _HomeScreenState extends State<HomeScreen> {
   late Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
-  late final Future<String?> _fotoPerfilFuture = widget.fotoPerfilRepositorio.carregar();
+  late Future<String?> _fotoPerfilFuture = widget.fotoPerfilRepositorio.carregar();
   late final Future<RegistroPeso?> _ultimoPesoFuture = widget.progressoRepositorio.ultimoPeso();
   late final Future<_ContextoPrograma> _contextoFuture = _carregarContexto();
 
@@ -97,11 +97,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     AnamneseRepository.revisao.addListener(_recarregarAnamnese);
+    FotoPerfilRepository.revisao.addListener(_recarregarFotoPerfil);
   }
 
   @override
   void dispose() {
     AnamneseRepository.revisao.removeListener(_recarregarAnamnese);
+    FotoPerfilRepository.revisao.removeListener(_recarregarFotoPerfil);
     super.dispose();
   }
 
@@ -109,6 +111,14 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
     setState(() {
       _anamneseFuture = widget.anamneseRepositorio.carregar();
+    });
+  }
+
+  /// A usuária trocou a foto pelo Perfil — atualiza o avatar da saudação.
+  void _recarregarFotoPerfil() {
+    if (!mounted) return;
+    setState(() {
+      _fotoPerfilFuture = widget.fotoPerfilRepositorio.carregar();
     });
   }
 
