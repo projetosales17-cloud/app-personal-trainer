@@ -477,6 +477,7 @@ class _MinhaFichaViewState extends State<MinhaFichaView> {
                     for (final dia in ficha.dias)
                       _DiaDeTreinoCard(
                         dia: dia,
+                        prescricao: ficha.prescricao,
                         datas: ficha.datasPara(dia, diasDaSemana: diasDaSemana),
                         checkins: checkins,
                         aoAlternarConcluido: _alternarConcluido,
@@ -695,9 +696,11 @@ class _DiaDeTreinoCard extends StatelessWidget {
     required this.aoTrocar,
     required this.aoDesfazerTroca,
     required this.aoRestaurar,
+    this.prescricao,
   });
 
   final DiaDeTreino dia;
+  final PrescricaoTreino? prescricao;
   final List<DateTime> datas;
   final List<CheckinTreino> checkins;
   final Future<void> Function(DateTime data, int diaFicha, bool concluido) aoAlternarConcluido;
@@ -785,6 +788,7 @@ class _DiaDeTreinoCard extends StatelessWidget {
                 _ExercicioTile(
                   exibido: exerciciosExibidos[i],
                   original: exerciciosOriginais[i],
+                  prescricao: prescricao,
                   trocado: idsTrocados.contains(exerciciosOriginais[i].id),
                   aoTrocar: aoTrocar,
                   aoDesfazerTroca: aoDesfazerTroca,
@@ -823,10 +827,12 @@ class _ExercicioTile extends StatelessWidget {
     required this.trocado,
     required this.aoTrocar,
     required this.aoDesfazerTroca,
+    this.prescricao,
   });
 
   final Exercicio exibido;
   final Exercicio original;
+  final PrescricaoTreino? prescricao;
   final bool trocado;
   final void Function(Exercicio original) aoTrocar;
   final void Function(String exercicioOriginalId) aoDesfazerTroca;
@@ -863,7 +869,7 @@ class _ExercicioTile extends StatelessWidget {
       ),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => ExercicioDetalheScreen(exercicio: exibido),
+          builder: (_) => ExercicioDetalheScreen(exercicio: exibido, prescricao: prescricao),
         ),
       ),
     );

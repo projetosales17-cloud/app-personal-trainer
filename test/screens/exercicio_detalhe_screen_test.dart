@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app_personal_trainer/data/biblioteca_exercicios.dart';
 import 'package:app_personal_trainer/models/exercicio.dart';
+import 'package:app_personal_trainer/models/ficha_treino.dart';
 import 'package:app_personal_trainer/models/registro_carga.dart';
 import 'package:app_personal_trainer/screens/exercicio_detalhe_screen.dart';
 import 'package:app_personal_trainer/services/treino_repository.dart';
@@ -307,6 +308,59 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
     expect(find.byType(SvgPicture), findsNothing);
     expect(find.textContaining('Ilustración genérica del grupo muscular'), findsNothing);
+  });
+
+  const _prescricao = PrescricaoTreino(
+    series: '3 a 4 series',
+    repeticoes: '10 a 12 repeticiones',
+    descanso: '60 a 90 segundos entre series',
+    estilo: 'Cargas moderadas con poco descanso.',
+  );
+
+  testWidgets('Con prescripción, mostra series/repeticiones/descanso no topo', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao, prescricao: _prescricao)),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byKey(const Key('cartao-treino-de-hoje')), findsOneWidget);
+    expect(find.text('3 a 4 series · 10 a 12 repeticiones'), findsOneWidget);
+    expect(find.textContaining('Descanso: 60 a 90 segundos'), findsOneWidget);
+    expect(find.textContaining('las 2 últimas repeticiones'), findsOneWidget);
+  });
+
+  testWidgets('Con prescripción e histórico, o peso mostra a última carga', (tester) async {
+    final repositorio = TreinoRepository();
+    await repositorio.registrarCarga(RegistroCarga(
+      exercicioId: _flexao.id,
+      data: DateTime(2026, 1, 2),
+      pesoKg: 12,
+      series: 3,
+      repeticoes: 10,
+    ));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExercicioDetalheScreen(
+          exercicio: _flexao,
+          prescricao: _prescricao,
+          repositorio: repositorio,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.textContaining('tu última carga fue 12 kg (3x10)'), findsOneWidget);
+  });
+
+  testWidgets('Sin prescripción (aberto pela biblioteca), não mostra o cartão', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao)));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byKey(const Key('cartao-treino-de-hoje')), findsNothing);
   });
 
   testWidgets('Tocar na imagem abre a visualização ampliada com zoom', (tester) async {
