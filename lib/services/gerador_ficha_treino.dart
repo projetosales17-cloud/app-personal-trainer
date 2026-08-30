@@ -46,16 +46,37 @@ class GeradorFichaTreino {
 
   static const duracaoValidadeDias = 30;
 
-  /// Mapeia os textos de lesão coletados no onboarding para o grupo
-  /// muscular correspondente, para excluir da ficha. Lesões digitadas em
-  /// "Outra" (texto livre) não são reconhecidas aqui e não filtram nada.
-  static const _mapaLesaoParaGrupo = {
-    'Joelho': GrupoMuscular.perna,
-    'Ombro': GrupoMuscular.ombro,
-    'Coluna/lombar': GrupoMuscular.costas,
-    'Punho': GrupoMuscular.biceps,
-    'Tornozelo': GrupoMuscular.perna,
+  /// Mapeia os textos de lesão coletados no onboarding para os grupos
+  /// musculares afetados, para excluir da ficha. Lesões digitadas em
+  /// "Outra" (texto livre) não são reconhecidas aqui — para essas, a
+  /// usuária usa a etapa "Grupos que prefere não treinar" (gruposEvitar).
+  static const _mapaLesaoParaGrupos = <String, List<GrupoMuscular>>{
+    'Joelho': [GrupoMuscular.perna],
+    'Ombro': [GrupoMuscular.ombro],
+    'Cotovelo': [GrupoMuscular.biceps, GrupoMuscular.triceps],
+    'Coluna/lombar': [GrupoMuscular.costas],
+    'Punho': [GrupoMuscular.biceps],
+    'Tornozelo': [GrupoMuscular.perna],
   };
+
+  static GrupoMuscular? _grupoPorNome(String nome) {
+    for (final g in GrupoMuscular.values) {
+      if (g.name == nome) return g;
+    }
+    return null;
+  }
+
+  /// Grupos musculares que ficam de fora da ficha por causa das lesões
+  /// selecionadas e dos grupos que a usuária marcou para evitar — para a
+  /// tela mostrar "Treino ajustado: sem Ombro, Bíceps". Não inclui a
+  /// restrição temporária de abdômen pós-parto (essa tem aviso próprio).
+  static List<GrupoMuscular> gruposEvitadosDe(Anamnese anamnese) {
+    final grupos = <GrupoMuscular>{
+      for (final lesao in anamnese.lesoesLimitacoes) ...?_mapaLesaoParaGrupos[lesao],
+      for (final nome in anamnese.gruposEvitar) ?_grupoPorNome(nome),
+    };
+    return [for (final g in GrupoMuscular.values) if (grupos.contains(g)) g];
+  }
 
   /// Mapeia os textos de "priorização de região" coletados no onboarding
   /// para os grupos musculares que ganham volume extra e entram primeiro
@@ -210,10 +231,9 @@ class GeradorFichaTreino {
     final emRestricaoAbdomenPosParto = anamnese.dataParto != null &&
         DateTime.now().difference(anamnese.dataParto!).inDays < _diasRestricaoAbdomenPosParto;
 
-    final gruposExcluidos = anamnese.lesoesLimitacoes
-        .map((lesao) => _mapaLesaoParaGrupo[lesao])
-        .whereType<GrupoMuscular>()
-        .toSet();
+    // Lesões selecionadas + grupos que a usuária marcou para não treinar
+    // (lesão fora da lista, recomendação médica, ou só preferência).
+    final gruposExcluidos = gruposEvitadosDe(anamnese).toSet();
     if (emRestricaoAbdomenPosParto) {
       gruposExcluidos.add(GrupoMuscular.abdomen);
     }

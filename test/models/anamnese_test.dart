@@ -19,6 +19,7 @@ void main() {
       condicaoHormonal: 'Menopausa',
       restricoesAlimentares: ['Lactose', 'Glúten'],
       lesoesLimitacoes: ['Joelho'],
+      gruposEvitar: ['ombro', 'biceps'],
       nivelAtividade: NivelAtividade.leve,
       frequenciaSemanalDias: 4,
       regioesPriorizadas: ['Fortalecer core'],
@@ -47,6 +48,7 @@ void main() {
     expect(reconstruido.condicaoHormonal, original.condicaoHormonal);
     expect(reconstruido.restricoesAlimentares, original.restricoesAlimentares);
     expect(reconstruido.lesoesLimitacoes, original.lesoesLimitacoes);
+    expect(reconstruido.gruposEvitar, original.gruposEvitar);
     expect(reconstruido.nivelAtividade, original.nivelAtividade);
     expect(reconstruido.frequenciaSemanalDias, original.frequenciaSemanalDias);
     expect(reconstruido.regioesPriorizadas, original.regioesPriorizadas);
@@ -74,6 +76,7 @@ void main() {
     expect(anamnese.condicaoHormonal, 'Nenhuma');
     expect(anamnese.restricoesAlimentares, isEmpty);
     expect(anamnese.lesoesLimitacoes, isEmpty);
+    expect(anamnese.gruposEvitar, isEmpty);
     expect(anamnese.regioesPriorizadas, isEmpty);
     expect(anamnese.localTreino, LocalTreino.academia);
     expect(anamnese.preferenciaTreino, PreferenciaTreino.soMusculacao);

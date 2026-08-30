@@ -141,6 +141,12 @@ class Anamnese {
     this.condicaoHormonal = 'Nenhuma',
     this.restricoesAlimentares = const [],
     this.lesoesLimitacoes = const [],
+    // Grupos musculares que a usuária escolheu NÃO treinar (lesão,
+    // recomendação médica ou preferência). Guardados como
+    // `GrupoMuscular.name` (ver models/exercicio.dart). O GeradorFichaTreino
+    // tira esses grupos da ficha, além dos que já vêm das lesões. Vazio em
+    // anamneses salvas antes desse campo existir.
+    this.gruposEvitar = const [],
     required this.nivelAtividade,
     required this.frequenciaSemanalDias,
     this.regioesPriorizadas = const [],
@@ -189,6 +195,7 @@ class Anamnese {
   final String condicaoHormonal;
   final List<String> restricoesAlimentares;
   final List<String> lesoesLimitacoes;
+  final List<String> gruposEvitar;
   final NivelAtividade nivelAtividade;
   final int frequenciaSemanalDias;
   final List<String> regioesPriorizadas;
@@ -225,6 +232,7 @@ class Anamnese {
     'condicaoHormonal': condicaoHormonal,
     'restricoesAlimentares': restricoesAlimentares,
     'lesoesLimitacoes': lesoesLimitacoes,
+    'gruposEvitar': gruposEvitar,
     'nivelAtividade': nivelAtividade.name,
     'frequenciaSemanalDias': frequenciaSemanalDias,
     'regioesPriorizadas': regioesPriorizadas,
@@ -253,6 +261,7 @@ class Anamnese {
         (json['restricoesAlimentares'] as List?)?.cast<String>() ?? const [],
     lesoesLimitacoes:
         (json['lesoesLimitacoes'] as List?)?.cast<String>() ?? const [],
+    gruposEvitar: (json['gruposEvitar'] as List?)?.cast<String>() ?? const [],
     nivelAtividade: NivelAtividade.values.byName(json['nivelAtividade'] as String),
     frequenciaSemanalDias: json['frequenciaSemanalDias'] as int,
     regioesPriorizadas:

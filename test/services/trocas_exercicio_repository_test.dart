@@ -32,10 +32,23 @@ void main() {
     expect(await repositorio.carregar(), {'b': '2'});
   });
 
-  test('limparTudo zera o mapa', () async {
+  test('limparTudo zera trocas e removidos', () async {
     await repositorio.trocar('a', '1');
-    await repositorio.trocar('b', '2');
+    await repositorio.remover('c');
     await repositorio.limparTudo();
+    expect(await repositorio.carregar(), isEmpty);
+    expect(await repositorio.removidos(), isEmpty);
+  });
+
+  test('remover e restaurar mexem só no conjunto de removidos', () async {
+    expect(await repositorio.removidos(), isEmpty);
+    await repositorio.remover('supino-reto-barra');
+    await repositorio.remover('rosca-direta-barra');
+    expect(await repositorio.removidos(), {'supino-reto-barra', 'rosca-direta-barra'});
+
+    await repositorio.restaurar('supino-reto-barra');
+    expect(await repositorio.removidos(), {'rosca-direta-barra'});
+    // Não interfere nas trocas.
     expect(await repositorio.carregar(), isEmpty);
   });
 }

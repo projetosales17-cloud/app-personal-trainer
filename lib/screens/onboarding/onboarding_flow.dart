@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/anamnese.dart';
+import '../../models/exercicio.dart' show GrupoMuscular, GrupoMuscularLabel;
 import '../../saude/ciclo_hormonal.dart';
 import '../../saude/imc.dart';
 import '../../saude/metabolismo.dart';
@@ -32,6 +33,7 @@ const _restricoesComuns = [
 const _lesoesComuns = [
   'Joelho',
   'Ombro',
+  'Cotovelo',
   'Coluna/lombar',
   'Punho',
   'Tornozelo',
@@ -99,6 +101,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   bool _duracaoCicloNaoSei = false;
   final Set<String> _restricoes = {};
   final Set<String> _lesoes = {};
+  // Grupos musculares que a usuária marcou para não treinar (GrupoMuscular.name).
+  final Set<String> _gruposEvitar = {};
   bool _teveParto = false;
   DateTime? _dataParto;
   NivelAtividade? _nivelAtividade;
@@ -145,6 +149,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       _restricaoOutraController,
     );
     _preencherSelecao(inicial.lesoesLimitacoes, _lesoesComuns, _lesoes, _lesaoOutraController);
+    _gruposEvitar.addAll(inicial.gruposEvitar);
     _regioes.addAll(inicial.regioesPriorizadas.where(_regioesComuns.contains));
     _nivelAtividade = inicial.nivelAtividade;
     _frequenciaSemanalDias = inicial.frequenciaSemanalDias;
@@ -296,6 +301,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         ..._lesoes,
         if (_lesaoOutraController.text.trim().isNotEmpty) _lesaoOutraController.text.trim(),
       ],
+      gruposEvitar: _gruposEvitar.toList(),
       nivelAtividade: _nivelAtividade!,
       frequenciaSemanalDias: _frequenciaSemanalDias,
       regioesPriorizadas: _regioes.toList(),
@@ -374,12 +380,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           outroController: _restricaoOutraController,
         );
       case 7:
-        return _passoMultiSelecao(
-          titulo: 'Lesões ou limitações físicas',
-          opcoes: _lesoesComuns,
-          selecionadas: _lesoes,
-          outroController: _lesaoOutraController,
-        );
+        return _passoLesoesLimitacoes();
       case 8:
         return _passoPosParto();
       case 9:
@@ -751,6 +752,70 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     return '$dia/$mes/${data.year}';
   }
 
+  Widget _passoLesoesLimitacoes() {
+    final texto = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Lesões ou limitações físicas', style: texto.headlineSmall),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final opcao in _lesoesComuns)
+              FilterChip(
+                label: Text(opcao),
+                selected: _lesoes.contains(opcao),
+                onSelected: (sel) => setState(() {
+                  sel ? _lesoes.add(opcao) : _lesoes.remove(opcao);
+                }),
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _lesaoOutraController,
+          decoration: const InputDecoration(labelText: 'Outra (opcional)'),
+        ),
+        const SizedBox(height: 28),
+        Text('Grupos que você prefere não treinar', style: texto.titleMedium),
+        const SizedBox(height: 4),
+        Text(
+          'Marque se tem lesão, recomendação médica, ou só não quer treinar '
+          'aquele grupo agora. Seu treino é montado sem eles — e você pode '
+          'mudar depois em Perfil. Ombro ou cotovelo machucado? Vale marcar '
+          'também Peito e Costas, que puxam essas articulações.',
+          style: texto.bodySmall,
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final grupo in GrupoMuscular.values)
+              FilterChip(
+                key: Key('chip-evitar-${grupo.name}'),
+                label: Text(grupo.label),
+                selected: _gruposEvitar.contains(grupo.name),
+                onSelected: (sel) => setState(() {
+                  sel ? _gruposEvitar.add(grupo.name) : _gruposEvitar.remove(grupo.name);
+                }),
+              ),
+          ],
+        ),
+        if (_gruposEvitar.length == GrupoMuscular.values.length) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Você marcou todos os grupos: seu treino vai ficar só com cardio. '
+            'Se não for a intenção, desmarque algum.',
+            style: texto.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error),
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _passoMultiSelecao({
     required String titulo,
     required List<String> opcoes,
@@ -898,6 +963,13 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         Text('Dias por semana: $_frequenciaSemanalDias'),
         Text('Local de treino: ${_localTreino?.label ?? '-'}'),
         Text('Preferência: ${_preferenciaTreino?.label ?? '-'}'),
+        if (_gruposEvitar.isNotEmpty)
+          Text(
+            'Sem treinar: ${[
+              for (final g in GrupoMuscular.values)
+                if (_gruposEvitar.contains(g.name)) g.label,
+            ].join(', ')}',
+          ),
         const Divider(height: 32),
         Text('IMC: $imc ($classificacaoImc)'),
         Text('Taxa Metabólica Basal: $tmb kcal/dia'),

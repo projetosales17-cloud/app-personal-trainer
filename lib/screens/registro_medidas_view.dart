@@ -3,6 +3,63 @@ import 'package:flutter/material.dart';
 import '../models/registro_medidas.dart';
 import '../services/progresso_repository.dart';
 
+/// Campos de medida na ordem em que aparecem no formulário (de cima para
+/// baixo no corpo). A chave é usada nas `Key` de teste; o rótulo é o texto
+/// visível. `ler`/`comValor` ligam ao modelo.
+class _CampoMedida {
+  const _CampoMedida(this.chave, this.rotulo, this.ler, this.comValor);
+  final String chave;
+  final String rotulo;
+  final double? Function(RegistroMedidas) ler;
+  final RegistroMedidas Function(RegistroMedidas base, double? valor) comValor;
+}
+
+final _campos = <_CampoMedida>[
+  _CampoMedida('pescoco', 'Pescoço (cm)', (r) => r.pescocoCm,
+      (r, v) => _copiar(r, pescoco: v)),
+  _CampoMedida('torax', 'Tórax (cm)', (r) => r.toraxCm, (r, v) => _copiar(r, torax: v)),
+  _CampoMedida('braco', 'Braço (cm)', (r) => r.bracoCm, (r, v) => _copiar(r, braco: v)),
+  _CampoMedida('antebraco', 'Antebraço (cm)', (r) => r.antebracoCm,
+      (r, v) => _copiar(r, antebraco: v)),
+  _CampoMedida('cintura', 'Cintura (cm)', (r) => r.cinturaCm,
+      (r, v) => _copiar(r, cintura: v)),
+  _CampoMedida('quadril', 'Quadril (cm)', (r) => r.quadrilCm,
+      (r, v) => _copiar(r, quadril: v)),
+  _CampoMedida('coxa', 'Coxa (cm)', (r) => r.coxaCm, (r, v) => _copiar(r, coxa: v)),
+  _CampoMedida('panturrilha', 'Panturrilha (cm)', (r) => r.panturrilhaCm,
+      (r, v) => _copiar(r, panturrilha: v)),
+];
+
+/// Como o modelo não tem `copyWith` (campos nulláveis não combinam com o
+/// padrão `?? this.x`), reconstrói o registro trocando só um campo.
+RegistroMedidas _copiar(
+  RegistroMedidas r, {
+  double? pescoco,
+  double? torax,
+  double? braco,
+  double? antebraco,
+  double? cintura,
+  double? quadril,
+  double? coxa,
+  double? panturrilha,
+}) => RegistroMedidas(
+  id: r.id,
+  data: r.data,
+  pescocoCm: pescoco ?? r.pescocoCm,
+  toraxCm: torax ?? r.toraxCm,
+  bracoCm: braco ?? r.bracoCm,
+  antebracoCm: antebraco ?? r.antebracoCm,
+  cinturaCm: cintura ?? r.cinturaCm,
+  quadrilCm: quadril ?? r.quadrilCm,
+  coxaCm: coxa ?? r.coxaCm,
+  panturrilhaCm: panturrilha ?? r.panturrilhaCm,
+);
+
+double? _parseCampo(TextEditingController c) {
+  if (c.text.trim().isEmpty) return null;
+  return double.tryParse(c.text.replaceAll(',', '.'));
+}
+
 class RegistroMedidasView extends StatefulWidget {
   RegistroMedidasView({super.key, ProgressoRepository? repositorio})
     : repositorio = repositorio ?? ProgressoRepository();
@@ -15,23 +72,14 @@ class RegistroMedidasView extends StatefulWidget {
 
 class _RegistroMedidasViewState extends State<RegistroMedidasView> {
   late Future<List<RegistroMedidas>> _registrosFuture = widget.repositorio.listarMedidas();
-  final _controladorCintura = TextEditingController();
-  final _controladorQuadril = TextEditingController();
-  final _controladorBraco = TextEditingController();
-  final _controladorCoxa = TextEditingController();
+  final _controladores = {for (final c in _campos) c.chave: TextEditingController()};
 
   @override
   void dispose() {
-    _controladorCintura.dispose();
-    _controladorQuadril.dispose();
-    _controladorBraco.dispose();
-    _controladorCoxa.dispose();
+    for (final c in _controladores.values) {
+      c.dispose();
+    }
     super.dispose();
-  }
-
-  double? _parse(TextEditingController controlador) {
-    if (controlador.text.trim().isEmpty) return null;
-    return double.tryParse(controlador.text.replaceAll(',', '.'));
   }
 
   void _recarregar() {
@@ -40,21 +88,22 @@ class _RegistroMedidasViewState extends State<RegistroMedidasView> {
     });
   }
 
+  RegistroMedidas _montar() {
+    var registro = RegistroMedidas(data: DateTime.now());
+    for (final campo in _campos) {
+      registro = campo.comValor(registro, _parseCampo(_controladores[campo.chave]!));
+    }
+    return registro;
+  }
+
   Future<void> _registrar() async {
-    final registro = RegistroMedidas(
-      data: DateTime.now(),
-      cinturaCm: _parse(_controladorCintura),
-      quadrilCm: _parse(_controladorQuadril),
-      bracoCm: _parse(_controladorBraco),
-      coxaCm: _parse(_controladorCoxa),
-    );
+    final registro = _montar();
     if (registro.vazio) return;
 
     await widget.repositorio.registrarMedidas(registro);
-    _controladorCintura.clear();
-    _controladorQuadril.clear();
-    _controladorBraco.clear();
-    _controladorCoxa.clear();
+    for (final c in _controladores.values) {
+      c.clear();
+    }
     _recarregar();
   }
 
@@ -100,29 +149,22 @@ class _RegistroMedidasViewState extends State<RegistroMedidasView> {
     return '$dia/$mes/${data.year}';
   }
 
-  String _resumo(RegistroMedidas registro) {
-    final partes = [
-      if (registro.cinturaCm != null) 'Cintura ${registro.cinturaCm!.toStringAsFixed(0)}cm',
-      if (registro.quadrilCm != null) 'Quadril ${registro.quadrilCm!.toStringAsFixed(0)}cm',
-      if (registro.bracoCm != null) 'Braço ${registro.bracoCm!.toStringAsFixed(0)}cm',
-      if (registro.coxaCm != null) 'Coxa ${registro.coxaCm!.toStringAsFixed(0)}cm',
-    ];
-    return partes.join(' · ');
-  }
+  static String _resumo(RegistroMedidas registro) => [
+    for (final (rotulo, valor) in registro.todas)
+      if (valor != null) '$rotulo ${valor.toStringAsFixed(0)}cm',
+  ].join(' · ');
 
-  Widget _campo(Key chave, String rotulo, TextEditingController controlador) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: TextField(
-          key: chave,
-          controller: controlador,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(labelText: rotulo),
-        ),
+  Widget _campo(String chave, String rotulo) => Expanded(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: TextField(
+        key: Key('campo-$chave'),
+        controller: _controladores[chave],
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        decoration: InputDecoration(labelText: rotulo),
       ),
-    );
-  }
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -130,20 +172,19 @@ class _RegistroMedidasViewState extends State<RegistroMedidasView> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          Row(
-            children: [
-              _campo(const Key('campo-cintura'), 'Cintura (cm)', _controladorCintura),
-              _campo(const Key('campo-quadril'), 'Quadril (cm)', _controladorQuadril),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _campo(const Key('campo-braco'), 'Braço (cm)', _controladorBraco),
-              _campo(const Key('campo-coxa'), 'Coxa (cm)', _controladorCoxa),
-            ],
-          ),
-          const SizedBox(height: 8),
+          for (var i = 0; i < _campos.length; i += 2)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  _campo(_campos[i].chave, _campos[i].rotulo),
+                  if (i + 1 < _campos.length)
+                    _campo(_campos[i + 1].chave, _campos[i + 1].rotulo)
+                  else
+                    const Spacer(),
+                ],
+              ),
+            ),
           Align(
             alignment: Alignment.centerRight,
             child: ElevatedButton(
@@ -209,38 +250,20 @@ class _DialogoEditarMedidas extends StatefulWidget {
 }
 
 class _DialogoEditarMedidasState extends State<_DialogoEditarMedidas> {
-  late final _cintura = _controlador(widget.registro.cinturaCm);
-  late final _quadril = _controlador(widget.registro.quadrilCm);
-  late final _braco = _controlador(widget.registro.bracoCm);
-  late final _coxa = _controlador(widget.registro.coxaCm);
-
-  TextEditingController _controlador(double? valor) => TextEditingController(
-    text: valor == null ? '' : valor.toStringAsFixed(0),
-  );
-
-  double? _parse(TextEditingController c) {
-    if (c.text.trim().isEmpty) return null;
-    return double.tryParse(c.text.replaceAll(',', '.'));
-  }
+  late final _controladores = {
+    for (final campo in _campos)
+      campo.chave: TextEditingController(
+        text: campo.ler(widget.registro)?.toStringAsFixed(0) ?? '',
+      ),
+  };
 
   @override
   void dispose() {
-    _cintura.dispose();
-    _quadril.dispose();
-    _braco.dispose();
-    _coxa.dispose();
+    for (final c in _controladores.values) {
+      c.dispose();
+    }
     super.dispose();
   }
-
-  Widget _campo(Key chave, String rotulo, TextEditingController c) => Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: TextField(
-      key: chave,
-      controller: c,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      decoration: InputDecoration(labelText: rotulo),
-    ),
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -250,10 +273,16 @@ class _DialogoEditarMedidasState extends State<_DialogoEditarMedidas> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _campo(const Key('editar-campo-cintura'), 'Cintura (cm)', _cintura),
-            _campo(const Key('editar-campo-quadril'), 'Quadril (cm)', _quadril),
-            _campo(const Key('editar-campo-braco'), 'Braço (cm)', _braco),
-            _campo(const Key('editar-campo-coxa'), 'Coxa (cm)', _coxa),
+            for (final campo in _campos)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: TextField(
+                  key: Key('editar-campo-${campo.chave}'),
+                  controller: _controladores[campo.chave],
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(labelText: campo.rotulo),
+                ),
+              ),
           ],
         ),
       ),
@@ -265,14 +294,10 @@ class _DialogoEditarMedidasState extends State<_DialogoEditarMedidas> {
         FilledButton(
           key: const Key('editar-salvar-medidas'),
           onPressed: () {
-            final editado = RegistroMedidas(
-              id: widget.registro.id,
-              data: widget.registro.data,
-              cinturaCm: _parse(_cintura),
-              quadrilCm: _parse(_quadril),
-              bracoCm: _parse(_braco),
-              coxaCm: _parse(_coxa),
-            );
+            var editado = RegistroMedidas(id: widget.registro.id, data: widget.registro.data);
+            for (final campo in _campos) {
+              editado = campo.comValor(editado, _parseCampo(_controladores[campo.chave]!));
+            }
             if (editado.vazio) return;
             Navigator.of(context).pop(editado);
           },

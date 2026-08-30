@@ -72,6 +72,70 @@ void main() {
     }
   });
 
+  test('lesão de cotovelo exclui bíceps e tríceps', () {
+    const anamnese = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.hipertrofia,
+      lesoesLimitacoes: ['Cotovelo'],
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 4,
+    );
+    final grupos = gerador.gerar(anamnese).dias.expand((d) => d.gruposMusculares).toSet();
+    expect(grupos.contains(GrupoMuscular.biceps), isFalse);
+    expect(grupos.contains(GrupoMuscular.triceps), isFalse);
+  });
+
+  test('gruposEvitar tira os grupos escolhidos da ficha', () {
+    const anamnese = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.hipertrofia,
+      gruposEvitar: ['ombro', 'peito'],
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 4,
+    );
+    final grupos = gerador.gerar(anamnese).dias.expand((d) => d.gruposMusculares).toSet();
+    expect(grupos.contains(GrupoMuscular.ombro), isFalse);
+    expect(grupos.contains(GrupoMuscular.peito), isFalse);
+    expect(grupos.contains(GrupoMuscular.perna), isTrue);
+  });
+
+  test('gruposEvitadosDe junta lesões reconhecidas e grupos marcados', () {
+    const anamnese = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.hipertrofia,
+      lesoesLimitacoes: ['Ombro'],
+      gruposEvitar: ['perna'],
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+    );
+    expect(
+      GeradorFichaTreino.gruposEvitadosDe(anamnese).toSet(),
+      {GrupoMuscular.ombro, GrupoMuscular.perna},
+    );
+  });
+
+  test('marcar todos os grupos para evitar deixa a ficha só com cardio', () {
+    final anamnese = Anamnese(
+      idade: 30,
+      alturaCm: 170,
+      pesoAtualKg: 65,
+      objetivoPrincipal: Objetivo.emagrecimento,
+      gruposEvitar: [for (final g in GrupoMuscular.values) g.name],
+      nivelAtividade: NivelAtividade.moderado,
+      frequenciaSemanalDias: 3,
+      preferenciaTreino: PreferenciaTreino.combinado,
+    );
+    final ficha = gerador.gerar(anamnese);
+    expect(ficha.dias.every((d) => d.exercicios.isEmpty), isTrue);
+    expect(ficha.dias.every((d) => d.atividadesCardio.isNotEmpty), isTrue);
+  });
+
   test('lesão em texto livre (não reconhecida) não filtra nenhum grupo', () {
     const anamneseComLesaoLivre = Anamnese(
       idade: 30,

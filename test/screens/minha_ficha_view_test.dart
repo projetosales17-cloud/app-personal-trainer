@@ -478,4 +478,65 @@ void main() {
       findsWidgets,
     );
   });
+
+  testWidgets('gruposEvitar mostra o aviso "Treino sem: ..."', (tester) async {
+    final anamneseRepositorio = AnamneseRepository();
+    await anamneseRepositorio.salvar(
+      const Anamnese(
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        gruposEvitar: ['ombro'],
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(home: MinhaFichaView(anamneseRepositorio: anamneseRepositorio)),
+    );
+    await _carregar(tester);
+
+    expect(find.byKey(const Key('aviso-grupos-evitados')), findsOneWidget);
+    expect(find.textContaining('Treino sem: Ombro'), findsOneWidget);
+  });
+
+  testWidgets('"Não fazer este exercício" tira da ficha e "Restaurar" traz de volta', (
+    tester,
+  ) async {
+    final anamneseRepositorio = AnamneseRepository();
+    await anamneseRepositorio.salvar(
+      const Anamnese(
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+    final trocasRepositorio = TrocasExercicioRepository();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MinhaFichaView(
+            anamneseRepositorio: anamneseRepositorio,
+            trocasRepositorio: trocasRepositorio,
+          ),
+        ),
+      ),
+    );
+    await _carregar(tester);
+
+    await _tocar(tester, find.byIcon(Icons.swap_horiz).first);
+    await _tocar(tester, find.text('Não fazer este exercício'));
+
+    expect(await trocasRepositorio.removidos(), isNotEmpty);
+    expect(find.text('Fora do treino'), findsWidgets);
+
+    await _tocar(tester, find.text('Restaurar').first);
+    expect(await trocasRepositorio.removidos(), isEmpty);
+  });
 }
