@@ -8,9 +8,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app_personal_trainer/services/foto_perfil_repository.dart';
 
 void main() {
-  setUp(() => SharedPreferences.setMockInitialValues({}));
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    FotoPerfilRepository.atual.value = null;
+  });
 
   final bytes = Uint8List.fromList(List.generate(32, (i) => i));
+
+  test('salvar e carregar publicam a foto em FotoPerfilRepository.atual', () async {
+    final repo = FotoPerfilRepository(
+      firestore: FakeFirebaseFirestore(),
+      uidAtual: () => 'u1',
+    );
+    await repo.salvar(bytes);
+    expect(FotoPerfilRepository.atual.value, startsWith('data:image/jpeg;base64,'));
+
+    await repo.remover();
+    expect(FotoPerfilRepository.atual.value, isNull);
+  });
 
   test('salvar guarda a foto no Firestore e no cache; carregar devolve o data URI', () async {
     final firestore = FakeFirebaseFirestore();

@@ -52,8 +52,15 @@ class PerfilScreen extends StatefulWidget {
 class _PerfilScreenState extends State<PerfilScreen> {
   late Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
   late Future<bool> _notificacoesFuture = widget.preferenciasRepositorio.notificacoesAtivadas();
-  late Future<String?> _fotoPerfilFuture = widget.fotoPerfilRepositorio.carregar();
   bool _salvandoFoto = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Preenche FotoPerfilRepository.atual — o avatar (aqui e na Home)
+    // escuta esse notifier.
+    widget.fotoPerfilRepositorio.carregar();
+  }
 
   Future<void> _trocarFotoPerfil({required bool temFoto}) async {
     final acao = await showModalBottomSheet<String>(
@@ -89,8 +96,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
     if (acao == 'remover') {
       await widget.fotoPerfilRepositorio.remover();
-      if (!mounted) return;
-      setState(() => _fotoPerfilFuture = widget.fotoPerfilRepositorio.carregar());
       return;
     }
 
@@ -110,12 +115,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
     try {
       await widget.fotoPerfilRepositorio.salvar(bytes);
     } finally {
-      if (mounted) {
-        setState(() {
-          _salvandoFoto = false;
-          _fotoPerfilFuture = widget.fotoPerfilRepositorio.carregar();
-        });
-      }
+      if (mounted) setState(() => _salvandoFoto = false);
     }
   }
 
@@ -210,7 +210,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
             padding: const EdgeInsets.all(16),
             children: [
               _CabecalhoFotoPerfil(
-                fotoFuture: _fotoPerfilFuture,
                 nome: (anamnese?.nome.isNotEmpty ?? false)
                     ? anamnese!.nome
                     : (anamnese?.nomeExibicao ?? ''),
@@ -313,23 +312,20 @@ class _PerfilScreenState extends State<PerfilScreen> {
 /// Avatar grande no topo do Perfil com o botão de trocar/remover a foto.
 class _CabecalhoFotoPerfil extends StatelessWidget {
   const _CabecalhoFotoPerfil({
-    required this.fotoFuture,
     required this.nome,
     required this.salvando,
     required this.aoTrocar,
   });
 
-  final Future<String?> fotoFuture;
   final String nome;
   final bool salvando;
   final Future<void> Function({required bool temFoto}) aoTrocar;
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String?>(
-      future: fotoFuture,
-      builder: (context, snapshot) {
-        final dataUri = snapshot.data;
+    return ValueListenableBuilder<String?>(
+      valueListenable: FotoPerfilRepository.atual,
+      builder: (context, dataUri, _) {
         final temFoto = dataUri != null;
         return Center(
           child: Column(
