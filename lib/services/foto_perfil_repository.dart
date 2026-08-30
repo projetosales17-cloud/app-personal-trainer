@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Foto de perfil da usuária — uma imagem só, mostrada na Home e no Perfil
@@ -28,6 +28,12 @@ class FotoPerfilRepository {
 
   final FirebaseFirestore? _firestoreInjetado;
   final String? Function() _uidAtual;
+
+  /// Sobe a cada `salvar`/`remover`. A Home escuta pra atualizar o avatar
+  /// quando a usuária troca a foto pelo Perfil na mesma sessão — o
+  /// `IndexedStack` da navegação mantém a Home viva. Mesmo padrão de
+  /// [AnamneseRepository.revisao].
+  static final ValueNotifier<int> revisao = ValueNotifier<int>(0);
 
   FirebaseFirestore get _firestore => _firestoreInjetado ?? FirebaseFirestore.instance;
 
@@ -83,6 +89,7 @@ class FotoPerfilRepository {
         // offline — sobe na próxima vez que salvar online
       }
     }
+    revisao.value++;
   }
 
   /// Remove a foto de perfil (Firestore + cache).
@@ -97,6 +104,7 @@ class FotoPerfilRepository {
         // offline — some na próxima vez que remover online
       }
     }
+    revisao.value++;
   }
 }
 
