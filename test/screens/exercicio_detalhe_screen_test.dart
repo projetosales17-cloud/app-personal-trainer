@@ -310,7 +310,7 @@ void main() {
     expect(find.textContaining('Ilustración genérica del grupo muscular'), findsNothing);
   });
 
-  const _prescricao = PrescricaoTreino(
+  const prescricaoExemplo = PrescricaoTreino(
     series: '3 a 4 series',
     repeticoes: '10 a 12 repeticiones',
     descanso: '60 a 90 segundos entre series',
@@ -319,7 +319,7 @@ void main() {
 
   testWidgets('Con prescripción, mostra series/repeticiones/descanso no topo', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao, prescricao: _prescricao)),
+      MaterialApp(home: ExercicioDetalheScreen(exercicio: _flexao, prescricao: prescricaoExemplo)),
     );
     await tester.pump();
     await tester.pump();
@@ -344,7 +344,7 @@ void main() {
       MaterialApp(
         home: ExercicioDetalheScreen(
           exercicio: _flexao,
-          prescricao: _prescricao,
+          prescricao: prescricaoExemplo,
           repositorio: repositorio,
         ),
       ),

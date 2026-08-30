@@ -10,12 +10,14 @@ import '../models/programa_treino.dart';
 import '../models/registro_peso.dart';
 import '../services/anamnese_repository.dart';
 import '../services/checkin_treino_repository.dart';
+import '../services/foto_perfil_repository.dart';
 import '../services/gerador_cardapio.dart';
 import '../services/gerador_ficha_treino.dart';
 import '../services/motor_aderencia.dart';
 import '../services/preferencias_repository.dart';
 import '../services/programa_treino_repository.dart';
 import '../services/progresso_repository.dart';
+import '../widgets/avatar_perfil.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({
@@ -28,6 +30,7 @@ class HomeScreen extends StatefulWidget {
     CheckinTreinoRepository? checkinRepositorio,
     PreferenciasRepository? preferenciasRepositorio,
     MotorAderencia? motorAderencia,
+    FotoPerfilRepository? fotoPerfilRepositorio,
   }) : anamneseRepositorio = anamneseRepositorio ?? AnamneseRepository(),
        geradorFicha = geradorFicha ?? GeradorFichaTreino(),
        geradorCardapio = geradorCardapio ?? GeradorCardapio(),
@@ -35,9 +38,11 @@ class HomeScreen extends StatefulWidget {
        programaRepositorio = programaRepositorio ?? ProgramaTreinoRepository(),
        checkinRepositorio = checkinRepositorio ?? CheckinTreinoRepository(),
        preferenciasRepositorio = preferenciasRepositorio ?? PreferenciasRepository(),
-       motorAderencia = motorAderencia ?? MotorAderencia();
+       motorAderencia = motorAderencia ?? MotorAderencia(),
+       fotoPerfilRepositorio = fotoPerfilRepositorio ?? FotoPerfilRepository();
 
   final AnamneseRepository anamneseRepositorio;
+  final FotoPerfilRepository fotoPerfilRepositorio;
   final GeradorFichaTreino geradorFicha;
   final GeradorCardapio geradorCardapio;
   final ProgressoRepository progressoRepositorio;
@@ -73,6 +78,7 @@ const _mensagensMotivacionais = [
 
 class _HomeScreenState extends State<HomeScreen> {
   late Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
+  late final Future<String?> _fotoPerfilFuture = widget.fotoPerfilRepositorio.carregar();
   late final Future<RegistroPeso?> _ultimoPesoFuture = widget.progressoRepositorio.ultimoPeso();
   late final Future<_ContextoPrograma> _contextoFuture = _carregarContexto();
 
@@ -135,16 +141,38 @@ class _HomeScreenState extends State<HomeScreen> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Text(
-                anamnese.nomeExibicao.isEmpty
-                    ? '¡Hola!'
-                    : '¡Hola, ${anamnese.nomeExibicao}!',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _mensagensMotivacionais[DateTime.now().day % _mensagensMotivacionais.length],
-                style: Theme.of(context).textTheme.bodyMedium,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  FutureBuilder<String?>(
+                    future: _fotoPerfilFuture,
+                    builder: (context, fotoSnapshot) => AvatarPerfil(
+                      dataUri: fotoSnapshot.data,
+                      nome: anamnese.nome.isEmpty ? anamnese.nomeExibicao : anamnese.nome,
+                      raio: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          anamnese.nomeExibicao.isEmpty
+                              ? '¡Hola!'
+                              : '¡Hola, ${anamnese.nomeExibicao}!',
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _mensagensMotivacionais[
+                              DateTime.now().day % _mensagensMotivacionais.length],
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               FutureBuilder<_ContextoPrograma>(

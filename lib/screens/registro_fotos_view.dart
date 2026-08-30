@@ -1,24 +1,11 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models/registro_foto.dart';
 import '../services/progresso_repository.dart';
 import '../widgets/ajuda_fotos_progresso.dart';
+import '../widgets/seletor_imagem.dart';
 import 'foto_detalhe_screen.dart';
-
-typedef SelecionarImagem = Future<Uint8List?> Function(ImageSource fonte);
-
-Future<Uint8List?> _selecionarImagemPadrao(ImageSource fonte) async {
-  final arquivo = await ImagePicker().pickImage(
-    source: fonte,
-    maxWidth: 1280,
-    maxHeight: 1280,
-    imageQuality: 55,
-  );
-  return arquivo?.readAsBytes();
-}
 
 /// Acima deste tamanho a foto não cabe com folga num documento do
 /// Firestore (limite de 1 MB; base64 infla ~33%).
@@ -34,7 +21,7 @@ class RegistroFotosView extends StatefulWidget {
     ProgressoRepository? repositorio,
     SelecionarImagem? selecionarImagem,
   }) : repositorio = repositorio ?? ProgressoRepository(),
-       selecionarImagem = selecionarImagem ?? _selecionarImagemPadrao;
+       selecionarImagem = selecionarImagem ?? selecionarImagemPadrao;
 
   final ProgressoRepository repositorio;
   final SelecionarImagem selecionarImagem;
