@@ -77,6 +77,29 @@ void main() {
     expect(registros.map((r) => r.pesoKg), [70, 72]);
   });
 
+  test('atualizarPeso troca o valor mantendo o id', () async {
+    final repositorio = ProgressoRepository();
+    await repositorio.registrarPeso(70, data: DateTime(2026, 1, 1));
+    final original = (await repositorio.listarPesos()).single;
+
+    await repositorio.atualizarPeso(original.copyWith(pesoKg: 68));
+
+    final atualizado = (await repositorio.listarPesos()).single;
+    expect(atualizado.id, original.id);
+    expect(atualizado.pesoKg, 68);
+  });
+
+  test('removerPeso tira só o registro do id informado', () async {
+    final repositorio = ProgressoRepository();
+    await repositorio.registrarPeso(70, data: DateTime(2026, 1, 1));
+    await repositorio.registrarPeso(72, data: DateTime(2026, 1, 10));
+    final primeiro = (await repositorio.listarPesos()).firstWhere((r) => r.pesoKg == 70);
+
+    await repositorio.removerPeso(primeiro.id);
+
+    expect((await repositorio.listarPesos()).map((r) => r.pesoKg), [72]);
+  });
+
   test('listarMedidas retorna vazio quando nada foi registrado', () async {
     final repositorio = ProgressoRepository();
     expect(await repositorio.listarMedidas(), isEmpty);
@@ -101,6 +124,34 @@ void main() {
 
     final registros = await repositorio.listarMedidas();
     expect(registros.map((r) => r.bracoCm), [30, 32]);
+  });
+
+  test('atualizarMedidas troca os valores (inclusive limpando campos) mantendo o id', () async {
+    final repositorio = ProgressoRepository();
+    await repositorio.registrarMedidas(
+      RegistroMedidas(data: DateTime(2026, 1, 1), cinturaCm: 80, quadrilCm: 100),
+    );
+    final original = (await repositorio.listarMedidas()).single;
+
+    await repositorio.atualizarMedidas(
+      RegistroMedidas(id: original.id, data: original.data, cinturaCm: 78),
+    );
+
+    final atualizado = (await repositorio.listarMedidas()).single;
+    expect(atualizado.id, original.id);
+    expect(atualizado.cinturaCm, 78);
+    expect(atualizado.quadrilCm, isNull);
+  });
+
+  test('removerMedidas tira só o registro do id informado', () async {
+    final repositorio = ProgressoRepository();
+    await repositorio.registrarMedidas(RegistroMedidas(data: DateTime(2026, 1, 1), bracoCm: 30));
+    await repositorio.registrarMedidas(RegistroMedidas(data: DateTime(2026, 1, 10), bracoCm: 32));
+    final primeiro = (await repositorio.listarMedidas()).firstWhere((r) => r.bracoCm == 30);
+
+    await repositorio.removerMedidas(primeiro.id);
+
+    expect((await repositorio.listarMedidas()).map((r) => r.bracoCm), [32]);
   });
 
   group('fotos — sem usuária logada (cache local)', () {
@@ -150,6 +201,13 @@ void main() {
       await repositorio.registrarFoto(bytesFoto);
       expect((await repositorio.listarFotos()).single.pose, PoseFoto.livre);
     });
+
+    test('atualizarPoseFoto troca o ângulo no cache local', () async {
+      final repositorio = criarRepositorio();
+      final foto = await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.frente);
+      await repositorio.atualizarPoseFoto(foto.id, PoseFoto.costas);
+      expect((await repositorio.listarFotos()).single.pose, PoseFoto.costas);
+    });
   });
 
   group('fotos — com usuária logada (Firestore)', () {
@@ -193,6 +251,21 @@ void main() {
           await firestore.collection('usuarios').doc('u1').collection('fotos_progresso').get();
       expect(snap.docs, isEmpty);
       expect(await repositorio.listarFotos(), isEmpty);
+    });
+
+    test('atualizarPoseFoto grava o novo ângulo no documento do Firestore', () async {
+      final repositorio = criarRepositorioFs();
+      final foto = await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.frente);
+      await repositorio.atualizarPoseFoto(foto.id, PoseFoto.ladoDireito);
+
+      final snap = await firestore
+          .collection('usuarios')
+          .doc('u1')
+          .collection('fotos_progresso')
+          .doc(foto.id)
+          .get();
+      expect(snap.data()!['pose'], 'ladoDireito');
+      expect((await repositorio.listarFotos()).single.pose, PoseFoto.ladoDireito);
     });
 
     test('paginaFotos traz as mais recentes primeiro e pagina pelo cursor', () async {
@@ -257,6 +330,38 @@ void main() {
 
     final registros = await repositorio.listarVideos();
     expect(registros.first.caminhoMiniatura, registro.caminhoMiniatura);
+  });
+
+  test('removerVideo apaga o arquivo, a miniatura e o registro da lista', () async {
+    final repositorio = ProgressoRepository(
+      resolverDiretorioBase: () async => diretorioTemp,
+      gerarMiniaturaVideo: (caminhoVideo, pastaDestino) async {
+        final miniatura = File('$pastaDestino/miniatura.jpg')..writeAsBytesSync(bytesFoto);
+        return miniatura.path;
+      },
+      uidAtual: () => null,
+    );
+    final registro = await repositorio.registrarVideo(arquivoOrigem);
+    expect(await File(registro.caminhoArquivo).exists(), isTrue);
+    expect(await File(registro.caminhoMiniatura!).exists(), isTrue);
+
+    await repositorio.removerVideo(registro.id);
+
+    expect(await repositorio.listarVideos(), isEmpty);
+    expect(await File(registro.caminhoArquivo).exists(), isFalse);
+    expect(await File(registro.caminhoMiniatura!).exists(), isFalse);
+  });
+
+  test('removerVideo tira só o vídeo do id informado', () async {
+    final repositorio = criarRepositorio();
+    final primeiro = await repositorio.registrarVideo(arquivoOrigem);
+    await repositorio.registrarVideo(arquivoOrigem);
+
+    await repositorio.removerVideo(primeiro.id);
+
+    final restantes = await repositorio.listarVideos();
+    expect(restantes, hasLength(1));
+    expect(restantes.single.id, isNot(primeiro.id));
   });
 
   test('fotos e vídeos ficam em listas independentes', () async {

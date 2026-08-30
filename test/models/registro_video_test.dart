@@ -37,4 +37,19 @@ void main() {
 
     expect(registro.caminhoMiniatura, isNull);
   });
+
+  test('id sobrevive ao round-trip e registro antigo sem id cai na data', () {
+    final registro = RegistroVideo(
+      data: DateTime(2026, 3, 15),
+      caminhoArquivo: '/dados/app/videos_progresso/123.mp4',
+    );
+    expect(RegistroVideo.fromJson(registro.toJson()).id, registro.id);
+    expect(
+      RegistroVideo.fromJson({
+        'data': '2026-03-15T00:00:00.000',
+        'caminhoArquivo': '/x.mp4',
+      }).id,
+      '2026-03-15T00:00:00.000',
+    );
+  });
 }

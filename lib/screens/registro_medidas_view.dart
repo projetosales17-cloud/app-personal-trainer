@@ -34,6 +34,12 @@ class _RegistroMedidasViewState extends State<RegistroMedidasView> {
     return double.tryParse(controlador.text.replaceAll(',', '.'));
   }
 
+  void _recarregar() {
+    setState(() {
+      _registrosFuture = widget.repositorio.listarMedidas();
+    });
+  }
+
   Future<void> _registrar() async {
     final registro = RegistroMedidas(
       data: DateTime.now(),
@@ -49,9 +55,43 @@ class _RegistroMedidasViewState extends State<RegistroMedidasView> {
     _controladorQuadril.clear();
     _controladorBraco.clear();
     _controladorCoxa.clear();
-    setState(() {
-      _registrosFuture = widget.repositorio.listarMedidas();
-    });
+    _recarregar();
+  }
+
+  Future<void> _editar(RegistroMedidas registro) async {
+    final editado = await showDialog<RegistroMedidas>(
+      context: context,
+      builder: (_) => _DialogoEditarMedidas(registro: registro),
+    );
+    if (editado == null) return;
+    await widget.repositorio.atualizarMedidas(editado);
+    _recarregar();
+  }
+
+  Future<void> _apagar(RegistroMedidas registro) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Apagar registro?'),
+        content: Text(
+          'O registro de medidas de ${_formatarData(registro.data)} será removido.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            key: const Key('confirmar-apagar-medidas'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Apagar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmar != true) return;
+    await widget.repositorio.removerMedidas(registro.id);
+    _recarregar();
   }
 
   String _formatarData(DateTime data) {
@@ -136,6 +176,17 @@ class _RegistroMedidasViewState extends State<RegistroMedidasView> {
                     return ListTile(
                       title: Text(_resumo(registro)),
                       subtitle: Text(_formatarData(registro.data)),
+                      trailing: PopupMenuButton<String>(
+                        key: Key('menu-medidas-${registro.id}'),
+                        onSelected: (opcao) {
+                          if (opcao == 'editar') _editar(registro);
+                          if (opcao == 'apagar') _apagar(registro);
+                        },
+                        itemBuilder: (_) => const [
+                          PopupMenuItem(value: 'editar', child: Text('Editar')),
+                          PopupMenuItem(value: 'apagar', child: Text('Apagar')),
+                        ],
+                      ),
                     );
                   },
                 );
@@ -144,6 +195,90 @@ class _RegistroMedidasViewState extends State<RegistroMedidasView> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DialogoEditarMedidas extends StatefulWidget {
+  const _DialogoEditarMedidas({required this.registro});
+
+  final RegistroMedidas registro;
+
+  @override
+  State<_DialogoEditarMedidas> createState() => _DialogoEditarMedidasState();
+}
+
+class _DialogoEditarMedidasState extends State<_DialogoEditarMedidas> {
+  late final _cintura = _controlador(widget.registro.cinturaCm);
+  late final _quadril = _controlador(widget.registro.quadrilCm);
+  late final _braco = _controlador(widget.registro.bracoCm);
+  late final _coxa = _controlador(widget.registro.coxaCm);
+
+  TextEditingController _controlador(double? valor) => TextEditingController(
+    text: valor == null ? '' : valor.toStringAsFixed(0),
+  );
+
+  double? _parse(TextEditingController c) {
+    if (c.text.trim().isEmpty) return null;
+    return double.tryParse(c.text.replaceAll(',', '.'));
+  }
+
+  @override
+  void dispose() {
+    _cintura.dispose();
+    _quadril.dispose();
+    _braco.dispose();
+    _coxa.dispose();
+    super.dispose();
+  }
+
+  Widget _campo(Key chave, String rotulo, TextEditingController c) => Padding(
+    padding: const EdgeInsets.only(bottom: 4),
+    child: TextField(
+      key: chave,
+      controller: c,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      decoration: InputDecoration(labelText: rotulo),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Editar medidas'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _campo(const Key('editar-campo-cintura'), 'Cintura (cm)', _cintura),
+            _campo(const Key('editar-campo-quadril'), 'Quadril (cm)', _quadril),
+            _campo(const Key('editar-campo-braco'), 'Braço (cm)', _braco),
+            _campo(const Key('editar-campo-coxa'), 'Coxa (cm)', _coxa),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          key: const Key('editar-salvar-medidas'),
+          onPressed: () {
+            final editado = RegistroMedidas(
+              id: widget.registro.id,
+              data: widget.registro.data,
+              cinturaCm: _parse(_cintura),
+              quadrilCm: _parse(_quadril),
+              bracoCm: _parse(_braco),
+              coxaCm: _parse(_coxa),
+            );
+            if (editado.vazio) return;
+            Navigator.of(context).pop(editado);
+          },
+          child: const Text('Salvar'),
+        ),
+      ],
     );
   }
 }

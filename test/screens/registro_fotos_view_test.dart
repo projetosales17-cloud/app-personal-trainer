@@ -158,6 +158,26 @@ void main() {
     expect(find.textContaining('Nenhuma foto ainda'), findsOneWidget);
   });
 
+  testWidgets('Trocar o ângulo da foto pela tela de detalhe salva o novo ângulo', (tester) async {
+    final repositorio = criarRepositorio();
+    await repositorio.registrarFoto(bytesFoto, pose: PoseFoto.frente);
+
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: RegistroFotosView(repositorio: repositorio))),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(Image));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('botao-trocar-angulo-foto')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('opcao-pose-costas')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Costas ·'), findsOneWidget);
+    expect((await repositorio.listarFotos()).single.pose, PoseFoto.costas);
+  });
+
   testWidgets('O "?" abre a folha de ajuda com orientação de roupa', (tester) async {
     await tester.pumpWidget(
       MaterialApp(home: Scaffold(body: RegistroFotosView(repositorio: criarRepositorio()))),

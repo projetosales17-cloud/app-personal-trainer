@@ -17,4 +17,23 @@ void main() {
     expect(reconstruido.refeicao, 'Almoço');
     expect(reconstruido.descricao, 'Frango grelhado com arroz e salada');
   });
+
+  test('id sobrevive ao round-trip e copyWith preserva o id', () {
+    final registro = RegistroDiario(
+      data: DateTime(2026, 3, 15),
+      refeicao: 'Almoço',
+      descricao: 'Frango',
+    );
+    expect(RegistroDiario.fromJson(registro.toJson()).id, registro.id);
+    expect(registro.copyWith(descricao: 'Peixe').id, registro.id);
+  });
+
+  test('fromJson de registro antigo sem id usa a data como id', () {
+    final registro = RegistroDiario.fromJson({
+      'data': '2026-03-15T12:30:00.000',
+      'refeicao': 'Almoço',
+      'descricao': 'Frango',
+    });
+    expect(registro.id, '2026-03-15T12:30:00.000');
+  });
 }

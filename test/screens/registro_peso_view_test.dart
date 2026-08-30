@@ -77,4 +77,46 @@ void main() {
 
     expect(find.textContaining('Nenhum registro de peso ainda'), findsOneWidget);
   });
+
+  testWidgets('Editar um registro pelo menu troca o peso salvo', (tester) async {
+    final repositorio = ProgressoRepository();
+    await repositorio.registrarPeso(70, data: DateTime(2026, 1, 1));
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: RegistroPesoView(repositorio: repositorio))),
+    );
+    await tester.pumpAndSettle();
+
+    final registro = (await repositorio.listarPesos()).single;
+    await tester.tap(find.byKey(Key('menu-peso-${registro.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Editar').last);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('editar-campo-peso')), '68');
+    await tester.tap(find.byKey(const Key('editar-salvar-peso')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('68.0 kg'), findsOneWidget);
+    expect((await repositorio.listarPesos()).single.pesoKg, 68);
+  });
+
+  testWidgets('Apagar um registro pede confirmação e remove da lista', (tester) async {
+    final repositorio = ProgressoRepository();
+    await repositorio.registrarPeso(70, data: DateTime(2026, 1, 1));
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: RegistroPesoView(repositorio: repositorio))),
+    );
+    await tester.pumpAndSettle();
+
+    final registro = (await repositorio.listarPesos()).single;
+    await tester.tap(find.byKey(Key('menu-peso-${registro.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apagar').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('confirmar-apagar-peso')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Nenhum registro de peso ainda'), findsOneWidget);
+    expect(await repositorio.listarPesos(), isEmpty);
+  });
 }
