@@ -149,6 +149,8 @@ void main() {
 
     await tester.tap(find.byType(Image));
     await tester.pumpAndSettle();
+    // A foto abre com zoom (pinça) para ampliar.
+    expect(find.byKey(const Key('foto-ampliavel')), findsOneWidget);
     await tester.tap(find.byKey(const Key('botao-apagar-foto')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Borrar'));
