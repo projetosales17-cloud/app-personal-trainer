@@ -89,4 +89,28 @@ void main() {
     expect(find.text('Olá, Ana!'), findsOneWidget);
     expect(find.text('Olá, Maria!'), findsNothing);
   });
+
+  testWidgets('Mostra o avatar da usuária ao lado da saudação', (tester) async {
+    final repositorio = AnamneseRepository();
+    await repositorio.salvar(
+      const Anamnese(
+        nome: 'Maria Silva',
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(home: HomeScreen(anamneseRepositorio: repositorio)),
+    );
+    await tester.pumpAndSettle();
+
+    // Sem foto salva: mostra as iniciais.
+    expect(find.byKey(const Key('avatar-perfil-iniciais')), findsOneWidget);
+    expect(find.text('MS'), findsOneWidget);
+  });
 }

@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../models/anamnese.dart';
 import 'onboarding/onboarding_flow.dart';
 import '../services/anamnese_repository.dart';
 import '../services/auth_repository.dart';
+import '../services/foto_perfil_repository.dart';
 import '../services/gerador_ficha_treino.dart';
 import '../services/notificacoes_treino_service.dart';
 import '../services/preferencias_repository.dart';
 import '../services/programa_treino_repository.dart';
+import '../widgets/avatar_perfil.dart';
+import '../widgets/seletor_imagem.dart';
 
 /// Assinatura/pagamento ainda não está implementado (ver briefing do
 /// produto) — conta e login já são reais (Firebase Authentication).
@@ -21,12 +25,16 @@ class PerfilScreen extends StatefulWidget {
     NotificacoesTreinoService? notificacoesService,
     AuthRepository? authRepositorio,
     ProgramaTreinoRepository? programaRepositorio,
+    FotoPerfilRepository? fotoPerfilRepositorio,
+    SelecionarImagem? selecionarImagem,
   }) : anamneseRepositorio = anamneseRepositorio ?? AnamneseRepository(),
        preferenciasRepositorio = preferenciasRepositorio ?? PreferenciasRepository(),
        geradorFicha = geradorFicha ?? GeradorFichaTreino(),
        notificacoesService = notificacoesService ?? NotificacoesTreinoService(),
        authRepositorio = authRepositorio ?? AuthRepository(),
-       programaRepositorio = programaRepositorio ?? ProgramaTreinoRepository();
+       programaRepositorio = programaRepositorio ?? ProgramaTreinoRepository(),
+       fotoPerfilRepositorio = fotoPerfilRepositorio ?? FotoPerfilRepository(),
+       selecionarImagem = selecionarImagem ?? selecionarImagemPadrao;
 
   final AnamneseRepository anamneseRepositorio;
   final PreferenciasRepository preferenciasRepositorio;
@@ -34,6 +42,8 @@ class PerfilScreen extends StatefulWidget {
   final NotificacoesTreinoService notificacoesService;
   final AuthRepository authRepositorio;
   final ProgramaTreinoRepository programaRepositorio;
+  final FotoPerfilRepository fotoPerfilRepositorio;
+  final SelecionarImagem selecionarImagem;
 
   @override
   State<PerfilScreen> createState() => _PerfilScreenState();
@@ -42,6 +52,72 @@ class PerfilScreen extends StatefulWidget {
 class _PerfilScreenState extends State<PerfilScreen> {
   late Future<Anamnese?> _anamneseFuture = widget.anamneseRepositorio.carregar();
   late Future<bool> _notificacoesFuture = widget.preferenciasRepositorio.notificacoesAtivadas();
+  late Future<String?> _fotoPerfilFuture = widget.fotoPerfilRepositorio.carregar();
+  bool _salvandoFoto = false;
+
+  Future<void> _trocarFotoPerfil({required bool temFoto}) async {
+    final acao = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              key: const Key('foto-perfil-camera'),
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: const Text('Tirar foto'),
+              onTap: () => Navigator.of(context).pop('camera'),
+            ),
+            ListTile(
+              key: const Key('foto-perfil-galeria'),
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Escolher da galeria'),
+              onTap: () => Navigator.of(context).pop('galeria'),
+            ),
+            if (temFoto)
+              ListTile(
+                key: const Key('foto-perfil-remover'),
+                leading: const Icon(Icons.delete_outline),
+                title: const Text('Remover foto'),
+                onTap: () => Navigator.of(context).pop('remover'),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (acao == null || !mounted) return;
+
+    if (acao == 'remover') {
+      await widget.fotoPerfilRepositorio.remover();
+      if (!mounted) return;
+      setState(() => _fotoPerfilFuture = widget.fotoPerfilRepositorio.carregar());
+      return;
+    }
+
+    final fonte = acao == 'camera' ? ImageSource.camera : ImageSource.gallery;
+    final bytes = await widget.selecionarImagem(fonte);
+    if (bytes == null || !mounted) return;
+    if (bytes.lengthInBytes > FotoPerfilRepository.limiteBytes) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Foto muito pesada. Tente outra ou uma de menor resolução.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _salvandoFoto = true);
+    try {
+      await widget.fotoPerfilRepositorio.salvar(bytes);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _salvandoFoto = false;
+          _fotoPerfilFuture = widget.fotoPerfilRepositorio.carregar();
+        });
+      }
+    }
+  }
 
   Future<void> _editarAnamnese(Anamnese anamnese) async {
     final atualizou = await Navigator.of(context).push<bool>(
@@ -133,6 +209,15 @@ class _PerfilScreenState extends State<PerfilScreen> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              _CabecalhoFotoPerfil(
+                fotoFuture: _fotoPerfilFuture,
+                nome: (anamnese?.nome.isNotEmpty ?? false)
+                    ? anamnese!.nome
+                    : (anamnese?.nomeExibicao ?? ''),
+                salvando: _salvandoFoto,
+                aoTrocar: _trocarFotoPerfil,
+              ),
+              const SizedBox(height: 24),
               Text('Seus dados', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               if (anamnese == null)
@@ -221,6 +306,77 @@ class _PerfilScreenState extends State<PerfilScreen> {
           );
         },
       ),
+    );
+  }
+}
+
+/// Avatar grande no topo do Perfil com o botão de trocar/remover a foto.
+class _CabecalhoFotoPerfil extends StatelessWidget {
+  const _CabecalhoFotoPerfil({
+    required this.fotoFuture,
+    required this.nome,
+    required this.salvando,
+    required this.aoTrocar,
+  });
+
+  final Future<String?> fotoFuture;
+  final String nome;
+  final bool salvando;
+  final Future<void> Function({required bool temFoto}) aoTrocar;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String?>(
+      future: fotoFuture,
+      builder: (context, snapshot) {
+        final dataUri = snapshot.data;
+        final temFoto = dataUri != null;
+        return Center(
+          child: Column(
+            children: [
+              Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  AvatarPerfil(dataUri: dataUri, nome: nome, raio: 48),
+                  if (salvando)
+                    const Positioned.fill(
+                      child: Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    )
+                  else
+                    Material(
+                      color: Theme.of(context).colorScheme.primary,
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        key: const Key('botao-trocar-foto-perfil'),
+                        customBorder: const CircleBorder(),
+                        onTap: () => aoTrocar(temFoto: temFoto),
+                        child: Padding(
+                          padding: const EdgeInsets.all(6),
+                          child: Icon(
+                            Icons.photo_camera,
+                            size: 16,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: salvando ? null : () => aoTrocar(temFoto: temFoto),
+                child: Text(temFoto ? 'Trocar foto' : 'Adicionar foto'),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

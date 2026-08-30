@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,6 +11,7 @@ import 'package:app_personal_trainer/screens/perfil_screen.dart';
 import 'package:app_personal_trainer/services/agendador_notificacoes.dart';
 import 'package:app_personal_trainer/services/anamnese_repository.dart';
 import 'package:app_personal_trainer/services/auth_repository.dart';
+import 'package:app_personal_trainer/services/foto_perfil_repository.dart';
 import 'package:app_personal_trainer/services/notificacoes_treino_service.dart';
 import 'package:app_personal_trainer/services/preferencias_repository.dart';
 
@@ -210,6 +214,7 @@ void main() {
       await tester.pump();
       await tester.pump();
 
+      await tester.scrollUntilVisible(find.byKey(const Key('switch-notificacoes')), 200);
       await tester.tap(find.byKey(const Key('switch-notificacoes')));
       await tester.pumpAndSettle();
 
@@ -257,6 +262,7 @@ void main() {
       await tester.pump();
       await tester.pump();
 
+      await tester.scrollUntilVisible(find.byKey(const Key('switch-notificacoes')), 200);
       await tester.tap(find.byKey(const Key('switch-notificacoes')));
       await tester.pumpAndSettle();
 
@@ -274,7 +280,10 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.textContaining('cobrança de assinatura ainda não'), findsOneWidget);
+    expect(
+      find.textContaining('cobrança de assinatura ainda não', skipOffstage: false),
+      findsOneWidget,
+    );
     // "Suporte" fica abaixo da dobra na viewport de teste (a nova seção
     // "Conta" empurrou o conteúdo) — usamos skipOffstage:false, já
     // construído com o texto certo, só não visível sem rolar.
@@ -282,5 +291,80 @@ void main() {
       find.textContaining('Canal de suporte em breve', skipOffstage: false),
       findsOneWidget,
     );
+  });
+
+  testWidgets('Sem foto de perfil, o topo mostra as iniciais e "Adicionar foto"', (tester) async {
+    final anamneseRepositorio = AnamneseRepository();
+    await anamneseRepositorio.salvar(
+      const Anamnese(
+        nome: 'Bianca Reis',
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PerfilScreen(
+          authRepositorio: _authComUsuaria(),
+          anamneseRepositorio: anamneseRepositorio,
+          fotoPerfilRepositorio: FotoPerfilRepository(
+            firestore: FakeFirebaseFirestore(),
+            uidAtual: () => 'uid-1',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('avatar-perfil-iniciais')), findsOneWidget);
+    expect(find.text('BR'), findsOneWidget);
+    expect(find.text('Adicionar foto'), findsOneWidget);
+  });
+
+  testWidgets('Escolher uma foto da galeria salva e mostra o avatar com a imagem', (tester) async {
+    final anamneseRepositorio = AnamneseRepository();
+    await anamneseRepositorio.salvar(
+      const Anamnese(
+        nome: 'Bianca',
+        idade: 30,
+        alturaCm: 170,
+        pesoAtualKg: 65,
+        objetivoPrincipal: Objetivo.hipertrofia,
+        nivelAtividade: NivelAtividade.moderado,
+        frequenciaSemanalDias: 3,
+      ),
+    );
+    final fotoRepositorio = FotoPerfilRepository(
+      firestore: FakeFirebaseFirestore(),
+      uidAtual: () => 'uid-1',
+    );
+    // PNG 1x1 válido — MemoryImage precisa decodificar.
+    final bytes = base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PerfilScreen(
+          authRepositorio: _authComUsuaria(),
+          anamneseRepositorio: anamneseRepositorio,
+          fotoPerfilRepositorio: fotoRepositorio,
+          selecionarImagem: (_) async => bytes,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('botao-trocar-foto-perfil')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('foto-perfil-galeria')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('avatar-perfil-foto')), findsOneWidget);
+    expect(await fotoRepositorio.carregar(), isNotNull);
   });
 }

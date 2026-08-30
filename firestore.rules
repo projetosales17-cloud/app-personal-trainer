@@ -49,6 +49,12 @@ service cloud.firestore {
       match /fotos_progresso/{fotoId} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
       }
+
+      // Foto de perfil (documento único `foto`, data URI base64) — ver
+      // FotoPerfilRepository.
+      match /perfil/{doc} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
     }
   }
 }
